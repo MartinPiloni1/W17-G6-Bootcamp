@@ -1,0 +1,34 @@
+package handler
+
+import (
+	"net/http"
+
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/bootcamp-go/web/response"
+)
+
+type SellerHandler struct {
+	sv service.SellerService
+}
+
+func NewSellerHandler(sv service.SellerService) SellerHandler {
+	return SellerHandler{sv: sv}
+}
+
+func (h SellerHandler) GetAll() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		data, err := h.sv.GetAll()
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+
+		response.JSON(w, http.StatusOK, map[string]any{
+			"message": "success",
+			"data":    data,
+		})
+	}
+}

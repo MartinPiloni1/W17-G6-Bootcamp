@@ -1,0 +1,16 @@
+{
+  "1": {
+    "id": 1,
+    "cid": 10,
+    "company_name": "Alkemy",
+    "address": "Monroe 860",
+    "telephone": "47470000"
+  },
+  "2": {
+    "id": 2,
+    "cid": 13,
+    "company_name": "Globant",
+    "address": "Av. Corrientes 3240",
+    "telephone": "40001234"
+  }
+}
