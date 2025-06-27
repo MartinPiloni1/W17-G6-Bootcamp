@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 	"os"
@@ -29,8 +30,16 @@ func (e EmployeeRepositoryImpl) GetAll() (map[int]models.Employee, error) {
 }
 
 func (e EmployeeRepositoryImpl) GetByID(id int) (models.Employee, error) {
-	//TODO implement me
-	panic("implement me")
+	data, err := utils.Read[models.Employee](e.filePath)
+	if err != nil {
+		return models.Employee{}, err
+	}
+	for _, emp := range data {
+		if emp.Id == id {
+			return emp, nil
+		}
+	}
+	return models.Employee{}, httperrors.NotFoundError{Message: "Empleado no encontrado"}
 }
 
 func (e EmployeeRepositoryImpl) Update(id int, data models.Employee) (models.Employee, error) {

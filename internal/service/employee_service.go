@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/mapper"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 )
@@ -18,13 +19,17 @@ func (e EmployeeServiceImpl) Create(Employee models.Employee) (models.Employee, 
 	panic("implement me")
 }
 
-func (e EmployeeServiceImpl) GetAll() (map[int]models.Employee, error) {
-	return e.repo.GetAll()
+func (e EmployeeServiceImpl) GetAll() ([]models.Employee, error) {
+	employees, err := e.repo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	return mapper.NewEmployeeMapper().MapToSlice(employees), nil
 }
 
 func (e EmployeeServiceImpl) GetByID(id int) (models.Employee, error) {
-	//TODO implement me
-	panic("implement me")
+	return e.repo.GetByID(id)
 }
 
 func (e EmployeeServiceImpl) Update(id int, employee models.Employee) (models.Employee, error) {

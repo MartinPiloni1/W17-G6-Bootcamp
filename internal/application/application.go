@@ -27,5 +27,6 @@ func EmployeeRouter() chi.Router {
 	service := service.NewEmployeeService(repo)
 	handler := handler.NewEmployeeHandler(service)
 	router.Get("/", handler.GetAll())
+	router.Get("/{id}", handler.GetById())
 	return router
 }
