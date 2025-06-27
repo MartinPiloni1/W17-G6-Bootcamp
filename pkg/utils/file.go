@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func LoadJsonData[T any](filePath string) (map[int]T, error) {
+func Read[T any](filePath string) (map[int]T, error) {
 	dataAsBytes, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
