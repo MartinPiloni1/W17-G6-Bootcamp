@@ -1,0 +1,42 @@
+{
+  "1": {
+    "id": 1,
+    "address": "Monroe 860",
+    "telephone": "47470000",
+    "warehouse_code": "DHM",
+    "minimun_capacity": 10,
+    "minimun_temperature": 10
+  },
+  "2": {
+    "id": 2,
+    "address": "Av. Siempre Viva 742",
+    "telephone": "41009876",
+    "warehouse_code": "SPR",
+    "minimun_capacity": 20,
+    "minimun_temperature": 5
+  },
+  "3": {
+    "id": 3,
+    "address": "Ruta 8 km 35,5",
+    "telephone": "02304555555",
+    "warehouse_code": "PIL",
+    "minimun_capacity": 15,
+    "minimun_temperature": 8
+  },
+  "4": {
+    "id": 4,
+    "address": "Córdoba 1234",
+    "telephone": "3516000123",
+    "warehouse_code": "CBA",
+    "minimun_capacity": 25,
+    "minimun_temperature": 4
+  },
+  "5": {
+    "id": 5,
+    "address": "Parque Industrial Sur, Mza. 3",
+    "telephone": "02991543210",
+    "warehouse_code": "PAT",
+    "minimun_capacity": 30,
+    "minimun_temperature": -2
+  }
+}

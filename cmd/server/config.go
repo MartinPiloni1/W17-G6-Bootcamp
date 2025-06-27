@@ -18,7 +18,7 @@ type ServerChi struct {
 }
 
 func LoadServerConf() (*ServerChi, error) {
-	err := godotenv.Load(".env")
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Failed to load .env: %s", err)
 	}
@@ -48,9 +48,11 @@ func (a *ServerChi) Run() (err error) {
 	router.Use(middleware.Logger) // logger
 
 	healthRouter := application.HealthRouter()
+	warehouseRouter := application.WarehouseRouter()
 
 	// mount healthcheck
 	router.Mount("/healthcheck", healthRouter)
+	router.Mount("/api/v1/warehouses", warehouseRouter)
 	err = http.ListenAndServe(a.ServerAddr, router)
 	return
 }
