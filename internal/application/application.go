@@ -24,6 +24,9 @@ func ProductRouter() chi.Router {
 	repo := repository.NewProductRepository()
 	service := service.NewProductService(repo)
 	handler := handler.NewProductHandler(service)
-	router.Get("/", handler.GetAll())
+	router.Group(func(r chi.Router) {
+		r.Get("/", handler.GetAll())
+		r.Get("/{id}", handler.GetById())
+	})
 	return router
 }

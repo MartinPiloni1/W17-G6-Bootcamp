@@ -25,7 +25,7 @@ func (p *ProductService) GetAll() (map[int]models.Product, error) {
 
 // GetByID implements ProductServiceInterface.
 func (p *ProductService) GetByID(id int) (models.Product, error) {
-	panic("unimplemented")
+	return p.repo.GetByID(id)
 }
 
 // Delete implements ProductServiceInterface.
