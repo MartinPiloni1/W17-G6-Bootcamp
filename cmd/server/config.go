@@ -12,11 +12,6 @@ import (
 	"gitub.com/aaguero_meli/W17-G6-Bootcamp/internal/application"
 )
 
-type ConfigServerChi struct {
-	ServerAddr            string
-	LoaderFilePathDefault string // here whe can add diverse filepaths to the
-}
-
 type ServerChi struct {
 	ServerAddr     string
 	LoaderFilePath string // here whe can add diverse filepaths to the
