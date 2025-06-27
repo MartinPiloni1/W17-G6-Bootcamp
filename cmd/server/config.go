@@ -48,9 +48,11 @@ func (a *ServerChi) Run() (err error) {
 	router.Use(middleware.Logger) // logger
 
 	healthRouter := application.HealthRouter()
+	productRouter := application.ProductRouter()
 
 	// mount healthcheck
 	router.Mount("/healthcheck", healthRouter)
+	router.Mount("/products", productRouter)
 	err = http.ListenAndServe(a.ServerAddr, router)
 	return
 }
