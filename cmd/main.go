@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"gitub.com/aaguero_meli/W17-G6-Bootcamp/cmd/server"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/cmd/server"
 )
 
 func main() {

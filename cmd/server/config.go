@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/application"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
-	"gitub.com/aaguero_meli/W17-G6-Bootcamp/internal/application"
 )
 
 type ServerChi struct {
