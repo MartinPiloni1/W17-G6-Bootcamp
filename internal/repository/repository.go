@@ -1,1 +1,11 @@
 package repository
+
+import "github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
+
+type EmployeeRepository interface {
+	Create(Employee models.Employee) (models.Employee, error)
+	GetAll() (map[int]models.Employee, error)
+	GetByID(id int) (models.Employee, error)
+	Update(id int, data models.Employee) (models.Employee, error)
+	Delete(id int) error
+}
