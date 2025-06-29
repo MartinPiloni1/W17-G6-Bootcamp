@@ -1,0 +1,51 @@
+{
+    "1": {
+      "id": 1,
+      "section_number": "A-101-FRIGO",
+      "current_temperature": 4.5,
+      "minimum_temperature": 2.0,
+      "current_capacity": 550,
+      "minimum_capacity": 100,
+      "maximum_capacity": 1000,
+      "warehouse_id": 1,
+      "product_type_id": 1,
+      "product_batches": []
+    },
+    "2": {
+      "id": 2,
+      "section_number": "B-205-SECO",
+      "current_temperature": 21.0,
+      "minimum_temperature": 15.0,
+      "current_capacity": 1500,
+      "minimum_capacity": 250,
+      "maximum_capacity": 5000,
+      "warehouse_id": 1,
+      "product_type_id": 2,
+      "product_batches": []
+    },
+    "3": {
+      "id": 3,
+      "section_number": "F-003-CONGELADO",
+      "current_temperature": -18.0,
+      "minimum_temperature": -22.0,
+      "current_capacity": 0,
+      "minimum_capacity": 50,
+      "maximum_capacity": 800,
+      "warehouse_id": 2,
+      "product_type_id": 3,
+      "product_batches": []
+    },
+    "4": {
+      "id": 4,
+      "section_number": "A-102-FRIGO",
+      "current_temperature": 5.0,
+      "minimum_temperature": 2.0,
+      "current_capacity": 0,
+      "minimum_capacity": 100,
+      "maximum_capacity": 1000,
+      "warehouse_id": 1,
+      "product_type_id": 1,
+      "product_batches": []
+    }
+  }
+  
