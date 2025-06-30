@@ -3,6 +3,9 @@ package application
 import (
 	"net/http"
 
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/handler"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -13,5 +16,16 @@ func HealthRouter() chi.Router {
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello World!"))
 	})
+	return router
+}
+
+func BuyersRouter(BuyerFilePath string) chi.Router {
+	router := chi.NewRouter()
+
+	rp := repository.NewBuyerRepositoryFile(BuyerFilePath)
+	sv := service.NewBuyerService(rp)
+	hd := handler.NewBuyerHandler(sv)
+
+	router.Get("/", hd.GetAll())
 	return router
 }

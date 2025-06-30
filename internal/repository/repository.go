@@ -1,1 +1,7 @@
 package repository
+
+import "github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
+
+type BuyerRepositoryInterface interface {
+	GetAll() (map[int]models.Buyer, error)
+}
