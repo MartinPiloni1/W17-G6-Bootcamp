@@ -10,3 +10,7 @@ type BuyerAttributes struct {
 	FirstName    string `json:"first_name"`
 	LastName     string `json:"last_name"`
 }
+
+func (b Buyer) GetID() int {
+	return b.Id
+}

@@ -13,4 +13,7 @@ func NewBuyerService(rp repository.BuyerRepositoryInterface) BuyerServiceInterfa
 	return &BuyerService{rp: rp}
 }
 
-func (s *BuyerService) GetAll() (map[int]models.Buyer, error)
+func (s *BuyerService) GetAll() (map[int]models.Buyer, error) {
+	buyerData, err := s.rp.GetAll()
+	return buyerData, err
+}
