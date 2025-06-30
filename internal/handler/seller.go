@@ -1,0 +1,145 @@
+package handler
+
+import (
+	"encoding/json"
+	"net/http"
+	"strconv"
+
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
+	"github.com/bootcamp-go/web/response"
+	"github.com/go-chi/chi"
+)
+
+type SellerHandler struct {
+	sv service.SellerServiceInterface
+}
+
+func NewSellerHandler(sv service.SellerServiceInterface) SellerHandler {
+	return SellerHandler{sv: sv}
+}
+
+func (h SellerHandler) GetAll() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		data, err := h.sv.GetAll()
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+
+		response.JSON(w, http.StatusOK, map[string]any{
+			"message": "success",
+			"data":    data,
+		})
+	}
+}
+
+func (h SellerHandler) GetByID() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idStr := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err) //409 bad request
+			response.Error(w, statusCode, msg)
+			return
+		}
+		seller, err := h.sv.GetByID(id)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err) //404 not found
+			response.Error(w, statusCode, msg)
+			return
+		}
+		response.JSON(w, http.StatusOK, map[string]any{
+			"data": []any{seller},
+		})
+	}
+}
+
+func (h SellerHandler) Delete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idStr := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err) //409 bad request
+			response.Error(w, statusCode, msg)
+			return
+		}
+		err = h.sv.Delete(id)
+		if err != nil {
+			if err.Error() == "seller not found" {
+				statusCode, msg := httperrors.GetErrorData(err) //404 not found
+				response.Error(w, statusCode, msg)
+			} else {
+				statusCode, msg := httperrors.GetErrorData(err) //internal
+				response.Error(w, statusCode, msg)
+			}
+			return
+		}
+		// 204 No Content: no va body de respuesta
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func (h SellerHandler) Create() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req models.Seller
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			response.Error(w, http.StatusUnprocessableEntity, "invalid json")
+			return
+		}
+		created, err := h.sv.Create(req)
+		if err != nil {
+			if err.Error() == "cid already exists" {
+				response.Error(w, http.StatusConflict, "cid already exists")
+			} else if err.Error() == "missing required fields" {
+				response.Error(w, http.StatusUnprocessableEntity, "missing required fields")
+			} else {
+				response.Error(w, http.StatusInternalServerError, "internal error")
+			}
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		response.JSON(w, http.StatusCreated, map[string]any{
+			"data": []any{created},
+		})
+	}
+}
+
+func (h SellerHandler) Update() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idStr := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			response.Error(w, http.StatusBadRequest, "invalid id")
+			return
+		}
+
+		var req models.Seller
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			response.Error(w, http.StatusUnprocessableEntity, "bad request body")
+			return
+		}
+
+		updated, err := h.sv.Update(id, &req)
+		if err != nil {
+			if err.Error() == "seller not found" {
+				response.Error(w, http.StatusNotFound, "seller not found")
+				return
+			}
+			if err.Error() == "cid already exists" {
+				response.Error(w, http.StatusConflict, "cid already exists")
+				return
+			}
+			response.Error(w, http.StatusInternalServerError, "internal error")
+			return
+		}
+
+		response.JSON(w, http.StatusOK, map[string]any{
+			"data": []any{updated},
+		})
+	}
+}
