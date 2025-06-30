@@ -3,11 +3,10 @@ package repository
 import (
 	"os"
 
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 )
-
 
 type SectionRepositoryImpl struct {
 	filePath string
@@ -16,6 +15,7 @@ type SectionRepositoryImpl struct {
 func NewSectionRepository() SectionRepositoryInterface {
 	return &SectionRepositoryImpl{filePath: os.Getenv("FILE_PATH_DEFAULT")}
 }
+
 // Create implements SectionRepositoryInterface.
 func (s *SectionRepositoryImpl) Create(section models.Section) (*models.Section, error) {
 	panic("unimplemented")
@@ -23,7 +23,19 @@ func (s *SectionRepositoryImpl) Create(section models.Section) (*models.Section,
 
 // Delete implements SectionRepositoryInterface.
 func (s *SectionRepositoryImpl) Delete(id int) error {
-	panic("unimplemented")
+	data, err := utils.Read[models.Section](s.filePath)
+	if err != nil {
+		return err
+	}
+
+	_, ok := data[id]
+	if !ok {
+		return httperrors.NotFoundError{Message: "sección no encontrada"}
+	}
+
+	delete(data, id)
+
+	return utils.Write(s.filePath, data)
 }
 
 // GetAll implements SectionRepositoryInterface.
@@ -45,7 +57,7 @@ func (s *SectionRepositoryImpl) GetByID(id int) (models.Section, error) {
 	section, ok := data[id]
 	if !ok {
 		return models.Section{}, httperrors.NotFoundError{Message: "sección no encontrada"}
-	} 
+	}
 
 	return section, nil
 }

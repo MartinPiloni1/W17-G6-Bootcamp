@@ -20,7 +20,7 @@ func (s *SectionServiceImpl) Create(section models.Section) (*models.Section, er
 
 // Delete implements SectionServiceInterface.
 func (s *SectionServiceImpl) Delete(id int) error {
-	panic("unimplemented")
+	return s.repo.Delete(id)
 }
 
 // GetAll implements SectionServiceInterface.
