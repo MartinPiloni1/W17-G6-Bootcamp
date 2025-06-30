@@ -17,3 +17,8 @@ func (s *BuyerService) GetAll() (map[int]models.Buyer, error) {
 	buyerData, err := s.rp.GetAll()
 	return buyerData, err
 }
+
+func (s *BuyerService) GetByID(id int) (models.Buyer, error) {
+	buyer, err := s.rp.GetByID(id)
+	return buyer, err
+}

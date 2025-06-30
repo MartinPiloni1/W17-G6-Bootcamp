@@ -27,5 +27,6 @@ func BuyersRouter(BuyerFilePath string) chi.Router {
 	hd := handler.NewBuyerHandler(sv)
 
 	router.Get("/", hd.GetAll())
+	router.Get("/{id}", hd.GetByID())
 	return router
 }
