@@ -20,7 +20,7 @@ func NewProductRepository() ProductRepositoryInterface {
 }
 
 func (p *ProductRepository) Create(productAtribbutes models.ProductAtributtes) (models.Product, error) {
-	data, err := utils.Read[models.Product](p.filePath)
+	productData, err := utils.Read[models.Product](p.filePath)
 	if err != nil {
 		return models.Product{}, err
 	}
@@ -35,9 +35,9 @@ func (p *ProductRepository) Create(productAtribbutes models.ProductAtributtes) (
 		ProductAtributtes: productAtribbutes,
 	}
 
-	data[newId] = newProduct
+	productData[newId] = newProduct
 
-	err = utils.Write(p.filePath, data)
+	err = utils.Write(p.filePath, productData)
 	if err != nil {
 		return models.Product{}, err
 	}
@@ -46,20 +46,20 @@ func (p *ProductRepository) Create(productAtribbutes models.ProductAtributtes) (
 }
 
 func (p *ProductRepository) GetAll() (map[int]models.Product, error) {
-	data, err := utils.Read[models.Product](p.filePath)
+	productData, err := utils.Read[models.Product](p.filePath)
 	if err != nil {
 		return nil, err
 	}
-	return data, nil
+	return productData, nil
 }
 
 func (p *ProductRepository) GetByID(id int) (models.Product, error) {
-	data, err := utils.Read[models.Product](p.filePath)
+	productData, err := utils.Read[models.Product](p.filePath)
 	if err != nil {
 		return models.Product{}, err
 	}
 
-	product, exists := data[id]
+	product, exists := productData[id]
 	if !exists {
 		return models.Product{},
 			httperrors.NotFoundError{Message: "No se encontró un producto con el ID proporcionado"}
@@ -68,12 +68,12 @@ func (p *ProductRepository) GetByID(id int) (models.Product, error) {
 }
 
 func (p *ProductRepository) Update(id int, productAtributtes models.ProductAtributtes) (models.Product, error) {
-	data, err := utils.Read[models.Product](p.filePath)
+	productData, err := utils.Read[models.Product](p.filePath)
 	if err != nil {
 		return models.Product{}, err
 	}
 
-	if _, exists := data[id]; !exists {
+	if _, exists := productData[id]; !exists {
 		return models.Product{},
 			httperrors.NotFoundError{Message: "No se encontró un producto con el ID proporcionado"}
 	}
@@ -82,24 +82,28 @@ func (p *ProductRepository) Update(id int, productAtributtes models.ProductAtrib
 		ID:                id,
 		ProductAtributtes: productAtributtes,
 	}
-	data[id] = updatedProduct
+	productData[id] = updatedProduct
 
-	utils.Write(p.filePath, data)
+	utils.Write(p.filePath, productData)
 	return updatedProduct, nil
 }
 
 func (p *ProductRepository) Delete(id int) error {
-	data, err := utils.Read[models.Product](p.filePath)
+	productData, err := utils.Read[models.Product](p.filePath)
 	if err != nil {
 		return err
 	}
 
-	if _, exists := data[id]; !exists {
+	if _, exists := productData[id]; !exists {
 		return httperrors.NotFoundError{Message: "No se encontró un producto con el ID proporcionado"}
 	}
 
-	delete(data, id)
-	utils.Write(p.filePath, data)
+	delete(productData, id)
+
+	err = utils.Write(p.filePath, productData)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

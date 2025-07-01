@@ -1,7 +1,21 @@
 [
   {
-    "id": 1,
-    "description": "Yogurt natural",
+    "id": 3,
+    "description": "Helado de vainilla",
+    "expiration_rate": 30,
+    "freezing_rate": 8,
+    "height": 10,
+    "length": 15,
+    "width": 15,
+    "netweight": 1,
+    "product_code": "ICE03",
+    "recommended_freezing_temperature": -20,
+    "product_type_id": 30,
+    "seller_id": 300
+  },
+  {
+    "id": 4,
+    "description": "Yogurt congelado",
     "expiration_rate": 5,
     "freezing_rate": 3,
     "height": 6.4,
@@ -9,36 +23,8 @@
     "width": 1.2,
     "netweight": 0.5,
     "product_code": "YOG01",
-    "recommended_freezing_temperature": -18.0,
+    "recommended_freezing_temperature": -18,
     "product_type_id": 10,
     "seller_id": 100
-  },
-  {
-    "id": 2,
-    "description": "Pizza congelada",
-    "expiration_rate": 12,
-    "freezing_rate": 5,
-    "height": 2.5,
-    "length": 30.0,
-    "width": 30.0,
-    "netweight": 0.7,
-    "product_code": "PIZ02",
-    "recommended_freezing_temperature": -18.0,
-    "product_type_id": 20,
-    "seller_id": 200
-  },
-  {
-    "id": 3,
-    "description": "Helado de vainilla",
-    "expiration_rate": 30,
-    "freezing_rate": 8,
-    "height": 10.0,
-    "length": 15.0,
-    "width": 15.0,
-    "netweight": 1.0,
-    "product_code": "ICE03",
-    "recommended_freezing_temperature": -20.0,
-    "product_type_id": 30,
-    "seller_id": 300
   }
 ]
