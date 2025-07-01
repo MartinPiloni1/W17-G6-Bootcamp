@@ -65,6 +65,7 @@ func (h ProductHandler) GetById() http.HandlerFunc {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
 			response.Error(w, 500, "Error interno del servidor")
+			return
 		}
 
 		data, err := h.sv.GetByID(id)
