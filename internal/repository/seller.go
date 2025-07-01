@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"errors"
 	"os"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
@@ -9,27 +8,27 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
-type SellerRepositoryImpl struct {
+type SellerRepositoryFile struct {
 	filePath string
 }
 
 func NewSellerRepository() SellerRepositoryInterface {
-	return &SellerRepositoryImpl{filePath: os.Getenv("FILE_PATH_DEFAULT")}
+	return &SellerRepositoryFile{filePath: os.Getenv("FILE_PATH_DEFAULT")}
 }
 
-func (r SellerRepositoryImpl) GetByID(id int) (models.Seller, error) {
+func (r SellerRepositoryFile) GetByID(id int) (models.Seller, error) {
 	data, err := utils.Read[models.Seller](r.filePath)
 	if err != nil {
 		return models.Seller{}, err
 	}
 	seller, ok := data[id]
 	if !ok {
-		return models.Seller{}, httperrors.NotFoundError{Message: "seller not found"}
+		return models.Seller{}, httperrors.NotFoundError{Message: "Seller not found"}
 	}
 	return seller, nil
 }
 
-func (s SellerRepositoryImpl) GetAll() (map[int]models.Seller, error) {
+func (s SellerRepositoryFile) GetAll() (map[int]models.Seller, error) {
 	data, err := utils.Read[models.Seller](s.filePath)
 	if err != nil {
 		return nil, err
@@ -37,37 +36,40 @@ func (s SellerRepositoryImpl) GetAll() (map[int]models.Seller, error) {
 	return data, nil
 }
 
-func (r SellerRepositoryImpl) Create(seller models.Seller) (*models.Seller, error) {
+func (r SellerRepositoryFile) Create(seller models.SellerAttributes) (models.Seller, error) {
 	data, err := utils.Read[models.Seller](r.filePath)
 	if err != nil {
-		return nil, err
+		return models.Seller{}, err
+	}
+
+	sellerId, err := utils.GetNextID[models.Seller](r.filePath)
+	if err != nil {
+		return models.Seller{}, err
 	}
 	for _, v := range data {
 		if v.CID == seller.CID {
-			return nil, errors.New("cid already exists")
+			return models.Seller{}, httperrors.ConflictError{Message: "CID already exists"}
 		}
 	}
-	maxID := 0
-	for id := range data {
-		if id > maxID {
-			maxID = id
-		}
+
+	newSeller := models.Seller{
+		ID:               sellerId,
+		SellerAttributes: seller,
 	}
-	seller.ID = maxID + 1
-	data[seller.ID] = seller
+	data[sellerId] = newSeller
 	if err := utils.Write(r.filePath, data); err != nil {
-		return nil, err
+		return models.Seller{}, err
 	}
-	return &seller, nil
+	return newSeller, nil
 }
 
-func (r SellerRepositoryImpl) Delete(id int) error {
+func (r SellerRepositoryFile) Delete(id int) error {
 	data, err := utils.Read[models.Seller](r.filePath) // map[int]models.Seller
 	if err != nil {
 		return err
 	}
 	if _, exists := data[id]; !exists {
-		return errors.New("seller not found")
+		return httperrors.NotFoundError{Message: "Seller not found"}
 	}
 	delete(data, id)
 	if err := utils.Write(r.filePath, data); err != nil {
@@ -76,14 +78,14 @@ func (r SellerRepositoryImpl) Delete(id int) error {
 	return nil
 }
 
-func (r SellerRepositoryImpl) Update(id int, data *models.Seller) (*models.Seller, error) {
+func (r SellerRepositoryFile) Update(id int, data *models.SellerAttributes) (models.Seller, error) {
 	sellers, err := utils.Read[models.Seller](r.filePath)
 	if err != nil {
-		return nil, err
+		return models.Seller{}, err
 	}
 	seller, exists := sellers[id]
 	if !exists {
-		return nil, errors.New("seller not found")
+		return models.Seller{}, httperrors.NotFoundError{Message: "Seller not found"}
 	}
 
 	//actualizar solo los campos no vacios
@@ -102,7 +104,7 @@ func (r SellerRepositoryImpl) Update(id int, data *models.Seller) (*models.Selle
 
 	sellers[id] = seller
 	if err := utils.Write(r.filePath, sellers); err != nil {
-		return nil, err
+		return models.Seller{}, err
 	}
-	return &seller, nil
+	return seller, nil
 }

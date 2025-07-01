@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -40,11 +39,7 @@ func (h *SellerHandler) GetAll() http.HandlerFunc {
 
 func (h *SellerHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Request path:", r.URL.Path)
-		idStr := chi.URLParam(r, "id")
-		fmt.Println("idStr:", idStr)
-		id, err := strconv.Atoi(idStr)
-		fmt.Println("idStr:", id)
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err) //409 bad request
 			response.Error(w, statusCode, msg)
@@ -68,19 +63,13 @@ func (h *SellerHandler) Delete() http.HandlerFunc {
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
-			fmt.Println("idStr:", idStr)
 			response.Error(w, statusCode, msg)
 			return
 		}
 		err = h.sv.Delete(id)
 		if err != nil {
-			if err.Error() == "seller not found" {
-				statusCode, msg := httperrors.GetErrorData(err) //404 not found
-				response.Error(w, statusCode, msg)
-			} else {
-				statusCode, msg := httperrors.GetErrorData(err) //internal
-				response.Error(w, statusCode, msg)
-			}
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 		// 204 No Content: no va body de respuesta
@@ -90,20 +79,15 @@ func (h *SellerHandler) Delete() http.HandlerFunc {
 
 func (h *SellerHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req models.Seller
+		var req models.SellerAttributes
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			response.Error(w, http.StatusUnprocessableEntity, "invalid json")
 			return
 		}
 		created, err := h.sv.Create(req)
 		if err != nil {
-			if err.Error() == "cid already exists" {
-				response.Error(w, http.StatusConflict, "cid already exists")
-			} else if err.Error() == "missing required fields" {
-				response.Error(w, http.StatusUnprocessableEntity, "missing required fields")
-			} else {
-				response.Error(w, http.StatusInternalServerError, "internal error")
-			}
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 
@@ -116,16 +100,14 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 
 func (h *SellerHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Request path:", r.URL.Path)
 		idStr := chi.URLParam(r, "id")
-		fmt.Println("idStr:", idStr)
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			response.Error(w, http.StatusBadRequest, "invalid id")
 			return
 		}
 
-		var req models.Seller
+		var req models.SellerAttributes
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			response.Error(w, http.StatusUnprocessableEntity, "bad request body")
 			return
@@ -133,15 +115,8 @@ func (h *SellerHandler) Update() http.HandlerFunc {
 
 		updated, err := h.sv.Update(id, &req)
 		if err != nil {
-			if err.Error() == "seller not found" {
-				response.Error(w, http.StatusNotFound, "seller not found")
-				return
-			}
-			if err.Error() == "cid already exists" {
-				response.Error(w, http.StatusConflict, "cid already exists")
-				return
-			}
-			response.Error(w, http.StatusInternalServerError, "internal error")
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 

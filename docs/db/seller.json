@@ -1,16 +1,44 @@
-{
-  "1": {
+[
+  {
+    "id": 6,
+    "cid": 20,
+    "company_name": "Matias",
+    "address": "SN 4444",
+    "telephone": "123"
+  },
+  {
     "id": 1,
     "cid": 10,
     "company_name": "Alkemy",
     "address": "Monroe 860",
     "telephone": "47470000"
   },
-  "3": {
+  {
     "id": 3,
     "cid": 11,
+    "company_name": "Juancito",
+    "address": "SN 1234",
+    "telephone": "111"
+  },
+  {
+    "id": 4,
+    "cid": 12,
     "company_name": "Pepito",
-    "address": "SN 123",
-    "telephone": "12334563"
+    "address": "SN 1234",
+    "telephone": "111"
+  },
+  {
+    "id": 5,
+    "cid": 16,
+    "company_name": "Marcos",
+    "address": "SN 111111",
+    "telephone": "111"
+  },
+  {
+    "id": 7,
+    "cid": 1000,
+    "company_name": "Alkemy",
+    "address": "Monroe 860",
+    "telephone": "47470000"
   }
-}
+]

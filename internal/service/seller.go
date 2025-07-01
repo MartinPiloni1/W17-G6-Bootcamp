@@ -7,52 +7,43 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 )
 
-type SellerServiceImpl struct {
+type SellerServiceDefault struct {
 	rp repository.SellerRepositoryInterface
 }
 
 func NewSellerService(repo repository.SellerRepositoryInterface) SellerServiceInterface {
-	return &SellerServiceImpl{rp: repo}
+	return &SellerServiceDefault{rp: repo}
 }
 
-func (s SellerServiceImpl) Create(seller models.Seller) (*models.Seller, error) {
-	if seller.CID == 0 || seller.CompanyName == "" || seller.Address == "" || seller.Telephone == "" {
-		return &models.Seller{}, errors.New("missing required fields")
+func (s SellerServiceDefault) Create(seller models.SellerAttributes) (models.Seller, error) {
+	if seller.CID <= 0 || seller.CompanyName == "" || seller.Address == "" || seller.Telephone == "" {
+		return models.Seller{}, errors.New("missing required fields")
 	}
-	all, err := s.rp.GetAll()
-	if err != nil {
-		return &models.Seller{}, err
-	}
-	for _, v := range all {
-		if v.CID == seller.CID {
-			return &models.Seller{}, errors.New("cid already exists")
-		}
-	}
+
 	return s.rp.Create(seller)
 }
 
-func (s SellerServiceImpl) Delete(id int) error {
+func (s SellerServiceDefault) Delete(id int) error {
 	return s.rp.Delete(id)
 }
 
-func (s SellerServiceImpl) GetAll() (map[int]models.Seller, error) {
+func (s SellerServiceDefault) GetAll() (map[int]models.Seller, error) {
 	return s.rp.GetAll()
 }
 
-func (s SellerServiceImpl) GetByID(id int) (models.Seller, error) {
+func (s SellerServiceDefault) GetByID(id int) (models.Seller, error) {
 	return s.rp.GetByID(id)
 }
 
-func (s SellerServiceImpl) Update(id int, data *models.Seller) (*models.Seller, error) {
-	//no cambiar un seller inactivo, el CID debe seguir siendo único, etc.
+func (s SellerServiceDefault) Update(id int, data *models.SellerAttributes) (models.Seller, error) {
 	if data.CID != 0 {
 		all, err := s.rp.GetAll()
 		if err != nil {
-			return nil, err
+			return models.Seller{}, err
 		}
 		for _, existing := range all {
 			if existing.CID == data.CID && existing.ID != id {
-				return nil, errors.New("cid already exists")
+				return models.Seller{}, errors.New("cid already exists")
 			}
 		}
 	}
