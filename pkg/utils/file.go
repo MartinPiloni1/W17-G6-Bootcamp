@@ -23,7 +23,7 @@ func Read[T any](filePath string) (map[int]T, error) {
 	for k, v := range tmpData {
 		key, err := strconv.Atoi(k)
 		if err != nil {
-			return nil, errors.New("Error while loading Json as data")
+			return nil, errors.New("error while loading Json as data")
 		}
 		data[key] = v
 	}
