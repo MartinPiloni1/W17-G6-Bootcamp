@@ -19,7 +19,7 @@ func NewProductRepository() ProductRepositoryInterface {
 	}
 }
 
-func (p *ProductRepository) Create(productAtribbutes models.ProductAtributtes) (models.Product, error) {
+func (p *ProductRepository) Create(productAttribbutes models.ProductAttributes) (models.Product, error) {
 	productData, err := utils.Read[models.Product](p.filePath)
 	if err != nil {
 		return models.Product{}, err
@@ -32,7 +32,7 @@ func (p *ProductRepository) Create(productAtribbutes models.ProductAtributtes) (
 
 	newProduct := models.Product{
 		ID:                newId,
-		ProductAtributtes: productAtribbutes,
+		ProductAttributes: productAttribbutes,
 	}
 
 	productData[newId] = newProduct
@@ -67,7 +67,7 @@ func (p *ProductRepository) GetByID(id int) (models.Product, error) {
 	return product, nil
 }
 
-func (p *ProductRepository) Update(id int, productAtributtes models.ProductAtributtes) (models.Product, error) {
+func (p *ProductRepository) Update(id int, productAttributes models.ProductAttributes) (models.Product, error) {
 	productData, err := utils.Read[models.Product](p.filePath)
 	if err != nil {
 		return models.Product{}, err
@@ -80,7 +80,7 @@ func (p *ProductRepository) Update(id int, productAtributtes models.ProductAtrib
 
 	updatedProduct := models.Product{
 		ID:                id,
-		ProductAtributtes: productAtributtes,
+		ProductAttributes: productAttributes,
 	}
 	productData[id] = updatedProduct
 

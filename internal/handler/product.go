@@ -22,7 +22,7 @@ func NewProductHandler(sv service.ProductServiceInterface) ProductHandler {
 
 func (h ProductHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var product models.ProductAtributtes
+		var product models.ProductAttributes
 		err := json.NewDecoder(r.Body).Decode(&product)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
@@ -90,7 +90,7 @@ func (h ProductHandler) Update() http.HandlerFunc {
 			return
 		}
 
-		var updatedProduct models.ProductAtributtes
+		var updatedProduct models.ProductAttributes
 		err = json.NewDecoder(r.Body).Decode(&updatedProduct)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)

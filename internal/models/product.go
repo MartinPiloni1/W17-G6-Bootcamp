@@ -2,10 +2,10 @@ package models
 
 type Product struct {
 	ID int `json:"id"`
-	ProductAtributtes
+	ProductAttributes
 }
 
-type ProductAtributtes struct {
+type ProductAttributes struct {
 	Description                    string  `json:"description"`
 	ExpirationRate                 int     `json:"expiration_rate"`
 	FreezingRate                   int     `json:"freezing_rate"`
