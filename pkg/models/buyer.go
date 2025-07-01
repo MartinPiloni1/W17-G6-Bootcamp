@@ -6,9 +6,9 @@ type Buyer struct {
 }
 
 type BuyerAttributes struct {
-	CardNumberId int    `json:"card_number_id"`
-	FirstName    string `json:"first_name"`
-	LastName     string `json:"last_name"`
+	CardNumberId int    `json:"card_number_id" validate:"required,gt=0"`
+	FirstName    string `json:"first_name" validate:"required"`
+	LastName     string `json:"last_name" validate:"required"`
 }
 
 func (b Buyer) GetID() int {
@@ -16,7 +16,7 @@ func (b Buyer) GetID() int {
 }
 
 type BuyerPatchRequest struct {
-	CardNumberId *int    `json:"card_number_id"`
-	FirstName    *string `json:"first_name"`
-	LastName     *string `json:"last_name"`
+	CardNumberId *int    `json:"card_number_id" validate:"omitempty,gt=0"`
+	FirstName    *string `json:"first_name" validate:"omitempty,min=1"`
+	LastName     *string `json:"last_name" validate:"omitempty,min=1"`
 }

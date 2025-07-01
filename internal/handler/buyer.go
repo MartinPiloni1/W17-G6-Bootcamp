@@ -12,6 +12,7 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 	"github.com/bootcamp-go/web/response"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-playground/validator"
 )
 
 type BuyerHandler struct {
@@ -90,12 +91,21 @@ func (h *BuyerHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var newBuyer models.BuyerAttributes
 
-		err := json.NewDecoder(r.Body).Decode(&newBuyer)
-		if err != nil || newBuyer.CardNumberId <= 0 || newBuyer.FirstName == "" || newBuyer.LastName == "" {
+		dec := json.NewDecoder(r.Body)
+		dec.DisallowUnknownFields()
+
+		err := dec.Decode(&newBuyer)
+		if err != nil {
 			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 
+		validator := validator.New()
+		err = validator.Struct(newBuyer)
+		if err != nil {
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
+			return
+		}
 		buyer, err := h.sv.Create(newBuyer)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
@@ -119,12 +129,18 @@ func (h *BuyerHandler) Update() http.HandlerFunc {
 		}
 
 		var patchReq models.BuyerPatchRequest
-		if err := json.NewDecoder(r.Body).Decode(&patchReq); err != nil {
+
+		dec := json.NewDecoder(r.Body)
+		dec.DisallowUnknownFields()
+		err = dec.Decode(&patchReq)
+		if err != nil {
 			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 
-		if patchReq.CardNumberId == nil && patchReq.FirstName == nil && patchReq.LastName == nil {
+		validate := validator.New()
+		err = validate.Struct(patchReq)
+		if err != nil {
 			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
