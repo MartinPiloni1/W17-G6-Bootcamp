@@ -1,21 +1,24 @@
 package service
 
 import (
+	"slices"
+
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
-type SectionServiceImpl struct {
+type SectionServiceDefault struct {
 	repo repository.SectionRepositoryInterface
 }
 
 func NewSectionService(repo repository.SectionRepositoryInterface) SectionServiceInterface {
-	return &SectionServiceImpl{repo: repo}
+	return &SectionServiceDefault{repo: repo}
 }
 
 // Create implements SectionServiceInterface.
-func (s *SectionServiceImpl) Create(section models.Section) (*models.Section, error) {
+func (s SectionServiceDefault) Create(section models.Section) (*models.Section, error) {
 	allSections, err := s.GetAll()
 	if err != nil {
 		return nil, err
@@ -31,21 +34,30 @@ func (s *SectionServiceImpl) Create(section models.Section) (*models.Section, er
 }
 
 // Delete implements SectionServiceInterface.
-func (s *SectionServiceImpl) Delete(id int) error {
+func (s SectionServiceDefault) Delete(id int) error {
 	return s.repo.Delete(id)
 }
 
 // GetAll implements SectionServiceInterface.
-func (s *SectionServiceImpl) GetAll() (map[int]models.Section, error) {
-	return s.repo.GetAll()
+func (s SectionServiceDefault) GetAll() ([]models.Section, error) {
+	data, err := s.repo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	slicedData := utils.MapToSlice(data)
+	slices.SortFunc(slicedData, func(a, b models.Section) int {
+		return a.ID - b.ID
+	})
+	return slicedData, nil
 }
 
 // GetByID implements SectionServiceInterface.
-func (s *SectionServiceImpl) GetByID(id int) (models.Section, error) {
+func (s SectionServiceDefault) GetByID(id int) (models.Section, error) {
 	return s.repo.GetByID(id)
 }
 
 // Update implements SectionServiceInterface.
-func (s *SectionServiceImpl) Update(id int, data models.Section) (models.Section, error) {
+func (s SectionServiceDefault) Update(id int, data models.Section) (models.Section, error) {
 	panic("unimplemented")
 }

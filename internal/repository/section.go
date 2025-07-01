@@ -8,16 +8,16 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
-type SectionRepositoryImpl struct {
+type SectionRepositoryFile struct {
 	filePath string
 }
 
 func NewSectionRepository() SectionRepositoryInterface {
-	return &SectionRepositoryImpl{filePath: os.Getenv("FILE_PATH_DEFAULT")}
+	return &SectionRepositoryFile{filePath: os.Getenv("FILE_PATH_SECTIONS")}
 }
 
 // Create implements SectionRepositoryInterface.
-func (s *SectionRepositoryImpl) Create(section models.Section) (*models.Section, error) {
+func (s *SectionRepositoryFile) Create(section models.Section) (*models.Section, error) {
 	data, err := utils.Read[models.Section](s.filePath)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func (s *SectionRepositoryImpl) Create(section models.Section) (*models.Section,
 }
 
 // Delete implements SectionRepositoryInterface.
-func (s *SectionRepositoryImpl) Delete(id int) error {
+func (s SectionRepositoryFile) Delete(id int) error {
 	data, err := utils.Read[models.Section](s.filePath)
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func (s *SectionRepositoryImpl) Delete(id int) error {
 }
 
 // GetAll implements SectionRepositoryInterface.
-func (s *SectionRepositoryImpl) GetAll() (map[int]models.Section, error) {
+func (s SectionRepositoryFile) GetAll() (map[int]models.Section, error) {
 	data, err := utils.Read[models.Section](s.filePath)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (s *SectionRepositoryImpl) GetAll() (map[int]models.Section, error) {
 }
 
 // GetByID implements SectionRepository.
-func (s *SectionRepositoryImpl) GetByID(id int) (models.Section, error) {
+func (s SectionRepositoryFile) GetByID(id int) (models.Section, error) {
 	data, err := utils.Read[models.Section](s.filePath)
 	if err != nil {
 		return models.Section{}, err
@@ -72,6 +72,6 @@ func (s *SectionRepositoryImpl) GetByID(id int) (models.Section, error) {
 }
 
 // Update implements SectionRepositoryInterface.
-func (s *SectionRepositoryImpl) Update(id int, data models.Section) (models.Section, error) {
+func (s SectionRepositoryFile) Update(id int, data models.Section) (models.Section, error) {
 	panic("unimplemented")
 }
