@@ -1,5 +1,5 @@
-{
-  "1": {
+[
+  {
     "id": 1,
     "description": "Yogurt natural",
     "expiration_rate": 5,
@@ -13,7 +13,7 @@
     "product_type_id": 10,
     "seller_id": 100
   },
-  "2": {
+  {
     "id": 2,
     "description": "Pizza congelada",
     "expiration_rate": 12,
@@ -27,7 +27,7 @@
     "product_type_id": 20,
     "seller_id": 200
   },
-  "3": {
+  {
     "id": 3,
     "description": "Helado de vainilla",
     "expiration_rate": 30,
@@ -41,4 +41,4 @@
     "product_type_id": 30,
     "seller_id": 300
   }
-}
+]
