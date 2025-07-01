@@ -99,7 +99,7 @@ func (h *BuyerHandler) Create() http.HandlerFunc {
 
 		err := json.NewDecoder(r.Body).Decode(&newBuyer)
 		if err != nil || newBuyer.CardNumberId <= 0 || newBuyer.FirstName == "" || newBuyer.LastName == "" {
-			response.Error(w, http.StatusUnprocessableEntity, "Invalid body")
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 
@@ -115,6 +115,43 @@ func (h *BuyerHandler) Create() http.HandlerFunc {
 		}
 
 		response.JSON(w, http.StatusCreated, map[string]any{
+			"data": buyer,
+		})
+	}
+}
+
+func (h *BuyerHandler) Update() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idParam := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idParam)
+		if err != nil || id <= 0 {
+			response.Error(w, http.StatusBadRequest, "Invalid id")
+			return
+		}
+
+		var patchReq models.BuyerPatchRequest
+		if err := json.NewDecoder(r.Body).Decode(&patchReq); err != nil {
+			response.Error(w, http.StatusBadRequest, "Invalid JSON body")
+			return
+		}
+
+		if patchReq.CardNumberId == nil && patchReq.FirstName == nil && patchReq.LastName == nil {
+			response.Error(w, http.StatusBadRequest, "Invalid JSON body")
+			return
+		}
+
+		buyer, err := h.sv.Update(id, patchReq)
+		if err != nil {
+			if errors.As(err, &httperrors.ConflictError{}) || errors.As(err, &httperrors.NotFoundError{}) {
+				statusCode, msg := httperrors.GetErrorData(err)
+				response.Error(w, statusCode, msg)
+				return
+			}
+			http.Error(w, "Unexpected error at Update", http.StatusInternalServerError)
+			return
+		}
+
+		response.JSON(w, http.StatusOK, map[string]any{
 			"data": buyer,
 		})
 	}

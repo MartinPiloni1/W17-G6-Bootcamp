@@ -7,4 +7,5 @@ type BuyerService interface {
 	GetByID(id int) (models.Buyer, error)
 	Delete(id int) error
 	Create(newBuyer models.BuyerAttributes) (models.Buyer, error)
+	Update(id int, BuyerData models.BuyerPatchRequest) (models.Buyer, error)
 }

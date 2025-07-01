@@ -7,4 +7,6 @@ type BuyerRepository interface {
 	GetByID(id int) (models.Buyer, error)
 	Delete(id int) error
 	Create(newBuyer models.BuyerAttributes) (models.Buyer, error)
+	CardNumberIdAlreadyExist(newCardNumberId int) (bool, error)
+	Update(id int, updatedBuyer models.Buyer) (models.Buyer, error)
 }

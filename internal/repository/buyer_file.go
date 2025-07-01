@@ -74,16 +74,6 @@ func (r *BuyerRepositoryFile) CardNumberIdAlreadyExist(newCardNumberId int) (boo
 }
 
 func (r *BuyerRepositoryFile) Create(newBuyer models.BuyerAttributes) (models.Buyer, error) {
-	// check if the cardNumber already exist
-	exist, err := r.CardNumberIdAlreadyExist(newBuyer.CardNumberId)
-	if err != nil {
-		return models.Buyer{}, err
-	}
-
-	if exist {
-		return models.Buyer{}, httperrors.ConflictError{Message: "Buyer already exist"}
-	}
-
 	nextId, err := utils.GetNextID[models.Buyer](r.filePath)
 	if err != nil {
 		return models.Buyer{}, err
@@ -111,4 +101,20 @@ func (r *BuyerRepositoryFile) Create(newBuyer models.BuyerAttributes) (models.Bu
 	}
 
 	return buyer, nil
+}
+
+func (r *BuyerRepositoryFile) Update(id int, updatedBuyer models.Buyer) (models.Buyer, error) {
+	buyersData, err := utils.Read[models.Buyer](r.filePath)
+	if err != nil {
+		return models.Buyer{}, err
+	}
+
+	buyersData[id] = updatedBuyer
+
+	err = utils.Write(r.filePath, buyersData)
+	if err != nil {
+		return models.Buyer{}, err
+	}
+
+	return updatedBuyer, nil
 }
