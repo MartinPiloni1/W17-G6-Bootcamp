@@ -67,10 +67,27 @@ func (p *ProductRepository) GetByID(id int) (models.Product, error) {
 	return product, nil
 }
 
-func (p *ProductRepository) Delete(id int) error {
-	panic("unimplemented")
+func (p *ProductRepository) Update(id int, productAtributtes models.ProductAtributtes) (models.Product, error) {
+	data, err := utils.Read[models.Product](p.filePath)
+	if err != nil {
+		return models.Product{}, err
+	}
+
+	if _, exists := data[id]; !exists {
+		return models.Product{},
+			httperrors.NotFoundError{Message: "No se encontró un producto con el ID proporcionado"}
+	}
+
+	updatedProduct := models.Product{
+		ID:                id,
+		ProductAtributtes: productAtributtes,
+	}
+	data[id] = updatedProduct
+
+	utils.Write(p.filePath, data)
+	return updatedProduct, nil
 }
 
-func (p *ProductRepository) Update(id int, data models.Product) (models.Product, error) {
+func (p *ProductRepository) Delete(id int) error {
 	panic("unimplemented")
 }

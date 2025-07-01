@@ -80,3 +80,33 @@ func (h ProductHandler) GetById() http.HandlerFunc {
 		})
 	}
 }
+
+func (h ProductHandler) Update() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			response.Error(w, 500, "Error interno del servidor")
+			return
+		}
+
+		var updatedProduct models.ProductAtributtes
+		err = json.NewDecoder(r.Body).Decode(&updatedProduct)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+
+		data, err := h.sv.Update(id, updatedProduct)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+
+		response.JSON(w, http.StatusOK, map[string]any{
+			"message": "success",
+			"data":    data,
+		})
+	}
+}

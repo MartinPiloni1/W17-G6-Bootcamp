@@ -28,6 +28,7 @@ func ProductRouter() chi.Router {
 		r.Get("/", hd.GetAll())
 		r.Get("/{id}", hd.GetById())
 		r.Post("/", hd.Create())
+		r.Patch("/{id}", hd.Update())
 	})
 	return router
 }
