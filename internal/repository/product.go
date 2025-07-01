@@ -13,7 +13,7 @@ type ProductRepositoryFile struct {
 }
 
 func NewProductRepository() ProductRepositoryInterface {
-	filePath := os.Getenv("FILE_PATH_DEFAULT")
+	filePath := os.Getenv("FILE_PATH_PRODUCTS")
 	return &ProductRepositoryFile{
 		filePath: filePath,
 	}
