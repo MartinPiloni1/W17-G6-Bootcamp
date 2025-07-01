@@ -28,5 +28,8 @@ func EmployeeRouter() chi.Router {
 	handler := handler.NewEmployeeHandler(service)
 	router.Get("/", handler.GetAll())
 	router.Get("/{id}", handler.GetById())
+	router.Post("/", handler.Post())
+	router.Patch("/{id}", handler.Patch())
+	router.Delete("/{id}", handler.DeleteById())
 	return router
 }

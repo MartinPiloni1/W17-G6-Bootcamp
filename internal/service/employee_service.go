@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/mapper"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 )
 
@@ -14,9 +15,11 @@ func NewEmployeeService(repo repository.EmployeeRepository) EmployeeService {
 	return &EmployeeServiceImpl{repo: repo}
 }
 
-func (e EmployeeServiceImpl) Create(Employee models.Employee) (models.Employee, error) {
-	//TODO implement me
-	panic("implement me")
+func (e EmployeeServiceImpl) Create(employee models.Employee) (models.Employee, error) {
+	if employee.Id != 0 {
+		return models.Employee{}, httperrors.UnprocessableEntityError{Message: "No debe tener id"}
+	}
+	return e.repo.Create(employee)
 }
 
 func (e EmployeeServiceImpl) GetAll() ([]models.Employee, error) {
@@ -24,7 +27,6 @@ func (e EmployeeServiceImpl) GetAll() ([]models.Employee, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return mapper.NewEmployeeMapper().MapToSlice(employees), nil
 }
 
@@ -33,11 +35,9 @@ func (e EmployeeServiceImpl) GetByID(id int) (models.Employee, error) {
 }
 
 func (e EmployeeServiceImpl) Update(id int, employee models.Employee) (models.Employee, error) {
-	//TODO implement me
-	panic("implement me")
+	return e.repo.Update(id, employee)
 }
 
 func (e EmployeeServiceImpl) Delete(id int) error {
-	//TODO implement me
-	panic("implement me")
+	return e.repo.Delete(id)
 }

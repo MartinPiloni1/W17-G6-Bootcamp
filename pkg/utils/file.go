@@ -30,3 +30,19 @@ func Read[T any](filePath string) (map[int]T, error) {
 
 	return data, nil
 }
+
+// Escribe un map[int]T al filePath codificado como JSON (keys string)
+func Write[T any](filePath string, data map[int]T) error {
+	// Convertir de map[int]T → map[string]T para JSON
+	tmpData := make(map[string]T, len(data))
+	for k, v := range data {
+		tmpData[strconv.Itoa(k)] = v
+	}
+	// Marshal a JSON
+	dataAsBytes, err := json.MarshalIndent(tmpData, "", "  ")
+	if err != nil {
+		return err
+	}
+	// Escribir al archivo (permiso 0644: rw-r--r--)
+	return os.WriteFile(filePath, dataAsBytes, 0644)
+}

@@ -19,5 +19,40 @@
     "first_name": "Carlos",
     "last_name": "Pérez",
     "warehouse_id": 1
+  },
+  "4": {
+    "id": 4,
+    "card_number_id": "402330",
+    "first_name": "juan",
+    "last_name": "perez",
+    "warehouse_id": 1
+  },
+  "5": {
+    "id": 5,
+    "card_number_id": "402360",
+    "first_name": "juan",
+    "last_name": "perez",
+    "warehouse_id": 1
+  },
+  "6": {
+    "id": 6,
+    "card_number_id": "402382032",
+    "first_name": "pedsro",
+    "last_name": "perez",
+    "warehouse_id": 1
+  },
+  "7": {
+    "id": 7,
+    "card_number_id": "4023842032",
+    "first_name": "pedsro",
+    "last_name": "perez",
+    "warehouse_id": 1
+  },
+  "8": {
+    "id": 8,
+    "card_number_id": "40232h522",
+    "first_name": "Carlos",
+    "last_name": "Pérez",
+    "warehouse_id": 2
   }
 }
