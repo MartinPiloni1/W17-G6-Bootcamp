@@ -14,6 +14,7 @@ func HealthRouter() chi.Router {
 	//mount the endpoints and return to mount them in the Run()
 	router := chi.NewRouter()
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Hello World!"))
 	})
 	return router
@@ -23,7 +24,7 @@ func BuyersRouter(BuyerFilePath string) chi.Router {
 	router := chi.NewRouter()
 
 	rp := repository.NewBuyerRepositoryFile(BuyerFilePath)
-	sv := service.NewBuyerService(rp)
+	sv := service.NewBuyerServiceDefault(rp)
 	hd := handler.NewBuyerHandler(sv)
 
 	router.Get("/", hd.GetAll())

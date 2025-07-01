@@ -16,10 +16,10 @@ import (
 )
 
 type BuyerHandler struct {
-	sv service.BuyerServiceInterface
+	sv service.BuyerService
 }
 
-func NewBuyerHandler(sv service.BuyerServiceInterface) *BuyerHandler {
+func NewBuyerHandler(sv service.BuyerService) *BuyerHandler {
 	return &BuyerHandler{sv: sv}
 }
 

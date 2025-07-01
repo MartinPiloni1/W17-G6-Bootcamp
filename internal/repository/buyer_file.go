@@ -12,7 +12,7 @@ type BuyerRepositoryFile struct {
 	filePath string
 }
 
-func NewBuyerRepositoryFile(filePath string) BuyerRepositoryInterface {
+func NewBuyerRepositoryFile(filePath string) BuyerRepository {
 	return &BuyerRepositoryFile{filePath: filePath}
 }
 
