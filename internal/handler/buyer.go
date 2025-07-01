@@ -120,12 +120,12 @@ func (h *BuyerHandler) Update() http.HandlerFunc {
 
 		var patchReq models.BuyerPatchRequest
 		if err := json.NewDecoder(r.Body).Decode(&patchReq); err != nil {
-			response.Error(w, http.StatusBadRequest, "Invalid JSON body")
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 
 		if patchReq.CardNumberId == nil && patchReq.FirstName == nil && patchReq.LastName == nil {
-			response.Error(w, http.StatusBadRequest, "Invalid JSON body")
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 

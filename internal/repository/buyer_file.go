@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"fmt"
-
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
@@ -32,7 +30,7 @@ func (r *BuyerRepositoryFile) GetByID(id int) (models.Buyer, error) {
 	buyer, ok := buyersData[id]
 	if !ok {
 		return models.Buyer{},
-			httperrors.NotFoundError{Message: fmt.Sprintf("Buyer %d, not found", id)}
+			httperrors.NotFoundError{Message: "Buyer not found"}
 	}
 	return buyer, nil
 }
@@ -45,7 +43,7 @@ func (r *BuyerRepositoryFile) Delete(id int) error {
 
 	_, ok := buyersData[id]
 	if !ok {
-		return httperrors.NotFoundError{Message: fmt.Sprintf("Buyer %d, not found", id)}
+		return httperrors.NotFoundError{Message: "Buyer not found"}
 	}
 
 	delete(buyersData, id)
