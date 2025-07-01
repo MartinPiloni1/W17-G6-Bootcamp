@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"slices"
 	"strconv"
@@ -31,10 +30,12 @@ func (h *BuyerHandler) GetAll() http.HandlerFunc {
 			response.Error(w, statusCode, msg)
 			return
 		}
+
 		data := utils.MapToSlice(buyerData)
 		slices.SortFunc(data, func(a, b models.Buyer) int {
 			return a.Id - b.Id
 		})
+
 		response.JSON(w, http.StatusOK, map[string]any{
 			"data": data,
 		})
@@ -53,12 +54,8 @@ func (h *BuyerHandler) GetByID() http.HandlerFunc {
 
 		data, err := h.sv.GetByID(id)
 		if err != nil {
-			if errors.As(err, &httperrors.NotFoundError{}) {
-				statusCode, msg := httperrors.GetErrorData(err)
-				response.Error(w, statusCode, msg)
-				return
-			}
-			http.Error(w, "Unexpected error at GetByID", http.StatusInternalServerError)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 
@@ -80,12 +77,8 @@ func (h *BuyerHandler) Delete() http.HandlerFunc {
 
 		err = h.sv.Delete(id)
 		if err != nil {
-			if errors.As(err, &httperrors.NotFoundError{}) {
-				statusCode, msg := httperrors.GetErrorData(err)
-				response.Error(w, statusCode, msg)
-				return
-			}
-			http.Error(w, "Unexpected error at Delete", http.StatusInternalServerError)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 
@@ -105,12 +98,8 @@ func (h *BuyerHandler) Create() http.HandlerFunc {
 
 		buyer, err := h.sv.Create(newBuyer)
 		if err != nil {
-			if errors.As(err, &httperrors.ConflictError{}) {
-				statusCode, msg := httperrors.GetErrorData(err)
-				response.Error(w, statusCode, msg)
-				return
-			}
-			http.Error(w, "Unexpected error at Create", http.StatusInternalServerError)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 
@@ -142,12 +131,8 @@ func (h *BuyerHandler) Update() http.HandlerFunc {
 
 		buyer, err := h.sv.Update(id, patchReq)
 		if err != nil {
-			if errors.As(err, &httperrors.ConflictError{}) || errors.As(err, &httperrors.NotFoundError{}) {
-				statusCode, msg := httperrors.GetErrorData(err)
-				response.Error(w, statusCode, msg)
-				return
-			}
-			http.Error(w, "Unexpected error at Update", http.StatusInternalServerError)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 
