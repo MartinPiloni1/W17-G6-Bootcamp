@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"os"
+
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
@@ -10,8 +12,8 @@ type BuyerRepositoryFile struct {
 	filePath string
 }
 
-func NewBuyerRepositoryFile(filePath string) BuyerRepository {
-	return &BuyerRepositoryFile{filePath: filePath}
+func NewBuyerRepositoryFile() BuyerRepository {
+	return &BuyerRepositoryFile{filePath: os.Getenv("BUYER_FILE_PATH")}
 }
 
 func (r *BuyerRepositoryFile) GetAll() (map[int]models.Buyer, error) {

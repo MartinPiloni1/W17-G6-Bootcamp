@@ -20,10 +20,10 @@ func HealthRouter() chi.Router {
 	return router
 }
 
-func BuyersRouter(BuyerFilePath string) chi.Router {
+func BuyersRouter() chi.Router {
 	router := chi.NewRouter()
 
-	rp := repository.NewBuyerRepositoryFile(BuyerFilePath)
+	rp := repository.NewBuyerRepositoryFile()
 	sv := service.NewBuyerServiceDefault(rp)
 	hd := handler.NewBuyerHandler(sv)
 
