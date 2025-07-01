@@ -27,6 +27,10 @@ func WarehouseRouter() chi.Router {
 	router := chi.NewRouter()
 
 	router.Get("/", hd.GetAll())
+	router.Post("/", hd.Create())
+	router.Get("/{id}", hd.GetById())
+	router.Patch("/{id}", hd.Update())
+	router.Delete("/{id}", hd.Delete())
 
 	return router
 }

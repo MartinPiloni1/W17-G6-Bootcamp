@@ -12,6 +12,6 @@ type WarehouseAttributes struct {
 	MinimunTemperature float64 `json:"minimun_temperature"`
 }
 
-func (b Warehouse) GetID() int {
-	return b.Id
+func (w Warehouse) GetID() int {
+	return w.Id
 }
