@@ -5,6 +5,14 @@ import (
 	"os"
 )
 
+func MapToSlice[T any](data map[int]T) []T {
+	var slicedData []T
+	for _, v := range data {
+		slicedData = append(slicedData, v)
+	}
+	return slicedData
+}
+
 func Read[T Identifiable](filePath string) (map[int]T, error) {
 	dataAsBytes, err := os.ReadFile(filePath)
 	if err != nil {
@@ -26,10 +34,7 @@ func Read[T Identifiable](filePath string) (map[int]T, error) {
 }
 
 func Write[T any](filePath string, data map[int]T) error {
-	var slicedData []T
-	for _, v := range data {
-		slicedData = append(slicedData, v)
-	}
+	slicedData := MapToSlice(data)
 
 	dataAsBytes, err := json.MarshalIndent(slicedData, "", "  ")
 	if err != nil {
