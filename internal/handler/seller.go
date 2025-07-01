@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/bootcamp-go/web/response"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 type SellerHandler struct {
@@ -20,7 +21,7 @@ func NewSellerHandler(sv service.SellerServiceInterface) SellerHandler {
 	return SellerHandler{sv: sv}
 }
 
-func (h SellerHandler) GetAll() http.HandlerFunc {
+func (h *SellerHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		data, err := h.sv.GetAll()
@@ -37,10 +38,13 @@ func (h SellerHandler) GetAll() http.HandlerFunc {
 	}
 }
 
-func (h SellerHandler) GetByID() http.HandlerFunc {
+func (h *SellerHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Request path:", r.URL.Path)
 		idStr := chi.URLParam(r, "id")
+		fmt.Println("idStr:", idStr)
 		id, err := strconv.Atoi(idStr)
+		fmt.Println("idStr:", id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err) //409 bad request
 			response.Error(w, statusCode, msg)
@@ -58,12 +62,13 @@ func (h SellerHandler) GetByID() http.HandlerFunc {
 	}
 }
 
-func (h SellerHandler) Delete() http.HandlerFunc {
+func (h *SellerHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idStr := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err) //409 bad request
+			statusCode, msg := httperrors.GetErrorData(err)
+			fmt.Println("idStr:", idStr)
 			response.Error(w, statusCode, msg)
 			return
 		}
@@ -83,7 +88,7 @@ func (h SellerHandler) Delete() http.HandlerFunc {
 	}
 }
 
-func (h SellerHandler) Create() http.HandlerFunc {
+func (h *SellerHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req models.Seller
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -109,9 +114,11 @@ func (h SellerHandler) Create() http.HandlerFunc {
 	}
 }
 
-func (h SellerHandler) Update() http.HandlerFunc {
+func (h *SellerHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Request path:", r.URL.Path)
 		idStr := chi.URLParam(r, "id")
+		fmt.Println("idStr:", idStr)
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			response.Error(w, http.StatusBadRequest, "invalid id")

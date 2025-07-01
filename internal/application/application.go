@@ -22,9 +22,13 @@ func HealthRouter() chi.Router {
 
 func SellerRouter() chi.Router {
 	router := chi.NewRouter()
-	repo := repository.NewSellerRepository()
-	service := service.NewSellerService(repo)
-	handler := handler.NewSellerHandler(service)
-	router.Get("/getall", handler.GetAll())
+	rp := repository.NewSellerRepository()
+	sv := service.NewSellerService(rp)
+	hd := handler.NewSellerHandler(sv)
+	router.Get("/", hd.GetAll())        // GET /seller         (lista todos)
+	router.Get("/{id}", hd.GetByID())   // GET /seller/{id}    (uno por id)
+	router.Post("/", hd.Create())       // POST /seller        (crear uno)
+	router.Patch("/{id}", hd.Update())  // PATCH /seller/{id}  (actualizar)
+	router.Delete("/{id}", hd.Delete()) // DELETE
 	return router
 }

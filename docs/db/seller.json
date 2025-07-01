@@ -6,11 +6,11 @@
     "address": "Monroe 860",
     "telephone": "47470000"
   },
-  "2": {
-    "id": 2,
-    "cid": 13,
-    "company_name": "Globant",
-    "address": "Av. Corrientes 3240",
-    "telephone": "40001234"
+  "3": {
+    "id": 3,
+    "cid": 11,
+    "company_name": "Pepito",
+    "address": "SN 123",
+    "telephone": "12334563"
   }
 }

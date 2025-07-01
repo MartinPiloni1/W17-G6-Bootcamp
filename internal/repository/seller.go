@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
@@ -16,19 +17,19 @@ func NewSellerRepository() SellerRepositoryInterface {
 	return &SellerRepositoryImpl{filePath: os.Getenv("FILE_PATH_DEFAULT")}
 }
 
-func (r *SellerRepositoryImpl) GetByID(id int) (models.Seller, error) {
+func (r SellerRepositoryImpl) GetByID(id int) (models.Seller, error) {
 	data, err := utils.Read[models.Seller](r.filePath)
 	if err != nil {
 		return models.Seller{}, err
 	}
 	seller, ok := data[id]
 	if !ok {
-		return models.Seller{}, errors.New("seller not found")
+		return models.Seller{}, httperrors.NotFoundError{Message: "seller not found"}
 	}
 	return seller, nil
 }
 
-func (s *SellerRepositoryImpl) GetAll() (map[int]models.Seller, error) {
+func (s SellerRepositoryImpl) GetAll() (map[int]models.Seller, error) {
 	data, err := utils.Read[models.Seller](s.filePath)
 	if err != nil {
 		return nil, err
@@ -36,7 +37,7 @@ func (s *SellerRepositoryImpl) GetAll() (map[int]models.Seller, error) {
 	return data, nil
 }
 
-func (r *SellerRepositoryImpl) Create(seller models.Seller) (*models.Seller, error) {
+func (r SellerRepositoryImpl) Create(seller models.Seller) (*models.Seller, error) {
 	data, err := utils.Read[models.Seller](r.filePath)
 	if err != nil {
 		return nil, err
@@ -60,7 +61,7 @@ func (r *SellerRepositoryImpl) Create(seller models.Seller) (*models.Seller, err
 	return &seller, nil
 }
 
-func (r *SellerRepositoryImpl) Delete(id int) error {
+func (r SellerRepositoryImpl) Delete(id int) error {
 	data, err := utils.Read[models.Seller](r.filePath) // map[int]models.Seller
 	if err != nil {
 		return err
@@ -75,7 +76,7 @@ func (r *SellerRepositoryImpl) Delete(id int) error {
 	return nil
 }
 
-func (r *SellerRepositoryImpl) Update(id int, data *models.Seller) (*models.Seller, error) {
+func (r SellerRepositoryImpl) Update(id int, data *models.Seller) (*models.Seller, error) {
 	sellers, err := utils.Read[models.Seller](r.filePath)
 	if err != nil {
 		return nil, err

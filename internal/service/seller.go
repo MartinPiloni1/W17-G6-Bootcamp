@@ -15,7 +15,7 @@ func NewSellerService(repo repository.SellerRepositoryInterface) SellerServiceIn
 	return &SellerServiceImpl{rp: repo}
 }
 
-func (s *SellerServiceImpl) Create(seller models.Seller) (*models.Seller, error) {
+func (s SellerServiceImpl) Create(seller models.Seller) (*models.Seller, error) {
 	if seller.CID == 0 || seller.CompanyName == "" || seller.Address == "" || seller.Telephone == "" {
 		return &models.Seller{}, errors.New("missing required fields")
 	}
@@ -31,19 +31,19 @@ func (s *SellerServiceImpl) Create(seller models.Seller) (*models.Seller, error)
 	return s.rp.Create(seller)
 }
 
-func (s *SellerServiceImpl) Delete(id int) error {
+func (s SellerServiceImpl) Delete(id int) error {
 	return s.rp.Delete(id)
 }
 
-func (s *SellerServiceImpl) GetAll() (map[int]models.Seller, error) {
+func (s SellerServiceImpl) GetAll() (map[int]models.Seller, error) {
 	return s.rp.GetAll()
 }
 
-func (s *SellerServiceImpl) GetByID(id int) (models.Seller, error) {
+func (s SellerServiceImpl) GetByID(id int) (models.Seller, error) {
 	return s.rp.GetByID(id)
 }
 
-func (s *SellerServiceImpl) Update(id int, data *models.Seller) (*models.Seller, error) {
+func (s SellerServiceImpl) Update(id int, data *models.Seller) (*models.Seller, error) {
 	//no cambiar un seller inactivo, el CID debe seguir siendo único, etc.
 	if data.CID != 0 {
 		all, err := s.rp.GetAll()
