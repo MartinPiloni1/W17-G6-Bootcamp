@@ -7,4 +7,4 @@ require (
 	github.com/joho/godotenv v1.5.1
 )
 
-require github.com/bootcamp-go/web v1.0.0 // indirect
+require github.com/bootcamp-go/web v1.0.0

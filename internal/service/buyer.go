@@ -27,3 +27,8 @@ func (s *BuyerService) Delete(id int) error {
 	err := s.rp.Delete(id)
 	return err
 }
+
+func (s *BuyerService) Create(newBuyer models.BuyerAttributes) (models.Buyer, error) {
+	buyer, err := s.rp.Create(newBuyer)
+	return buyer, err
+}

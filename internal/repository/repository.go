@@ -6,4 +6,5 @@ type BuyerRepositoryInterface interface {
 	GetAll() (map[int]models.Buyer, error)
 	GetByID(id int) (models.Buyer, error)
 	Delete(id int) error
+	Create(newBuyer models.BuyerAttributes) (models.Buyer, error)
 }
