@@ -7,7 +7,7 @@ import (
 
 func ApplyNonZero[T any](dst *T, patch T) error {
 	if dst == nil {
-		return errors.New("dst no puede ser nil")
+		return errors.New("the original struct cannot be nil")
 	}
 
 	dstVal := reflect.ValueOf(dst).Elem() // *T → T
@@ -15,13 +15,13 @@ func ApplyNonZero[T any](dst *T, patch T) error {
 
 	for patchVal.Kind() == reflect.Pointer {
 		if patchVal.IsNil() {
-			return errors.New("patch es puntero nil")
+			return errors.New("the patch struct is a nil pointer")
 		}
 		patchVal = patchVal.Elem()
 	}
 
 	if dstVal.Type() != patchVal.Type() || dstVal.Kind() != reflect.Struct {
-		return errors.New("dst y patch deben ser structs del mismo tipo")
+		return errors.New("the original struct and the patch struct must be structs of the same type")
 	}
 
 	for i := 0; i < dstVal.NumField(); i++ {
