@@ -68,7 +68,7 @@ func (h ProductHandler) GetById() http.HandlerFunc {
 			return
 		}
 
-		productData, err := h.sv.GetByID(id)
+		product, err := h.sv.GetByID(id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -77,7 +77,7 @@ func (h ProductHandler) GetById() http.HandlerFunc {
 
 		response.JSON(w, http.StatusOK, map[string]any{
 			"message": "success",
-			"data":    productData,
+			"data":    product,
 		})
 	}
 }
@@ -98,7 +98,7 @@ func (h ProductHandler) Update() http.HandlerFunc {
 			return
 		}
 
-		productData, err := h.sv.Update(id, updatedProduct)
+		product, err := h.sv.Update(id, updatedProduct)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -107,7 +107,7 @@ func (h ProductHandler) Update() http.HandlerFunc {
 
 		response.JSON(w, http.StatusOK, map[string]any{
 			"message": "success",
-			"data":    productData,
+			"data":    product,
 		})
 	}
 }
