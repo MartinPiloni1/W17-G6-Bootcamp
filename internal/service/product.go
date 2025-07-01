@@ -9,10 +9,10 @@ import (
 )
 
 type ProductServiceDefault struct {
-	rp repository.ProductRepositoryInterface
+	rp repository.ProductRepository
 }
 
-func NewProductService(repo repository.ProductRepositoryInterface) ProductServiceInterface {
+func NewProductService(repo repository.ProductRepository) ProductService {
 	return &ProductServiceDefault{rp: repo}
 }
 

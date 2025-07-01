@@ -2,7 +2,7 @@ package service
 
 import "github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 
-type ProductServiceInterface interface {
+type ProductService interface {
 	Create(product models.ProductAttributes) (models.Product, error)
 	GetAll() ([]models.Product, error)
 	GetByID(id int) (models.Product, error)
