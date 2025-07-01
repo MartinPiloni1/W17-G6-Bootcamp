@@ -2,31 +2,59 @@ package utils
 
 import (
 	"encoding/json"
-	"errors"
 	"os"
-	"strconv"
 )
 
-func Read[T any](filePath string) (map[int]T, error) {
+func Read[T Identifiable](filePath string) (map[int]T, error) {
 	dataAsBytes, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}
 
-	var tmpData map[string]T
-	err = json.Unmarshal(dataAsBytes, &tmpData)
+	var slicedData []T
+	err = json.Unmarshal(dataAsBytes, &slicedData)
 	if err != nil {
 		return nil, err
 	}
 
 	data := make(map[int]T)
-	for k, v := range tmpData {
-		key, err := strconv.Atoi(k)
-		if err != nil {
-			return nil, errors.New("error while loading Json as data")
-		}
-		data[key] = v
+	for _, e := range slicedData {
+		data[e.GetID()] = e
 	}
 
 	return data, nil
+}
+
+func Write[T any](filePath string, data map[int]T) error {
+	var slicedData []T
+	for _, v := range data {
+		slicedData = append(slicedData, v)
+	}
+
+	dataAsBytes, err := json.MarshalIndent(slicedData, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filePath, dataAsBytes, 0644)
+	return err
+}
+
+func GetNextID[T Identifiable](filePath string) (int, error) {
+	dataAsBytes, err := os.ReadFile(filePath)
+	if err != nil {
+		return 0, err
+	}
+
+	var slicedData []T
+	err = json.Unmarshal(dataAsBytes, &slicedData)
+	if err != nil {
+		return 0, err
+	}
+
+	maxId := 0
+	for _, v := range slicedData {
+		maxId = max(maxId, v.GetID())
+	}
+	return maxId + 1, nil
 }
