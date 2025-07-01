@@ -5,6 +5,7 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
+	"slices"
 )
 
 type WarehouseServiceDefault struct {
@@ -24,12 +25,17 @@ func (p *WarehouseServiceDefault) Create(product models.WarehouseAttributes) (mo
 	return p.rp.Create(product)
 }
 
-func (p *WarehouseServiceDefault) GetAll() (map[int]models.Warehouse, error) {
+func (p *WarehouseServiceDefault) GetAll() ([]models.Warehouse, error) {
 	result, err := p.rp.GetAll()
 	if err != nil {
-		return map[int]models.Warehouse{}, err
+		return []models.Warehouse{}, err
 	}
-	return result, nil
+	slicedData := utils.MapToSlice(result)
+	slices.SortFunc(slicedData, func(a, b models.Warehouse) int {
+		return a.Id - b.Id
+	})
+	return slicedData, nil
+
 }
 
 func (p *WarehouseServiceDefault) GetByID(id int) (models.Warehouse, error) {

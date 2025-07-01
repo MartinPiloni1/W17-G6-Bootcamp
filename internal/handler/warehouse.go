@@ -72,8 +72,7 @@ func (h WarehouseHandler) GetById() http.HandlerFunc {
 		}
 
 		response.JSON(w, http.StatusOK, map[string]any{
-			"message": "success",
-			"data":    warehouseData,
+			"data": warehouseData,
 		})
 	}
 }
@@ -113,7 +112,6 @@ func (h WarehouseHandler) Delete() http.HandlerFunc {
 			response.Error(w, 400, "Invalid ID format")
 			return
 		}
-
 		err = h.sv.Delete(id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
