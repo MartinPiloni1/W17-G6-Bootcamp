@@ -25,25 +25,18 @@ func Read[T Identifiable](filePath string) (map[int]T, error) {
 	return data, nil
 }
 
-func Write[T any](filePath string, newData T) error {
-	dataAsBytes, err := os.ReadFile(filePath)
-	if err != nil {
-		return err
-	}
-
+func Write[T any](filePath string, data map[int]T) error {
 	var slicedData []T
-	err = json.Unmarshal(dataAsBytes, &slicedData)
+	for _, v := range data {
+		slicedData = append(slicedData, v)
+	}
+
+	dataAsBytes, err := json.MarshalIndent(slicedData, "", "  ")
 	if err != nil {
 		return err
 	}
 
-	slicedData = append(slicedData, newData)
-	newDataAsBytes, err := json.MarshalIndent(slicedData, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(filePath, newDataAsBytes, 0644)
+	err = os.WriteFile(filePath, dataAsBytes, 0644)
 	return err
 }
 
