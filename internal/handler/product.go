@@ -38,8 +38,7 @@ func (h ProductHandler) Create() http.HandlerFunc {
 		}
 
 		response.JSON(w, http.StatusCreated, map[string]any{
-			"message": "success",
-			"data":    productData,
+			"data": productData,
 		})
 	}
 }
@@ -54,8 +53,7 @@ func (h ProductHandler) GetAll() http.HandlerFunc {
 		}
 
 		response.JSON(w, http.StatusOK, map[string]any{
-			"message": "success",
-			"data":    productData,
+			"data": productData,
 		})
 	}
 }
@@ -76,8 +74,7 @@ func (h ProductHandler) GetById() http.HandlerFunc {
 		}
 
 		response.JSON(w, http.StatusOK, map[string]any{
-			"message": "success",
-			"data":    product,
+			"data": product,
 		})
 	}
 }
@@ -106,8 +103,7 @@ func (h ProductHandler) Update() http.HandlerFunc {
 		}
 
 		response.JSON(w, http.StatusOK, map[string]any{
-			"message": "success",
-			"data":    product,
+			"data": product,
 		})
 	}
 }
