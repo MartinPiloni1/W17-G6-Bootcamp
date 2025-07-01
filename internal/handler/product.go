@@ -46,7 +46,7 @@ func (h ProductHandler) Create() http.HandlerFunc {
 
 func (h ProductHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		data, err := h.sv.GetAll()
+		productData, err := h.sv.GetAll()
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -55,7 +55,7 @@ func (h ProductHandler) GetAll() http.HandlerFunc {
 
 		response.JSON(w, http.StatusOK, map[string]any{
 			"message": "success",
-			"data":    data,
+			"data":    productData,
 		})
 	}
 }
@@ -64,11 +64,11 @@ func (h ProductHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			response.Error(w, 500, "Error interno del servidor")
+			response.Error(w, 500, "Internal server error")
 			return
 		}
 
-		data, err := h.sv.GetByID(id)
+		productData, err := h.sv.GetByID(id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -77,7 +77,7 @@ func (h ProductHandler) GetById() http.HandlerFunc {
 
 		response.JSON(w, http.StatusOK, map[string]any{
 			"message": "success",
-			"data":    data,
+			"data":    productData,
 		})
 	}
 }
@@ -86,7 +86,7 @@ func (h ProductHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			response.Error(w, 500, "Error interno del servidor")
+			response.Error(w, 500, "Internal server error")
 			return
 		}
 
@@ -98,7 +98,7 @@ func (h ProductHandler) Update() http.HandlerFunc {
 			return
 		}
 
-		data, err := h.sv.Update(id, updatedProduct)
+		productData, err := h.sv.Update(id, updatedProduct)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -107,7 +107,7 @@ func (h ProductHandler) Update() http.HandlerFunc {
 
 		response.JSON(w, http.StatusOK, map[string]any{
 			"message": "success",
-			"data":    data,
+			"data":    productData,
 		})
 	}
 }
@@ -116,7 +116,7 @@ func (h ProductHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			response.Error(w, 500, "Error interno del servidor")
+			response.Error(w, 500, "Internal server error")
 			return
 		}
 

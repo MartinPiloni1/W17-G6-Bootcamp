@@ -62,7 +62,7 @@ func (p *ProductRepositoryFile) GetByID(id int) (models.Product, error) {
 	product, exists := productData[id]
 	if !exists {
 		return models.Product{},
-			httperrors.NotFoundError{Message: "No se encontró un producto con el ID proporcionado"}
+			httperrors.NotFoundError{Message: "Product not found"}
 	}
 	return product, nil
 }
@@ -75,7 +75,7 @@ func (p *ProductRepositoryFile) Update(id int, productAttributes models.ProductA
 
 	if _, exists := productData[id]; !exists {
 		return models.Product{},
-			httperrors.NotFoundError{Message: "No se encontró un producto con el ID proporcionado"}
+			httperrors.NotFoundError{Message: "Product not found"}
 	}
 
 	updatedProduct := models.Product{
@@ -95,7 +95,7 @@ func (p *ProductRepositoryFile) Delete(id int) error {
 	}
 
 	if _, exists := productData[id]; !exists {
-		return httperrors.NotFoundError{Message: "No se encontró un producto con el ID proporcionado"}
+		return httperrors.NotFoundError{Message: "Product not found"}
 	}
 
 	delete(productData, id)
