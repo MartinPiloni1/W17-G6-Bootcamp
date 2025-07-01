@@ -102,5 +102,6 @@ func SectionRouter() chi.Router {
 	router.Get("/", handler.GetAll())
 	router.Get("/{id}", handler.GetByID())
 	router.Delete("/{id}", handler.Delete())
+	router.Post("/", handler.Create())
 	return router
 }

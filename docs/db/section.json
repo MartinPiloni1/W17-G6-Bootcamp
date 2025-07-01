@@ -75,5 +75,27 @@
     "maximum_capacity": 750,
     "warehouse_id": 3,
     "product_type_id": 5
+  },
+  "8": {
+    "id": 8,
+    "section_number": "A-101-FRIGOo",
+    "current_temperature": 1,
+    "minimum_temperature": 1,
+    "current_capacity": 1,
+    "minimum_capacity": 1,
+    "maximum_capacity": 1,
+    "warehouse_id": 1,
+    "product_type_id": 1
+  },
+  "9": {
+    "id": 9,
+    "section_number": "A-101-FRIGOoo",
+    "current_temperature": 1,
+    "minimum_temperature": 1,
+    "current_capacity": 1,
+    "minimum_capacity": 1,
+    "maximum_capacity": 1,
+    "warehouse_id": 1,
+    "product_type_id": 1
   }
 }

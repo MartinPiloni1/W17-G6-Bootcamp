@@ -18,7 +18,16 @@ func NewSectionRepository() SectionRepositoryInterface {
 
 // Create implements SectionRepositoryInterface.
 func (s *SectionRepositoryImpl) Create(section models.Section) (*models.Section, error) {
-	panic("unimplemented")
+	data, err := utils.Read[models.Section](s.filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	id := len(data) + 1
+	section.ID = id
+	data[id] = section
+
+	return &section, utils.Write(s.filePath, data)
 }
 
 // Delete implements SectionRepositoryInterface.

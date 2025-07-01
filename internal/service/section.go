@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 )
 
@@ -15,7 +16,18 @@ func NewSectionService(repo repository.SectionRepositoryInterface) SectionServic
 
 // Create implements SectionServiceInterface.
 func (s *SectionServiceImpl) Create(section models.Section) (*models.Section, error) {
-	panic("unimplemented")
+	allSections, err := s.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, sections := range allSections {
+		if sections.SectionNumber == section.SectionNumber {
+			return nil, httperrors.ConflictError{Message: "el section_number ya existe"}
+		}
+	}
+
+	return s.repo.Create(section)
 }
 
 // Delete implements SectionServiceInterface.
