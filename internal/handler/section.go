@@ -118,3 +118,42 @@ func (h *SectionHandler) Create() http.HandlerFunc {
 		})
 	}
 }
+
+func (h *SectionHandler) Update() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idParam := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idParam)
+		if err != nil {
+			response.Error(w, http.StatusBadRequest, "ID inválido")
+			return
+		}
+
+		var req models.UpdatePatchSectionRequest
+		
+		dec := json.NewDecoder(r.Body)
+		dec.DisallowUnknownFields()
+
+		err = dec.Decode(&req)
+		if err != nil {
+			response.Error(w, http.StatusBadRequest, "Cuerpo de la petición inválido o contiene campos desconocidos")
+			return
+		}
+
+		validate := validator.New()
+		if err := validate.Struct(req); err != nil {
+			response.Error(w, http.StatusUnprocessableEntity, "Error de validación: "+err.Error())
+			return
+		}
+
+		updatedSection, err := h.sectionService.Update(id, req)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+
+		response.JSON(w, http.StatusOK, map[string]any{
+			"data": updatedSection,
+		})
+	}
+}

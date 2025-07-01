@@ -73,5 +73,17 @@ func (s SectionRepositoryFile) GetByID(id int) (models.Section, error) {
 
 // Update implements SectionRepositoryInterface.
 func (s SectionRepositoryFile) Update(id int, data models.Section) (models.Section, error) {
-	panic("unimplemented")
+	dataMap, err := utils.Read[models.Section](s.filePath)
+	if err != nil {
+		return models.Section{}, err
+	}
+
+	_, ok := dataMap[id]
+	if !ok {
+		return models.Section{}, httperrors.NotFoundError{Message: "sección no encontrada"}
+	}
+
+	dataMap[id] = data
+
+	return dataMap[id], utils.Write(s.filePath, dataMap)
 }

@@ -27,3 +27,18 @@ type CreateSectionRequest struct {
 	WarehouseID        int     `json:"warehouse_id" validate:"required"`
 	ProductTypeID      int     `json:"product_type_id" validate:"required"`
 }
+
+// Usamos punteros para poder diferenciar entre un campo no enviado (nil)
+// y un campo enviado con su valor cero (ej: 0, "").
+// Las etiquetas de validación usan 'omitempty' para que solo se apliquen
+// si el campo está presente en la petición.
+type UpdatePatchSectionRequest struct {
+	SectionNumber      *string  `json:"section_number,omitempty" validate:"omitempty,min=1"`
+	CurrentTemperature *float64 `json:"current_temperature,omitempty"`
+	MinimumTemperature *float64 `json:"minimum_temperature,omitempty"`
+	CurrentCapacity    *int     `json:"current_capacity,omitempty" validate:"omitempty,gte=0"`
+	MinimumCapacity    *int     `json:"minimum_capacity,omitempty" validate:"omitempty,gte=0"`
+	MaximumCapacity    *int     `json:"maximum_capacity,omitempty" validate:"omitempty,gte=0"`
+	WarehouseID        *int     `json:"warehouse_id,omitempty" validate:"omitempty,gt=0"`
+	ProductTypeID      *int     `json:"product_type_id,omitempty" validate:"omitempty,gt=0"`
+}

@@ -57,7 +57,53 @@ func (s SectionServiceDefault) GetByID(id int) (models.Section, error) {
 	return s.repo.GetByID(id)
 }
 
-// Update implements SectionServiceInterface.
-func (s SectionServiceDefault) Update(id int, data models.Section) (models.Section, error) {
-	panic("unimplemented")
+func (s *SectionServiceDefault) Update(id int, patchData models.UpdatePatchSectionRequest) (models.Section, error) {
+	sectionToUpdate, err := s.repo.GetByID(id)
+	if err != nil {
+		return models.Section{}, err
+	}
+	if err := s.applyChanges(&sectionToUpdate, patchData); err != nil {
+		return models.Section{}, err
+	}
+
+	return s.repo.Update(id, sectionToUpdate)
+}
+
+func (s *SectionServiceDefault) applyChanges(sectionToUpdate *models.Section, patchData models.UpdatePatchSectionRequest) error {
+	if patchData.SectionNumber != nil {
+		allSections, err := s.repo.GetAll()
+		if err != nil {
+			return err
+		}
+		for _, section := range allSections {
+			if section.ID != sectionToUpdate.ID && section.SectionNumber == *patchData.SectionNumber {
+				return httperrors.ConflictError{Message: "el section_number ya existe en otra sección"}
+			}
+		}
+		sectionToUpdate.SectionNumber = *patchData.SectionNumber
+	}
+
+	if patchData.CurrentTemperature != nil {
+		sectionToUpdate.CurrentTemperature = *patchData.CurrentTemperature
+	}
+	if patchData.MinimumTemperature != nil {
+		sectionToUpdate.MinimumTemperature = *patchData.MinimumTemperature
+	}
+	if patchData.CurrentCapacity != nil {
+		sectionToUpdate.CurrentCapacity = *patchData.CurrentCapacity
+	}
+	if patchData.MinimumCapacity != nil {
+		sectionToUpdate.MinimumCapacity = *patchData.MinimumCapacity
+	}
+	if patchData.MaximumCapacity != nil {
+		sectionToUpdate.MaximumCapacity = *patchData.MaximumCapacity
+	}
+	if patchData.WarehouseID != nil {
+		sectionToUpdate.WarehouseID = *patchData.WarehouseID
+	}
+	if patchData.ProductTypeID != nil {
+		sectionToUpdate.ProductTypeID = *patchData.ProductTypeID
+	}
+
+	return nil
 }
