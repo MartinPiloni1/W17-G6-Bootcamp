@@ -111,3 +111,22 @@ func (h ProductHandler) Update() http.HandlerFunc {
 		})
 	}
 }
+
+func (h ProductHandler) Delete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			response.Error(w, 500, "Error interno del servidor")
+			return
+		}
+
+		err = h.sv.Delete(id)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}
+}

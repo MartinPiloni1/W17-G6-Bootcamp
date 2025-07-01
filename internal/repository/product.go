@@ -62,7 +62,7 @@ func (p *ProductRepository) GetByID(id int) (models.Product, error) {
 	product, exists := data[id]
 	if !exists {
 		return models.Product{},
-			httperrors.NotFoundError{Message: "El producto no fue encontrado."}
+			httperrors.NotFoundError{Message: "No se encontró un producto con el ID proporcionado"}
 	}
 	return product, nil
 }
@@ -89,5 +89,17 @@ func (p *ProductRepository) Update(id int, productAtributtes models.ProductAtrib
 }
 
 func (p *ProductRepository) Delete(id int) error {
-	panic("unimplemented")
+	data, err := utils.Read[models.Product](p.filePath)
+	if err != nil {
+		return err
+	}
+
+	if _, exists := data[id]; !exists {
+		return httperrors.NotFoundError{Message: "No se encontró un producto con el ID proporcionado"}
+	}
+
+	delete(data, id)
+	utils.Write(p.filePath, data)
+
+	return nil
 }

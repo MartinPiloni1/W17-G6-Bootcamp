@@ -35,5 +35,5 @@ func (p *ProductService) Update(id int, productAtributtes models.ProductAtributt
 
 // Delete implements ProductServiceInterface.
 func (p *ProductService) Delete(id int) error {
-	panic("unimplemented")
+	return p.repo.Delete(id)
 }
