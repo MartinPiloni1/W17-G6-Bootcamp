@@ -22,15 +22,15 @@ func NewProductHandler(sv service.ProductServiceInterface) *ProductHandler {
 
 func (h ProductHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var product models.ProductAttributes
-		err := json.NewDecoder(r.Body).Decode(&product)
+		var newProduct models.ProductAttributes
+		err := json.NewDecoder(r.Body).Decode(&newProduct)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
 			return
 		}
 
-		vehicleData, err := h.sv.Create(product)
+		productData, err := h.sv.Create(newProduct)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -39,7 +39,7 @@ func (h ProductHandler) Create() http.HandlerFunc {
 
 		response.JSON(w, http.StatusCreated, map[string]any{
 			"message": "success",
-			"data":    vehicleData,
+			"data":    productData,
 		})
 	}
 }
@@ -63,8 +63,8 @@ func (h ProductHandler) GetAll() http.HandlerFunc {
 func (h ProductHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
-		if err != nil {
-			response.Error(w, 500, "Internal server error")
+		if err != nil || id <= 0 {
+			response.Error(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
 
@@ -85,8 +85,8 @@ func (h ProductHandler) GetById() http.HandlerFunc {
 func (h ProductHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
-		if err != nil {
-			response.Error(w, 500, "Internal server error")
+		if err != nil || id <= 0 {
+			response.Error(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
 
@@ -115,8 +115,8 @@ func (h ProductHandler) Update() http.HandlerFunc {
 func (h ProductHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
-		if err != nil {
-			response.Error(w, 500, "Internal server error")
+		if err != nil || id <= 0 {
+			response.Error(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
 
