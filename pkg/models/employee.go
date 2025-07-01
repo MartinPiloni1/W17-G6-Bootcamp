@@ -7,3 +7,7 @@ type Employee struct {
 	LastName     string `json:"last_name"`
 	WarehouseID  int    `json:"warehouse_id"`
 }
+
+func (e Employee) GetID() int {
+	return e.Id
+}

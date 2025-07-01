@@ -25,18 +25,17 @@ func (e EmployeeRepositoryImpl) Create(employee models.Employee) (models.Employe
 		return models.Employee{}, httperrors.ConflictError{Message: "Ya existe"}
 	}
 
-	maxId := 0
 	for _, empIteration := range dataList {
 		if empIteration.CardNumberID == employee.CardNumberID {
 			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "Numero de tarjeta duplicado"}
 		}
-		if empIteration.Id > maxId {
-			maxId = empIteration.Id
-		}
 	}
 
-	employee.Id = maxId + 1
-	dataList[maxId] = employee
+	employee.Id, err = utils.GetNextID[models.Employee](e.filePath)
+	if err != nil {
+		return models.Employee{}, httperrors.ConflictError{Message: "error al obtener nextId"}
+	}
+	dataList[employee.Id] = employee
 
 	utils.Write[models.Employee](e.filePath, dataList)
 	return employee, nil
@@ -71,7 +70,7 @@ func (e EmployeeRepositoryImpl) Update(id int, employee models.Employee) (models
 	}
 
 	if _, exist := dataList[id]; !exist {
-		return models.Employee{}, httperrors.NotFoundError{Message: "No exist"}
+		return models.Employee{}, httperrors.NotFoundError{Message: "No existe el registro"}
 	}
 
 	for _, empIteration := range dataList {
