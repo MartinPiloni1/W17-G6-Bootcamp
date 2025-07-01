@@ -16,8 +16,8 @@ type ProductHandler struct {
 	sv service.ProductServiceInterface
 }
 
-func NewProductHandler(sv service.ProductServiceInterface) ProductHandler {
-	return ProductHandler{sv: sv}
+func NewProductHandler(sv service.ProductServiceInterface) *ProductHandler {
+	return &ProductHandler{sv: sv}
 }
 
 func (h ProductHandler) Create() http.HandlerFunc {

@@ -8,20 +8,20 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
-type ProductService struct {
-	repo repository.ProductRepositoryInterface
+type ProductServiceDefault struct {
+	rp repository.ProductRepositoryInterface
 }
 
 func NewProductService(repo repository.ProductRepositoryInterface) ProductServiceInterface {
-	return &ProductService{repo: repo}
+	return &ProductServiceDefault{rp: repo}
 }
 
-func (p *ProductService) Create(product models.ProductAttributes) (models.Product, error) {
-	return p.repo.Create(product)
+func (p *ProductServiceDefault) Create(product models.ProductAttributes) (models.Product, error) {
+	return p.rp.Create(product)
 }
 
-func (p *ProductService) GetAll() ([]models.Product, error) {
-	data, err := p.repo.GetAll()
+func (p *ProductServiceDefault) GetAll() ([]models.Product, error) {
+	data, err := p.rp.GetAll()
 	if err != nil {
 		return []models.Product{}, err
 	}
@@ -33,14 +33,14 @@ func (p *ProductService) GetAll() ([]models.Product, error) {
 	return slicedData, nil
 }
 
-func (p *ProductService) GetByID(id int) (models.Product, error) {
-	return p.repo.GetByID(id)
+func (p *ProductServiceDefault) GetByID(id int) (models.Product, error) {
+	return p.rp.GetByID(id)
 }
 
-func (p *ProductService) Update(id int, productAttributes models.ProductAttributes) (models.Product, error) {
-	return p.repo.Update(id, productAttributes)
+func (p *ProductServiceDefault) Update(id int, productAttributes models.ProductAttributes) (models.Product, error) {
+	return p.rp.Update(id, productAttributes)
 }
 
-func (p *ProductService) Delete(id int) error {
-	return p.repo.Delete(id)
+func (p *ProductServiceDefault) Delete(id int) error {
+	return p.rp.Delete(id)
 }

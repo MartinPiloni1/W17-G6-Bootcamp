@@ -8,18 +8,18 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
-type ProductRepository struct {
+type ProductRepositoryFile struct {
 	filePath string
 }
 
 func NewProductRepository() ProductRepositoryInterface {
 	filePath := os.Getenv("FILE_PATH_DEFAULT")
-	return &ProductRepository{
+	return &ProductRepositoryFile{
 		filePath: filePath,
 	}
 }
 
-func (p *ProductRepository) Create(productAttribbutes models.ProductAttributes) (models.Product, error) {
+func (p *ProductRepositoryFile) Create(productAttribbutes models.ProductAttributes) (models.Product, error) {
 	productData, err := utils.Read[models.Product](p.filePath)
 	if err != nil {
 		return models.Product{}, err
@@ -45,7 +45,7 @@ func (p *ProductRepository) Create(productAttribbutes models.ProductAttributes) 
 	return newProduct, nil
 }
 
-func (p *ProductRepository) GetAll() (map[int]models.Product, error) {
+func (p *ProductRepositoryFile) GetAll() (map[int]models.Product, error) {
 	productData, err := utils.Read[models.Product](p.filePath)
 	if err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func (p *ProductRepository) GetAll() (map[int]models.Product, error) {
 	return productData, nil
 }
 
-func (p *ProductRepository) GetByID(id int) (models.Product, error) {
+func (p *ProductRepositoryFile) GetByID(id int) (models.Product, error) {
 	productData, err := utils.Read[models.Product](p.filePath)
 	if err != nil {
 		return models.Product{}, err
@@ -67,7 +67,7 @@ func (p *ProductRepository) GetByID(id int) (models.Product, error) {
 	return product, nil
 }
 
-func (p *ProductRepository) Update(id int, productAttributes models.ProductAttributes) (models.Product, error) {
+func (p *ProductRepositoryFile) Update(id int, productAttributes models.ProductAttributes) (models.Product, error) {
 	productData, err := utils.Read[models.Product](p.filePath)
 	if err != nil {
 		return models.Product{}, err
@@ -88,7 +88,7 @@ func (p *ProductRepository) Update(id int, productAttributes models.ProductAttri
 	return updatedProduct, nil
 }
 
-func (p *ProductRepository) Delete(id int) error {
+func (p *ProductRepositoryFile) Delete(id int) error {
 	productData, err := utils.Read[models.Product](p.filePath)
 	if err != nil {
 		return err
