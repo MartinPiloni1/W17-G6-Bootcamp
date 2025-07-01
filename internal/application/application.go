@@ -28,5 +28,6 @@ func BuyersRouter(BuyerFilePath string) chi.Router {
 
 	router.Get("/", hd.GetAll())
 	router.Get("/{id}", hd.GetByID())
+	router.Delete("/{id}", hd.Delete())
 	return router
 }

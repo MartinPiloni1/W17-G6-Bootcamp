@@ -64,3 +64,28 @@ func (h *BuyerHandler) GetByID() http.HandlerFunc {
 		})
 	}
 }
+
+func (h *BuyerHandler) Delete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idReq := chi.URLParam(r, "id")
+
+		id, err := strconv.Atoi(idReq)
+		if err != nil || id <= 0 {
+			response.Error(w, http.StatusBadRequest, "Invalid Id")
+			return
+		}
+
+		err = h.sv.Delete(id)
+		if err != nil {
+			if errors.As(err, &httperrors.NotFoundError{}) {
+				statusCode, msg := httperrors.GetErrorData(err)
+				response.Error(w, statusCode, msg)
+				return
+			}
+			http.Error(w, "error at Delete", http.StatusInternalServerError)
+			return
+		}
+
+		response.JSON(w, http.StatusNoContent, nil)
+	}
+}

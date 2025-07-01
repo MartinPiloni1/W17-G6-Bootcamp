@@ -22,3 +22,8 @@ func (s *BuyerService) GetByID(id int) (models.Buyer, error) {
 	buyer, err := s.rp.GetByID(id)
 	return buyer, err
 }
+
+func (s *BuyerService) Delete(id int) error {
+	err := s.rp.Delete(id)
+	return err
+}

@@ -36,3 +36,24 @@ func (r *BuyerRepositoryFile) GetByID(id int) (models.Buyer, error) {
 	}
 	return buyer, nil
 }
+
+func (r *BuyerRepositoryFile) Delete(id int) error {
+	buyersData, err := utils.Read[models.Buyer](r.filePath)
+	if err != nil {
+		return err
+	}
+
+	_, ok := buyersData[id]
+	if !ok {
+		return httperrors.NotFoundError{Message: fmt.Sprintf("Buyer %d, not found", id)}
+	}
+
+	delete(buyersData, id)
+
+	err = utils.Write(r.filePath, buyersData)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
