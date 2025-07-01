@@ -23,7 +23,7 @@ func HealthRouter() chi.Router {
 func BuyersRouter() chi.Router {
 	router := chi.NewRouter()
 
-	rp := repository.NewBuyerRepositoryFile()
+	rp := repository.NewBuyerRepositoryFile() // fileRepository
 	sv := service.NewBuyerServiceDefault(rp)
 	hd := handler.NewBuyerHandler(sv)
 
