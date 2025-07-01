@@ -1,8 +1,8 @@
 package service
 
 import (
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 )
 
 type ProductService struct {
@@ -14,8 +14,8 @@ func NewProductService(repo repository.ProductRepositoryInterface) ProductServic
 }
 
 // Create implements ProductServiceInterface.
-func (p *ProductService) Create(Product models.Product) (*models.Product, error) {
-	panic("unimplemented")
+func (p *ProductService) Create(product models.ProductAtributtes) (models.Product, error) {
+	return p.repo.Create(product)
 }
 
 // GetAll implements ProductServiceInterface.

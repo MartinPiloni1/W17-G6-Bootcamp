@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/bootcamp-go/web/response"
@@ -16,6 +18,30 @@ type ProductHandler struct {
 
 func NewProductHandler(sv service.ProductServiceInterface) ProductHandler {
 	return ProductHandler{sv: sv}
+}
+
+func (h ProductHandler) Create() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var product models.ProductAtributtes
+		err := json.NewDecoder(r.Body).Decode(&product)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+
+		vehicleData, err := h.sv.Create(product)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+
+		response.JSON(w, http.StatusCreated, map[string]any{
+			"message": "success",
+			"data":    vehicleData,
+		})
+	}
 }
 
 func (h ProductHandler) GetAll() http.HandlerFunc {

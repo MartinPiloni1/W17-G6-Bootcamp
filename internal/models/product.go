@@ -1,7 +1,11 @@
 package models
 
 type Product struct {
-	ID                             int     `json:"id"`
+	ID int `json:"id"`
+	ProductAtributtes
+}
+
+type ProductAtributtes struct {
 	Description                    string  `json:"description"`
 	ExpirationRate                 int     `json:"expiration_rate"`
 	FreezingRate                   int     `json:"freezing_rate"`
@@ -13,4 +17,8 @@ type Product struct {
 	RecommendedFreezingTemperature float64 `json:"recommended_freezing_temperature"`
 	ProductTypeID                  int     `json:"product_type_id"`
 	SellerID                       int     `json:"seller_id"`
+}
+
+func (p Product) GetID() int {
+	return p.ID
 }

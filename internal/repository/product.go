@@ -3,8 +3,8 @@ package repository
 import (
 	"os"
 
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
@@ -13,11 +13,36 @@ type ProductRepository struct {
 }
 
 func NewProductRepository() ProductRepositoryInterface {
-	return &ProductRepository{filePath: os.Getenv("FILE_PATH_DEFAULT")}
+	filePath := os.Getenv("FILE_PATH_DEFAULT")
+	return &ProductRepository{
+		filePath: filePath,
+	}
 }
 
-func (p *ProductRepository) Create(Product models.Product) (models.Product, error) {
-	panic("unimplemented")
+func (p *ProductRepository) Create(productAtribbutes models.ProductAtributtes) (models.Product, error) {
+	data, err := utils.Read[models.Product](p.filePath)
+	if err != nil {
+		return models.Product{}, err
+	}
+
+	newId, err := utils.GetNextID[models.Product](p.filePath)
+	if err != nil {
+		return models.Product{}, err
+	}
+
+	newProduct := models.Product{
+		ID:                newId,
+		ProductAtributtes: productAtribbutes,
+	}
+
+	data[newId] = newProduct
+
+	err = utils.Write(p.filePath, data)
+	if err != nil {
+		return models.Product{}, err
+	}
+
+	return newProduct, nil
 }
 
 func (p *ProductRepository) GetAll() (map[int]models.Product, error) {

@@ -52,7 +52,7 @@ func (a *ServerChi) Run() (err error) {
 
 	// mount healthcheck
 	router.Mount("/healthcheck", healthRouter)
-	router.Mount("/products", productRouter)
+	router.Mount("/api/v1/products", productRouter)
 	err = http.ListenAndServe(a.ServerAddr, router)
 	return
 }
