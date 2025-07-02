@@ -52,8 +52,3 @@ func GetErrorData(err error) (int, string) {
 		return 500, "Internal Server Error"
 	}
 }
-
-func RespondError(w http.ResponseWriter, err error) {
-	statusCode, msg := GetErrorData(err)
-	response.Error(w, statusCode, msg)
-}

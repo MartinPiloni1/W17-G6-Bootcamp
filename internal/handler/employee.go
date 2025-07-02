@@ -23,7 +23,8 @@ func (h *EmployeeHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		data, err := h.sv.GetAll()
 		if err != nil {
-			httperrors.RespondError(w, err)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 
@@ -39,13 +40,15 @@ func (h *EmployeeHandler) GetById() http.HandlerFunc {
 
 		id, err := strconv.Atoi(idReq)
 		if err != nil {
-			httperrors.RespondError(w, err)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 
 		data, err := h.sv.GetByID(id)
 		if err != nil {
-			httperrors.RespondError(w, err)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 
@@ -60,13 +63,21 @@ func (h *EmployeeHandler) Create() http.HandlerFunc {
 		var employee models.EmployeeAttributes
 		err := request.JSON(r, &employee)
 		if err != nil {
-			httperrors.RespondError(w, err)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+
+		if employee.CardNumberID == "" || employee.FirstName == "" ||
+			employee.LastName == "" || employee.WarehouseID == 0 {
+			response.Error(w, http.StatusUnprocessableEntity, "All fields must be completed and cannot be null/empty")
 			return
 		}
 
 		data, err := h.sv.Create(employee)
 		if err != nil {
-			httperrors.RespondError(w, err)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 
@@ -81,20 +92,23 @@ func (h *EmployeeHandler) Update() http.HandlerFunc {
 		var employee models.EmployeeAttributes
 		err := request.JSON(r, &employee)
 		if err != nil {
-			httperrors.RespondError(w, err)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 
 		idReq := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idReq)
 		if err != nil {
-			httperrors.RespondError(w, err)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 
 		dbEmployee, err := h.sv.GetByID(id)
 		if err != nil {
-			httperrors.RespondError(w, err)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 		if employee.CardNumberID != "" {
@@ -112,7 +126,8 @@ func (h *EmployeeHandler) Update() http.HandlerFunc {
 
 		data, err := h.sv.Update(id, dbEmployee.EmployeeAttributes)
 		if err != nil {
-			httperrors.RespondError(w, err)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 
@@ -128,13 +143,15 @@ func (h *EmployeeHandler) Delete() http.HandlerFunc {
 
 		id, err := strconv.Atoi(idReq)
 		if err != nil {
-			httperrors.RespondError(w, err)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 
 		err = h.sv.Delete(id)
 		if err != nil {
-			httperrors.RespondError(w, err)
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
 			return
 		}
 
