@@ -10,6 +10,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
+	"log"
+	"net/http"
+	"os"
 )
 
 type ServerChi struct {
@@ -18,7 +21,7 @@ type ServerChi struct {
 }
 
 func LoadServerConf() (*ServerChi, error) {
-	err := godotenv.Load(".env")
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Failed to load .env: %s", err)
 	}
@@ -26,7 +29,7 @@ func LoadServerConf() (*ServerChi, error) {
 	serverAddr := os.Getenv("ADDRESS")
 
 	// here we can load more files if we use it
-	filePathDefault := os.Getenv("FILE_PATH_EMPLOYEE")
+	filePathDefault := os.Getenv("FILE_PATH_DEFAULT")
 
 	if serverAddr == "" {
 		serverAddr = ":8080"
@@ -48,9 +51,13 @@ func (a *ServerChi) Run() (err error) {
 	router.Use(middleware.Logger) // logger
 
 	healthRouter := application.HealthRouter()
+	warehouseRouter := application.WarehouseRouter()
+	buyersRouter := application.BuyersRouter()
 	employeeRouter := application.EmployeeRouter()
 
 	router.Mount("/healthcheck", healthRouter)
+	router.Mount("/api/v1/warehouses", warehouseRouter)
+	router.Mount("/api/v1/buyers", buyersRouter)
 	router.Mount("/api/v1/employees", employeeRouter)
 	err = http.ListenAndServe(a.ServerAddr, router)
 	return
