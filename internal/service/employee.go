@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
@@ -8,11 +9,12 @@ import (
 )
 
 type EmployeeServiceImpl struct {
-	repo repository.EmployeeRepository
+	repo          repository.EmployeeRepository
+	warehouseRepo repository.WarehouseRepository
 }
 
-func NewEmployeeService(repo repository.EmployeeRepository) EmployeeService {
-	return &EmployeeServiceImpl{repo: repo}
+func NewEmployeeService(repo repository.EmployeeRepository, warehouseRepo repository.WarehouseRepository) EmployeeService {
+	return &EmployeeServiceImpl{repo: repo, warehouseRepo: warehouseRepo}
 }
 
 func (e EmployeeServiceImpl) Create(employee models.EmployeeAttributes) (models.Employee, error) {
@@ -24,6 +26,15 @@ func (e EmployeeServiceImpl) Create(employee models.EmployeeAttributes) (models.
 		if emp.CardNumberID == employee.CardNumberID {
 			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "duplicate card number"}
 		}
+	}
+
+	_, err = e.warehouseRepo.GetByID(employee.WarehouseID)
+	if err != nil {
+		var notFoundError httperrors.NotFoundError
+		if errors.As(err, &notFoundError) {
+			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "warehouse_id does not exist"}
+		}
+		return models.Employee{}, err
 	}
 
 	newEmployee := models.Employee{EmployeeAttributes: employee}
@@ -52,6 +63,15 @@ func (e EmployeeServiceImpl) Update(id int, employee models.EmployeeAttributes) 
 			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "duplicated card number"}
 		}
 	}
+	_, err = e.warehouseRepo.GetByID(employee.WarehouseID)
+	if err != nil {
+		var notFoundError httperrors.NotFoundError
+		if errors.As(err, &notFoundError) {
+			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "warehouse_id does not exist"}
+		}
+		return models.Employee{}, err
+	}
+
 	modifiedEmployee := models.Employee{EmployeeAttributes: employee}
 	return e.repo.Update(id, modifiedEmployee)
 }

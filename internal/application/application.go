@@ -53,7 +53,8 @@ func EmployeeRouter() chi.Router {
 	router := chi.NewRouter()
 
 	repo := repository.NewEmployeeRepository()
-	service := service.NewEmployeeService(repo)
+	warehouseRepo := repository.NewWarehouseRepository()
+	service := service.NewEmployeeService(repo, warehouseRepo)
 	handler := handler.NewEmployeeHandler(service)
 
 	router.Get("/", handler.GetAll())
