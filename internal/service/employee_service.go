@@ -17,8 +17,19 @@ func NewEmployeeService(repo repository.EmployeeRepository) EmployeeService {
 
 func (e EmployeeServiceImpl) Create(employee models.Employee) (models.Employee, error) {
 	if employee.Id != 0 {
-		return models.Employee{}, httperrors.UnprocessableEntityError{Message: "No debe tener id"}
+		return models.Employee{}, httperrors.UnprocessableEntityError{Message: "employee has id"}
 	}
+
+	existing, err := e.repo.GetAll()
+	if err != nil {
+		return models.Employee{}, err
+	}
+	for _, emp := range existing {
+		if emp.CardNumberID == employee.CardNumberID {
+			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "duplicate card number"}
+		}
+	}
+
 	return e.repo.Create(employee)
 }
 
@@ -35,6 +46,15 @@ func (e EmployeeServiceImpl) GetByID(id int) (models.Employee, error) {
 }
 
 func (e EmployeeServiceImpl) Update(id int, employee models.Employee) (models.Employee, error) {
+	existing, err := e.repo.GetAll()
+	if err != nil {
+		return models.Employee{}, err
+	}
+	for _, emp := range existing {
+		if emp.CardNumberID == employee.CardNumberID && emp.Id != id {
+			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "duplicated card number"}
+		}
+	}
 	return e.repo.Update(id, employee)
 }
 

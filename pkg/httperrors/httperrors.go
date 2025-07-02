@@ -1,6 +1,10 @@
 package httperrors
 
-import "errors"
+import (
+	"errors"
+	"github.com/bootcamp-go/web/response"
+	"net/http"
+)
 
 type NotFoundError struct {
 	Message string
@@ -47,4 +51,9 @@ func GetErrorData(err error) (int, string) {
 	default:
 		return 500, "Internal Server Error"
 	}
+}
+
+func RespondError(w http.ResponseWriter, err error) {
+	statusCode, msg := GetErrorData(err)
+	response.Error(w, statusCode, msg)
 }

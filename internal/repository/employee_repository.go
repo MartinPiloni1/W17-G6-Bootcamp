@@ -25,19 +25,16 @@ func (e *EmployeeRepositoryImpl) Create(employee models.Employee) (models.Employ
 		return models.Employee{}, httperrors.ConflictError{Message: "already exist"}
 	}
 
-	for _, empIteration := range dataList {
-		if empIteration.CardNumberID == employee.CardNumberID {
-			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "duplicate card number"}
-		}
-	}
-
 	employee.Id, err = utils.GetNextID[models.Employee](e.filePath)
 	if err != nil {
 		return models.Employee{}, httperrors.ConflictError{Message: "error generating sequential id"}
 	}
 	dataList[employee.Id] = employee
 
-	utils.Write[models.Employee](e.filePath, dataList)
+	if err := utils.Write[models.Employee](e.filePath, dataList); err != nil {
+		return models.Employee{}, err
+	}
+
 	return employee, nil
 }
 
@@ -46,7 +43,6 @@ func (e *EmployeeRepositoryImpl) GetAll() (map[int]models.Employee, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return data, nil
 }
 
@@ -55,12 +51,11 @@ func (e *EmployeeRepositoryImpl) GetByID(id int) (models.Employee, error) {
 	if err != nil {
 		return models.Employee{}, err
 	}
-	for _, emp := range data {
-		if emp.Id == id {
-			return emp, nil
-		}
+	emp, exist := data[id]
+	if !exist {
+		return models.Employee{}, httperrors.NotFoundError{Message: "employee not found"}
 	}
-	return models.Employee{}, httperrors.NotFoundError{Message: "employee not found"}
+	return emp, nil
 }
 
 func (e *EmployeeRepositoryImpl) Update(id int, employee models.Employee) (models.Employee, error) {
@@ -73,14 +68,10 @@ func (e *EmployeeRepositoryImpl) Update(id int, employee models.Employee) (model
 		return models.Employee{}, httperrors.NotFoundError{Message: "employee not found"}
 	}
 
-	for _, empIteration := range dataList {
-		if empIteration.CardNumberID == employee.CardNumberID && empIteration.Id != id {
-			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "duplicated card number"}
-		}
-	}
-
 	dataList[id] = employee
-	utils.Write[models.Employee](e.filePath, dataList)
+	if err := utils.Write[models.Employee](e.filePath, dataList); err != nil {
+		return models.Employee{}, err
+	}
 	return employee, nil
 }
 
@@ -95,6 +86,8 @@ func (e *EmployeeRepositoryImpl) Delete(id int) error {
 	}
 
 	delete(dataList, id)
-	utils.Write[models.Employee](e.filePath, dataList)
+	if err := utils.Write[models.Employee](e.filePath, dataList); err != nil {
+		return err
+	}
 	return nil
 }

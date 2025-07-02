@@ -23,8 +23,7 @@ func (h *EmployeeHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		data, err := h.sv.GetAll()
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			httperrors.RespondError(w, err)
 			return
 		}
 
@@ -40,15 +39,13 @@ func (h *EmployeeHandler) GetById() http.HandlerFunc {
 
 		id, err := strconv.Atoi(idReq)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			httperrors.RespondError(w, err)
 			return
 		}
 
 		data, err := h.sv.GetByID(id)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			httperrors.RespondError(w, err)
 			return
 		}
 
@@ -63,15 +60,13 @@ func (h *EmployeeHandler) Create() http.HandlerFunc {
 		var employee models.Employee
 		err := request.JSON(r, &employee)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			httperrors.RespondError(w, err)
 			return
 		}
 
 		data, err := h.sv.Create(employee)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			httperrors.RespondError(w, err)
 			return
 		}
 
@@ -86,20 +81,22 @@ func (h *EmployeeHandler) Update() http.HandlerFunc {
 		var employee models.Employee
 		err := request.JSON(r, &employee)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			httperrors.RespondError(w, err)
 			return
 		}
 
 		idReq := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idReq)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			httperrors.RespondError(w, err)
 			return
 		}
 
 		dbEmployee, err := h.sv.GetByID(id)
+		if err != nil {
+			httperrors.RespondError(w, err)
+			return
+		}
 		if employee.CardNumberID != "" {
 			dbEmployee.CardNumberID = employee.CardNumberID
 		}
@@ -115,8 +112,7 @@ func (h *EmployeeHandler) Update() http.HandlerFunc {
 
 		data, err := h.sv.Update(id, dbEmployee)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			httperrors.RespondError(w, err)
 			return
 		}
 
@@ -132,15 +128,13 @@ func (h *EmployeeHandler) Delete() http.HandlerFunc {
 
 		id, err := strconv.Atoi(idReq)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			httperrors.RespondError(w, err)
 			return
 		}
 
 		err = h.sv.Delete(id)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			httperrors.RespondError(w, err)
 			return
 		}
 
