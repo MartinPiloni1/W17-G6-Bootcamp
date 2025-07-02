@@ -18,17 +18,17 @@ func NewWarehouseService(repo repository.WarehouseRepository) *WarehouseServiceD
 	}
 }
 
-func (p *WarehouseServiceDefault) Create(warehouseAtribbutes models.WarehouseAttributes) (models.Warehouse, error) {
-	if warehouseAtribbutes.WarehouseCode == "" {
+func (p *WarehouseServiceDefault) Create(warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error) {
+	if warehouseAttributes.WarehouseCode == "" {
 		return models.Warehouse{}, httperrors.BadRequestError{Message: "the field WarehouseCode must not be empty"}
 	}
-	if warehouseAtribbutes.Address == "" {
+	if warehouseAttributes.Address == "" {
 		return models.Warehouse{}, httperrors.BadRequestError{Message: "the field Address must not be empty"}
 	}
-	if warehouseAtribbutes.Telephone == "" {
+	if warehouseAttributes.Telephone == "" {
 		return models.Warehouse{}, httperrors.BadRequestError{Message: "the field Telephone must not be empty"}
 	}
-	if warehouseAtribbutes.MinimunCapacity <= 0 {
+	if warehouseAttributes.MinimunCapacity <= 0 {
 		return models.Warehouse{}, httperrors.BadRequestError{Message: "the field MinimunCapacity must not be zero or negative"}
 	}
 	warehouses, err := p.rp.GetAll()
@@ -36,11 +36,11 @@ func (p *WarehouseServiceDefault) Create(warehouseAtribbutes models.WarehouseAtt
 		return models.Warehouse{}, err
 	}
 	for _, w := range warehouses {
-		if w.WarehouseCode == warehouseAtribbutes.WarehouseCode {
+		if w.WarehouseCode == warehouseAttributes.WarehouseCode {
 			return models.Warehouse{}, httperrors.ConflictError{Message: "the WarehouseCode already exists"}
 		}
 	}
-	return p.rp.Create(warehouseAtribbutes)
+	return p.rp.Create(warehouseAttributes)
 }
 
 func (p *WarehouseServiceDefault) GetAll() ([]models.Warehouse, error) {
