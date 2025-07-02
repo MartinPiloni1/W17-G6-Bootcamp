@@ -26,9 +26,9 @@ func ProductRouter() chi.Router {
 	sv := service.NewProductService(rp)
 	hd := handler.NewProductHandler(sv)
 
+	router.Post("/", hd.Create())
 	router.Get("/", hd.GetAll())
 	router.Get("/{id}", hd.GetById())
-	router.Post("/", hd.Create())
 	router.Patch("/{id}", hd.Update())
 	router.Delete("/{id}", hd.Delete())
 	return router
