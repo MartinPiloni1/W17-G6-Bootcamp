@@ -13,7 +13,7 @@ type ProductServiceDefault struct {
 	rp repository.ProductRepository
 }
 
-func NewProductService(repo repository.ProductRepository) ProductService {
+func NewProductServiceDefault(repo repository.ProductRepository) ProductService {
 	return &ProductServiceDefault{rp: repo}
 }
 

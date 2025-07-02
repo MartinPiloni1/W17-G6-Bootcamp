@@ -12,7 +12,7 @@ type ProductRepositoryFile struct {
 	filePath string
 }
 
-func NewProductRepository() ProductRepository {
+func NewProductRepositoryFile() ProductRepository {
 	filePath := os.Getenv("FILE_PATH_PRODUCTS")
 	return &ProductRepositoryFile{
 		filePath: filePath,
