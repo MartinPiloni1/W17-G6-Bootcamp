@@ -90,7 +90,7 @@ func (p *WarehouseServiceDefault) Delete(id int) error {
 	}
 	for _, emp := range employees {
 		if emp.WarehouseID == id {
-			return httperrors.UnprocessableEntityError{Message: "cannot delete warehouse: employees are associated with this warehouse"}
+			return httperrors.ConflictError{Message: "cannot delete warehouse: employees are associated with this warehouse"}
 		}
 	}
 
