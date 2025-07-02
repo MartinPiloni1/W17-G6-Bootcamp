@@ -16,14 +16,6 @@
     "minimun_temperature": 5
   },
   {
-    "id": 6,
-    "warehouse_code": "PIL",
-    "address": "Ruta 8 km 35,5 nuevo desde post",
-    "telephone": "02304555555",
-    "minimun_capacity": 15,
-    "minimun_temperature": 8
-  },
-  {
     "id": 4,
     "warehouse_code": "CBA",
     "address": "Córdoba 1234",
