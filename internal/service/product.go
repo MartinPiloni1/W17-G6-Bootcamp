@@ -56,7 +56,6 @@ func (p *ProductServiceDefault) Update(id int, productAttributes models.ProductP
 	}
 
 	if productAttributes.ProductCode != nil {
-		product.ProductCode = *productAttributes.ProductCode
 		products, err := p.rp.GetAll()
 		if err != nil {
 			return models.Product{}, err
@@ -67,6 +66,7 @@ func (p *ProductServiceDefault) Update(id int, productAttributes models.ProductP
 				return models.Product{}, httperrors.ConflictError{Message: "A product with this product code already exists"}
 			}
 		}
+		product.ProductCode = *productAttributes.ProductCode
 	}
 
 	if productAttributes.Description != nil {
