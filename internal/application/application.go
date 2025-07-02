@@ -35,8 +35,7 @@ func SellerRouter() chi.Router {
 
 func WarehouseRouter() chi.Router {
 	rp := repository.NewWarehouseRepository()
-	employeeRp := repository.NewEmployeeRepository()
-	sv := service.NewWarehouseService(rp, employeeRp)
+	sv := service.NewWarehouseService(rp)
 	hd := handler.NewWarehouseHandler(sv)
 
 	router := chi.NewRouter()
@@ -69,8 +68,7 @@ func EmployeeRouter() chi.Router {
 	router := chi.NewRouter()
 
 	rp := repository.NewEmployeeRepository()
-	warehouseRp := repository.NewWarehouseRepository()
-	sv := service.NewEmployeeService(rp, warehouseRp)
+	sv := service.NewEmployeeService(rp)
 	hd := handler.NewEmployeeHandler(sv)
 
 	router.Get("/", hd.GetAll())

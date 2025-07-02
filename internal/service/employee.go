@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
@@ -9,12 +8,11 @@ import (
 )
 
 type EmployeeServiceDefault struct {
-	repo          repository.EmployeeRepository
-	warehouseRepo repository.WarehouseRepository
+	repo repository.EmployeeRepository
 }
 
-func NewEmployeeService(repo repository.EmployeeRepository, warehouseRepo repository.WarehouseRepository) EmployeeService {
-	return &EmployeeServiceDefault{repo: repo, warehouseRepo: warehouseRepo}
+func NewEmployeeService(repo repository.EmployeeRepository) EmployeeService {
+	return &EmployeeServiceDefault{repo: repo}
 }
 
 func (e EmployeeServiceDefault) Create(employee models.EmployeeAttributes) (models.Employee, error) {
@@ -26,15 +24,6 @@ func (e EmployeeServiceDefault) Create(employee models.EmployeeAttributes) (mode
 		if emp.CardNumberID == employee.CardNumberID {
 			return models.Employee{}, httperrors.ConflictError{Message: "duplicate card number"}
 		}
-	}
-
-	_, err = e.warehouseRepo.GetByID(employee.WarehouseID)
-	if err != nil {
-		var notFoundError httperrors.NotFoundError
-		if errors.As(err, &notFoundError) {
-			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "warehouse_id does not exist"}
-		}
-		return models.Employee{}, err
 	}
 
 	newEmployee := models.Employee{EmployeeAttributes: employee}
@@ -62,14 +51,6 @@ func (e EmployeeServiceDefault) Update(id int, employee models.EmployeeAttribute
 		if emp.CardNumberID == employee.CardNumberID && emp.Id != id {
 			return models.Employee{}, httperrors.ConflictError{Message: "duplicated card number"}
 		}
-	}
-	_, err = e.warehouseRepo.GetByID(employee.WarehouseID)
-	if err != nil {
-		var notFoundError httperrors.NotFoundError
-		if errors.As(err, &notFoundError) {
-			return models.Employee{}, httperrors.NotFoundError{Message: "warehouse_id does not exist"}
-		}
-		return models.Employee{}, err
 	}
 
 	modifiedEmployee := models.Employee{EmployeeAttributes: employee}
