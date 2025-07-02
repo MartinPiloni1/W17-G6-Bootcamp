@@ -2,13 +2,14 @@ package server
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/application"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
-	"log"
-	"net/http"
-	"os"
 )
 
 type ServerChi struct {
@@ -47,13 +48,14 @@ func (a *ServerChi) Run() (err error) {
 	router.Use(middleware.Logger) // logger
 
 	healthRouter := application.HealthRouter()
+	productRouter := application.ProductRouter()
 	warehouseRouter := application.WarehouseRouter()
 	buyersRouter := application.BuyersRouter()
 	sellerRouter := application.SellerRouter()
 	employeeRouter := application.EmployeeRouter()
 
-	// mount healthcheck
 	router.Mount("/healthcheck", healthRouter)
+	router.Mount("/api/v1/products", productRouter)
 	router.Mount("/api/v1/warehouses", warehouseRouter)
 	router.Mount("/api/v1/buyers", buyersRouter)
 	router.Mount("/api/v1/sellers", sellerRouter)

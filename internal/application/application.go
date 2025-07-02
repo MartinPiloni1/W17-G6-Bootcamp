@@ -49,6 +49,21 @@ func WarehouseRouter() chi.Router {
 	return router
 }
 
+func ProductRouter() chi.Router {
+	router := chi.NewRouter()
+
+	rp := repository.NewProductRepositoryFile()
+	sv := service.NewProductServiceDefault(rp)
+	hd := handler.NewProductHandler(sv)
+
+	router.Post("/", hd.Create())
+	router.Get("/", hd.GetAll())
+	router.Get("/{id}", hd.GetById())
+	router.Patch("/{id}", hd.Update())
+	router.Delete("/{id}", hd.Delete())
+	return router
+}
+
 func BuyersRouter() chi.Router {
 	router := chi.NewRouter()
 
