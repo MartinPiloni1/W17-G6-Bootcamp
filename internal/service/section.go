@@ -21,20 +21,20 @@ func NewSectionService(repo repository.SectionRepository, warehouseService Wareh
 	}
 }
 
-func (s SectionServiceDefault) Create(section models.Section) (*models.Section, error) {
+func (s SectionServiceDefault) Create(section models.Section) (models.Section, error) {
 	_, err := s.warehouseService.GetByID(section.WarehouseID)
 	if err != nil {
-		return nil, httperrors.BadRequestError{Message: "warehouse not found"}
+		return models.Section{}, httperrors.BadRequestError{Message: "Warehouse not found"}
 	}
 
 	allSections, err := s.GetAll()
 	if err != nil {
-		return nil, err
+		return models.Section{}, err
 	}
 
 	for _, sections := range allSections {
 		if sections.SectionNumber == section.SectionNumber {
-			return nil, httperrors.ConflictError{Message: "section number already exists"}
+			return models.Section{}, httperrors.ConflictError{Message: "Section number already exists"}
 		}
 	}
 
@@ -47,7 +47,7 @@ func (s SectionServiceDefault) Delete(id int) error {
 func (s SectionServiceDefault) GetAll() ([]models.Section, error) {
 	data, err := s.repo.GetAll()
 	if err != nil {
-		return nil, err
+		return []models.Section{}, err
 	}
 
 	slicedData := utils.MapToSlice(data)
@@ -61,10 +61,10 @@ func (s SectionServiceDefault) GetByID(id int) (models.Section, error) {
 	return s.repo.GetByID(id)
 }
 
-func (s *SectionServiceDefault) Update(id int, patchData models.UpdatePatchSectionRequest) (models.Section, error) {
+func (s *SectionServiceDefault) Update(id int, patchData models.UpdateSectionRequest) (models.Section, error) {
 	_, err := s.warehouseService.GetByID(id)
 	if err != nil {
-		return models.Section{}, httperrors.BadRequestError{Message: "warehouse not found"}
+		return models.Section{}, httperrors.BadRequestError{Message: "Warehouse not found"}
 	}
 	sectionToUpdate, err := s.repo.GetByID(id)
 	if err != nil {
@@ -77,7 +77,7 @@ func (s *SectionServiceDefault) Update(id int, patchData models.UpdatePatchSecti
 	return s.repo.Update(id, sectionToUpdate)
 }
 
-func (s *SectionServiceDefault) applyChanges(sectionToUpdate *models.Section, patchData models.UpdatePatchSectionRequest) error {
+func (s *SectionServiceDefault) applyChanges(sectionToUpdate *models.Section, patchData models.UpdateSectionRequest) error {
 	if patchData.SectionNumber != nil {
 		allSections, err := s.repo.GetAll()
 		if err != nil {
@@ -85,7 +85,7 @@ func (s *SectionServiceDefault) applyChanges(sectionToUpdate *models.Section, pa
 		}
 		for _, section := range allSections {
 			if section.ID != sectionToUpdate.ID && section.SectionNumber == *patchData.SectionNumber {
-				return httperrors.ConflictError{Message: "section number already exists in another section"}
+				return httperrors.ConflictError{Message: "Section number already exists in another section"}
 			}
 		}
 		sectionToUpdate.SectionNumber = *patchData.SectionNumber

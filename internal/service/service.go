@@ -42,9 +42,9 @@ type EmployeeService interface {
 }
 
 type SectionService interface {
-	Create(section models.Section) (*models.Section, error)
+	Create(section models.Section) (models.Section, error)
 	GetAll() ([]models.Section, error)
 	GetByID(id int) (models.Section, error)
-	Update(id int, data models.UpdatePatchSectionRequest) (models.Section, error)
+	Update(id int, data models.UpdateSectionRequest) (models.Section, error)
 	Delete(id int) error
 }

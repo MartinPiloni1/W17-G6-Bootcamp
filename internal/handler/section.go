@@ -17,8 +17,8 @@ type SectionHandler struct {
 	sectionService service.SectionService
 }
 
-func NewSectionHandler(sectionService service.SectionService) SectionHandler {
-	return SectionHandler{sectionService: sectionService}
+func NewSectionHandler(sectionService service.SectionService) *SectionHandler {
+	return &SectionHandler{sectionService: sectionService}
 }
 
 func (h SectionHandler) GetAll() http.HandlerFunc {
@@ -40,8 +40,8 @@ func (h *SectionHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idParam := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idParam)
-		if err != nil {
-			response.Error(w, http.StatusBadRequest, "invalid ID")
+		if err != nil || id <= 0 {
+			response.Error(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
 
@@ -62,8 +62,8 @@ func (h *SectionHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idParam := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idParam)
-		if err != nil {
-			response.Error(w, http.StatusBadRequest, "invalid ID")
+		if err != nil || id <= 0 {
+			response.Error(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
 
@@ -81,15 +81,18 @@ func (h *SectionHandler) Delete() http.HandlerFunc {
 func (h *SectionHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var section models.CreateSectionRequest
-		err := json.NewDecoder(r.Body).Decode(&section)
+		dec := json.NewDecoder(r.Body)
+		dec.DisallowUnknownFields()
+
+		err := dec.Decode(&section)
 		if err != nil {
-			response.Error(w, http.StatusBadRequest, "invalid body")
+			response.Error(w, http.StatusBadRequest, "Invalid body")
 			return
 		}
 
 		validator := validator.New()
 		if err := validator.Struct(section); err != nil {
-			response.Error(w, http.StatusUnprocessableEntity, "invalid fields")
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 
@@ -122,24 +125,24 @@ func (h *SectionHandler) Update() http.HandlerFunc {
 		idParam := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idParam)
 		if err != nil {
-			response.Error(w, http.StatusBadRequest, "invalid ID")
+			response.Error(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
 
-		var req models.UpdatePatchSectionRequest
+		var req models.UpdateSectionRequest
 		
 		dec := json.NewDecoder(r.Body)
 		dec.DisallowUnknownFields()
 
 		err = dec.Decode(&req)
 		if err != nil {
-			response.Error(w, http.StatusBadRequest, "invalid body")
+			response.Error(w, http.StatusBadRequest, "Invalid body")
 			return
 		}
 
 		validate := validator.New()
 		if err := validate.Struct(req); err != nil {
-			response.Error(w, http.StatusUnprocessableEntity, "invalid fields")
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 

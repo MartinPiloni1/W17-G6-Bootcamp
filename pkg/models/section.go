@@ -17,7 +17,7 @@ func (s Section) GetID() int {
 }
 
 type CreateSectionRequest struct {
-	SectionNumber      string  `json:"section_number" validate:"required"`
+	SectionNumber      string  `json:"section_number" validate:"required, min=1"`
 	CurrentTemperature float64 `json:"current_temperature" validate:"required"`
 	MinimumTemperature float64 `json:"minimum_temperature" validate:"required"`
 	CurrentCapacity    int     `json:"current_capacity" validate:"required,gte=0"`
@@ -27,7 +27,7 @@ type CreateSectionRequest struct {
 	ProductTypeID      int     `json:"product_type_id" validate:"required"`
 }
 
-type UpdatePatchSectionRequest struct {
+type UpdateSectionRequest struct {
 	SectionNumber      *string  `json:"section_number,omitempty" validate:"omitempty,min=1"`
 	CurrentTemperature *float64 `json:"current_temperature,omitempty"`
 	MinimumTemperature *float64 `json:"minimum_temperature,omitempty"`

@@ -95,15 +95,17 @@ func EmployeeRouter() chi.Router {
 }
 
 func SectionRouter() chi.Router {
+	rp := repository.NewSectionRepository()
+	ws := service.NewWarehouseService(repository.NewWarehouseRepository())
+	sv := service.NewSectionService(rp, ws)
+	hd := handler.NewSectionHandler(sv)
+
 	router := chi.NewRouter()
-	repo := repository.NewSectionRepository()
-	warehouseService := service.NewWarehouseService(repository.NewWarehouseRepository())
-	service := service.NewSectionService(repo, warehouseService)
-	handler := handler.NewSectionHandler(service)
-	router.Get("/", handler.GetAll())
-	router.Get("/{id}", handler.GetByID())
-	router.Delete("/{id}", handler.Delete())
-	router.Post("/", handler.Create())
-	router.Patch("/{id}", handler.Update())
+
+	router.Get("/", hd.GetAll())
+	router.Get("/{id}", hd.GetByID())
+	router.Delete("/{id}", hd.Delete())
+	router.Post("/", hd.Create())
+	router.Patch("/{id}", hd.Update())
 	return router
 }
