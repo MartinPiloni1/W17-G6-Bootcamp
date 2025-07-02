@@ -20,7 +20,8 @@ func HealthRouter() chi.Router {
 
 func WarehouseRouter() chi.Router {
 	rp := repository.NewWarehouseRepository()
-	sv := service.NewWarehouseService(rp)
+	employeeRepo := repository.NewEmployeeRepository()
+	sv := service.NewWarehouseService(rp, employeeRepo)
 	hd := handler.NewWarehouseHandler(sv)
 
 	router := chi.NewRouter()

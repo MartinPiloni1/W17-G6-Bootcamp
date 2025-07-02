@@ -9,12 +9,14 @@ import (
 )
 
 type WarehouseServiceDefault struct {
-	rp repository.WarehouseRepository
+	rp           repository.WarehouseRepository
+	employeeRepo repository.EmployeeRepository
 }
 
-func NewWarehouseService(repo repository.WarehouseRepository) *WarehouseServiceDefault {
+func NewWarehouseService(repo repository.WarehouseRepository, employeeRepo repository.EmployeeRepository) *WarehouseServiceDefault {
 	return &WarehouseServiceDefault{
-		rp: repo,
+		rp:           repo,
+		employeeRepo: employeeRepo,
 	}
 }
 
@@ -82,5 +84,15 @@ func (p *WarehouseServiceDefault) Update(id int, warehouseAttributes models.Ware
 }
 
 func (p *WarehouseServiceDefault) Delete(id int) error {
+	employees, err := p.employeeRepo.GetAll()
+	if err != nil {
+		return err
+	}
+	for _, emp := range employees {
+		if emp.WarehouseID == id {
+			return httperrors.UnprocessableEntityError{Message: "cannot delete warehouse: employees are associated with this warehouse"}
+		}
+	}
+
 	return p.rp.Delete(id)
 }
