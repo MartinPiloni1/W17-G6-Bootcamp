@@ -2,16 +2,17 @@ package service
 
 import (
 	"errors"
+	"slices"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 )
 
 type SellerServiceDefault struct {
-	rp repository.SellerRepositoryInterface
+	rp repository.SellerRepository
 }
 
-func NewSellerService(repo repository.SellerRepositoryInterface) SellerServiceInterface {
+func NewSellerService(repo repository.SellerRepository) SellerService {
 	return &SellerServiceDefault{rp: repo}
 }
 
@@ -27,8 +28,17 @@ func (s SellerServiceDefault) Delete(id int) error {
 	return s.rp.Delete(id)
 }
 
-func (s SellerServiceDefault) GetAll() (map[int]models.Seller, error) {
-	return s.rp.GetAll()
+func (s SellerServiceDefault) GetAll() ([]models.Seller, error) {
+	data, err := s.rp.GetAll()
+	if err != nil {
+		return []models.Seller{}, err
+	}
+
+	slicedData := utils.MapToSlice(data)
+	slices.SortFunc(slicedData, func(a, b models.Seller) int {
+		return a.ID - b.ID
+	})
+	return slicedData, nil
 }
 
 func (s SellerServiceDefault) GetByID(id int) (models.Seller, error) {

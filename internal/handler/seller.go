@@ -13,11 +13,11 @@ import (
 )
 
 type SellerHandler struct {
-	sv service.SellerServiceInterface
+	sv service.SellerService
 }
 
-func NewSellerHandler(sv service.SellerServiceInterface) SellerHandler {
-	return SellerHandler{sv: sv}
+func NewSellerHandler(sv service.SellerService) *SellerHandler {
+	return &SellerHandler{sv: sv}
 }
 
 func (h *SellerHandler) GetAll() http.HandlerFunc {
@@ -40,8 +40,7 @@ func (h *SellerHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err) //409 bad request
-			response.Error(w, statusCode, msg)
+			response.Error(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
 		seller, err := h.sv.GetByID(id)
@@ -61,8 +60,7 @@ func (h *SellerHandler) Delete() http.HandlerFunc {
 		idStr := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			response.Error(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
 		err = h.sv.Delete(id)
@@ -71,8 +69,6 @@ func (h *SellerHandler) Delete() http.HandlerFunc {
 			response.Error(w, statusCode, msg)
 			return
 		}
-		// 204 No Content: no va body de respuesta
-		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
@@ -102,7 +98,7 @@ func (h *SellerHandler) Update() http.HandlerFunc {
 		idStr := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
-			response.Error(w, http.StatusBadRequest, "invalid id")
+			response.Error(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
 

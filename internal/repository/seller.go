@@ -12,8 +12,8 @@ type SellerRepositoryFile struct {
 	filePath string
 }
 
-func NewSellerRepository() SellerRepositoryInterface {
-	return &SellerRepositoryFile{filePath: os.Getenv("FILE_PATH_DEFAULT")}
+func NewSellerRepository() SellerRepository {
+	return &SellerRepositoryFile{filePath: os.Getenv("FILE_PATH_SELLER")}
 }
 
 func (r SellerRepositoryFile) GetByID(id int) (models.Seller, error) {
