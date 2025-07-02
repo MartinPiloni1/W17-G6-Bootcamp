@@ -24,7 +24,7 @@ func (e EmployeeServiceDefault) Create(employee models.EmployeeAttributes) (mode
 	}
 	for _, emp := range existing {
 		if emp.CardNumberID == employee.CardNumberID {
-			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "duplicate card number"}
+			return models.Employee{}, httperrors.ConflictError{Message: "duplicate card number"}
 		}
 	}
 
@@ -60,7 +60,7 @@ func (e EmployeeServiceDefault) Update(id int, employee models.EmployeeAttribute
 	}
 	for _, emp := range existing {
 		if emp.CardNumberID == employee.CardNumberID && emp.Id != id {
-			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "duplicated card number"}
+			return models.Employee{}, httperrors.ConflictError{Message: "duplicated card number"}
 		}
 	}
 	_, err = e.warehouseRepo.GetByID(employee.WarehouseID)
