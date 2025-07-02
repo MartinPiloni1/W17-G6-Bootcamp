@@ -22,6 +22,15 @@ func (p *WarehouseServiceDefault) Create(warehouse models.WarehouseAttributes) (
 	if warehouse.WarehouseCode == "" {
 		return models.Warehouse{}, httperrors.BadRequestError{Message: "the field WarehouseCode must not be empty"}
 	}
+	if warehouse.Address == "" {
+		return models.Warehouse{}, httperrors.BadRequestError{Message: "the field Address must not be empty"}
+	}
+	if warehouse.Telephone == "" {
+		return models.Warehouse{}, httperrors.BadRequestError{Message: "the field Telephone must not be empty"}
+	}
+	if warehouse.MinimunCapacity <= 0 {
+		return models.Warehouse{}, httperrors.BadRequestError{Message: "the field MinimunCapacity must not be zero or negative"}
+	}
 	warehouses, err := p.rp.GetAll()
 	if err != nil {
 		return models.Warehouse{}, err
