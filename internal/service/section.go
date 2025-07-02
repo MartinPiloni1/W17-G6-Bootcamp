@@ -26,7 +26,7 @@ func (s SectionServiceDefault) Create(section models.Section) (*models.Section, 
 
 	for _, sections := range allSections {
 		if sections.SectionNumber == section.SectionNumber {
-			return nil, httperrors.ConflictError{Message: "el section_number ya existe"}
+			return nil, httperrors.ConflictError{Message: "section number already exists"}
 		}
 	}
 
@@ -77,7 +77,7 @@ func (s *SectionServiceDefault) applyChanges(sectionToUpdate *models.Section, pa
 		}
 		for _, section := range allSections {
 			if section.ID != sectionToUpdate.ID && section.SectionNumber == *patchData.SectionNumber {
-				return httperrors.ConflictError{Message: "el section_number ya existe en otra sección"}
+				return httperrors.ConflictError{Message: "section number already exists in another section"}
 			}
 		}
 		sectionToUpdate.SectionNumber = *patchData.SectionNumber

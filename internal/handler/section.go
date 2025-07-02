@@ -41,7 +41,7 @@ func (h *SectionHandler) GetByID() http.HandlerFunc {
 		idParam := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idParam)
 		if err != nil {
-			response.Error(w, http.StatusBadRequest, "ID inválido")
+			response.Error(w, http.StatusBadRequest, "invalid ID")
 			return
 		}
 
@@ -63,7 +63,7 @@ func (h *SectionHandler) Delete() http.HandlerFunc {
 		idParam := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idParam)
 		if err != nil {
-			response.Error(w, http.StatusBadRequest, "ID inválido")
+			response.Error(w, http.StatusBadRequest, "invalid ID")
 			return
 		}
 
@@ -74,9 +74,7 @@ func (h *SectionHandler) Delete() http.HandlerFunc {
 			return
 		}
 
-		response.JSON(w, http.StatusNoContent, map[string]any{
-			"data": "Sección eliminada correctamente",
-		})
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
@@ -85,13 +83,13 @@ func (h *SectionHandler) Create() http.HandlerFunc {
 		var section models.CreateSectionRequest
 		err := json.NewDecoder(r.Body).Decode(&section)
 		if err != nil {
-			response.Error(w, http.StatusBadRequest, "Error al decodificar el cuerpo de la solicitud")
+			response.Error(w, http.StatusBadRequest, "invalid body")
 			return
 		}
 
 		validator := validator.New()
 		if err := validator.Struct(section); err != nil {
-			response.Error(w, http.StatusUnprocessableEntity, "faltan campos o hay campos inválidos")
+			response.Error(w, http.StatusUnprocessableEntity, "invalid fields")
 			return
 		}
 
@@ -124,7 +122,7 @@ func (h *SectionHandler) Update() http.HandlerFunc {
 		idParam := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idParam)
 		if err != nil {
-			response.Error(w, http.StatusBadRequest, "ID inválido")
+			response.Error(w, http.StatusBadRequest, "invalid ID")
 			return
 		}
 
@@ -135,13 +133,13 @@ func (h *SectionHandler) Update() http.HandlerFunc {
 
 		err = dec.Decode(&req)
 		if err != nil {
-			response.Error(w, http.StatusBadRequest, "Cuerpo de la petición inválido o contiene campos desconocidos")
+			response.Error(w, http.StatusBadRequest, "invalid body")
 			return
 		}
 
 		validate := validator.New()
 		if err := validate.Struct(req); err != nil {
-			response.Error(w, http.StatusUnprocessableEntity, "Error de validación: "+err.Error())
+			response.Error(w, http.StatusUnprocessableEntity, "invalid fields")
 			return
 		}
 

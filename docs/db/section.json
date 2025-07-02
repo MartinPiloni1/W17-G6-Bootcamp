@@ -1,16 +1,5 @@
 [
   {
-    "id": 9,
-    "section_number": "A-101-FRIGOoo",
-    "current_temperature": 1,
-    "minimum_temperature": 1,
-    "current_capacity": 1,
-    "minimum_capacity": 1,
-    "maximum_capacity": 1,
-    "warehouse_id": 1,
-    "product_type_id": 1
-  },
-  {
     "id": 3,
     "section_number": "F-003-CONGELADO",
     "current_temperature": -18,
@@ -33,17 +22,6 @@
     "product_type_id": 1
   },
   {
-    "id": 4,
-    "section_number": "C-310-FRESCOS",
-    "current_temperature": 12.5,
-    "minimum_temperature": 10,
-    "current_capacity": 80,
-    "minimum_capacity": 20,
-    "maximum_capacity": 300,
-    "warehouse_id": 2,
-    "product_type_id": 4
-  },
-  {
     "id": 7,
     "section_number": "F-004-ULTRA-CONG",
     "current_temperature": -25,
@@ -55,17 +33,6 @@
     "product_type_id": 5
   },
   {
-    "id": 8,
-    "section_number": "A-101-FRIGOo",
-    "current_temperature": 1,
-    "minimum_temperature": 1,
-    "current_capacity": 1,
-    "minimum_capacity": 1,
-    "maximum_capacity": 1,
-    "warehouse_id": 1,
-    "product_type_id": 1
-  },
-  {
     "id": 5,
     "section_number": "B-206-SECO",
     "current_temperature": 22,
@@ -75,6 +42,28 @@
     "maximum_capacity": 6000,
     "warehouse_id": 2,
     "product_type_id": 2
+  },
+  {
+    "id": 4,
+    "section_number": "C-310-FRESCOS",
+    "current_temperature": 12.5,
+    "minimum_temperature": 10,
+    "current_capacity": 80,
+    "minimum_capacity": 20,
+    "maximum_capacity": 300,
+    "warehouse_id": 2,
+    "product_type_id": 4
+  },
+  {
+    "id": 8,
+    "section_number": "A-101-FRIGOo",
+    "current_temperature": 1,
+    "minimum_temperature": 1,
+    "current_capacity": 1,
+    "minimum_capacity": 1,
+    "maximum_capacity": 1,
+    "warehouse_id": 1,
+    "product_type_id": 1
   },
   {
     "id": 1,

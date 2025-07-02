@@ -39,7 +39,7 @@ func (s SectionRepositoryFile) Delete(id int) error {
 
 	_, ok := data[id]
 	if !ok {
-		return httperrors.NotFoundError{Message: "sección no encontrada"}
+		return httperrors.NotFoundError{Message: "section not found"}
 	}
 
 	delete(data, id)
@@ -65,7 +65,7 @@ func (s SectionRepositoryFile) GetByID(id int) (models.Section, error) {
 
 	section, ok := data[id]
 	if !ok {
-		return models.Section{}, httperrors.NotFoundError{Message: "sección no encontrada"}
+		return models.Section{}, httperrors.NotFoundError{Message: "section not found"}
 	}
 
 	return section, nil
@@ -80,7 +80,7 @@ func (s SectionRepositoryFile) Update(id int, data models.Section) (models.Secti
 
 	_, ok := dataMap[id]
 	if !ok {
-		return models.Section{}, httperrors.NotFoundError{Message: "sección no encontrada"}
+		return models.Section{}, httperrors.NotFoundError{Message: "section not found"}
 	}
 
 	dataMap[id] = data
