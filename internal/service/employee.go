@@ -8,16 +8,16 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
-type EmployeeServiceImpl struct {
+type EmployeeServiceDefault struct {
 	repo          repository.EmployeeRepository
 	warehouseRepo repository.WarehouseRepository
 }
 
 func NewEmployeeService(repo repository.EmployeeRepository, warehouseRepo repository.WarehouseRepository) EmployeeService {
-	return &EmployeeServiceImpl{repo: repo, warehouseRepo: warehouseRepo}
+	return &EmployeeServiceDefault{repo: repo, warehouseRepo: warehouseRepo}
 }
 
-func (e EmployeeServiceImpl) Create(employee models.EmployeeAttributes) (models.Employee, error) {
+func (e EmployeeServiceDefault) Create(employee models.EmployeeAttributes) (models.Employee, error) {
 	existing, err := e.repo.GetAll()
 	if err != nil {
 		return models.Employee{}, err
@@ -41,7 +41,7 @@ func (e EmployeeServiceImpl) Create(employee models.EmployeeAttributes) (models.
 	return e.repo.Create(newEmployee)
 }
 
-func (e EmployeeServiceImpl) GetAll() ([]models.Employee, error) {
+func (e EmployeeServiceDefault) GetAll() ([]models.Employee, error) {
 	employees, err := e.repo.GetAll()
 	if err != nil {
 		return nil, err
@@ -49,11 +49,11 @@ func (e EmployeeServiceImpl) GetAll() ([]models.Employee, error) {
 	return utils.MapToSlice[models.Employee](employees), nil
 }
 
-func (e EmployeeServiceImpl) GetByID(id int) (models.Employee, error) {
+func (e EmployeeServiceDefault) GetByID(id int) (models.Employee, error) {
 	return e.repo.GetByID(id)
 }
 
-func (e EmployeeServiceImpl) Update(id int, employee models.EmployeeAttributes) (models.Employee, error) {
+func (e EmployeeServiceDefault) Update(id int, employee models.EmployeeAttributes) (models.Employee, error) {
 	existing, err := e.repo.GetAll()
 	if err != nil {
 		return models.Employee{}, err
@@ -76,6 +76,6 @@ func (e EmployeeServiceImpl) Update(id int, employee models.EmployeeAttributes) 
 	return e.repo.Update(id, modifiedEmployee)
 }
 
-func (e EmployeeServiceImpl) Delete(id int) error {
+func (e EmployeeServiceDefault) Delete(id int) error {
 	return e.repo.Delete(id)
 }
