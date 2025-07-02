@@ -12,11 +12,10 @@ type SectionRepositoryFile struct {
 	filePath string
 }
 
-func NewSectionRepository() SectionRepositoryInterface {
+func NewSectionRepository() SectionRepository {
 	return &SectionRepositoryFile{filePath: os.Getenv("FILE_PATH_SECTIONS")}
 }
 
-// Create implements SectionRepositoryInterface.
 func (s *SectionRepositoryFile) Create(section models.Section) (*models.Section, error) {
 	data, err := utils.Read[models.Section](s.filePath)
 	if err != nil {
@@ -30,7 +29,6 @@ func (s *SectionRepositoryFile) Create(section models.Section) (*models.Section,
 	return &section, utils.Write(s.filePath, data)
 }
 
-// Delete implements SectionRepositoryInterface.
 func (s SectionRepositoryFile) Delete(id int) error {
 	data, err := utils.Read[models.Section](s.filePath)
 	if err != nil {
@@ -47,7 +45,6 @@ func (s SectionRepositoryFile) Delete(id int) error {
 	return utils.Write(s.filePath, data)
 }
 
-// GetAll implements SectionRepositoryInterface.
 func (s SectionRepositoryFile) GetAll() (map[int]models.Section, error) {
 	data, err := utils.Read[models.Section](s.filePath)
 	if err != nil {
@@ -56,7 +53,6 @@ func (s SectionRepositoryFile) GetAll() (map[int]models.Section, error) {
 	return data, nil
 }
 
-// GetByID implements SectionRepository.
 func (s SectionRepositoryFile) GetByID(id int) (models.Section, error) {
 	data, err := utils.Read[models.Section](s.filePath)
 	if err != nil {
@@ -71,7 +67,6 @@ func (s SectionRepositoryFile) GetByID(id int) (models.Section, error) {
 	return section, nil
 }
 
-// Update implements SectionRepositoryInterface.
 func (s SectionRepositoryFile) Update(id int, data models.Section) (models.Section, error) {
 	dataMap, err := utils.Read[models.Section](s.filePath)
 	if err != nil {

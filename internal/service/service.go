@@ -41,7 +41,7 @@ type EmployeeService interface {
 	Delete(id int) error
 }
 
-type SectionServiceInterface interface {
+type SectionService interface {
 	Create(section models.Section) (*models.Section, error)
 	GetAll() ([]models.Section, error)
 	GetByID(id int) (models.Section, error)

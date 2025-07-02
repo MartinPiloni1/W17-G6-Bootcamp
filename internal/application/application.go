@@ -97,7 +97,8 @@ func EmployeeRouter() chi.Router {
 func SectionRouter() chi.Router {
 	router := chi.NewRouter()
 	repo := repository.NewSectionRepository()
-	service := service.NewSectionService(repo)
+	warehouseService := service.NewWarehouseService(repository.NewWarehouseRepository())
+	service := service.NewSectionService(repo, warehouseService)
 	handler := handler.NewSectionHandler(service)
 	router.Get("/", handler.GetAll())
 	router.Get("/{id}", handler.GetByID())

@@ -10,15 +10,23 @@ import (
 )
 
 type SectionServiceDefault struct {
-	repo repository.SectionRepositoryInterface
+	repo             repository.SectionRepository
+	warehouseService WarehouseService 
 }
 
-func NewSectionService(repo repository.SectionRepositoryInterface) SectionServiceInterface {
-	return &SectionServiceDefault{repo: repo}
+func NewSectionService(repo repository.SectionRepository, warehouseService WarehouseService) SectionService {
+	return &SectionServiceDefault{
+		repo:             repo,
+		warehouseService: warehouseService,
+	}
 }
 
-// Create implements SectionServiceInterface.
 func (s SectionServiceDefault) Create(section models.Section) (*models.Section, error) {
+	_, err := s.warehouseService.GetByID(section.WarehouseID)
+	if err != nil {
+		return nil, httperrors.BadRequestError{Message: "warehouse not found"}
+	}
+
 	allSections, err := s.GetAll()
 	if err != nil {
 		return nil, err
@@ -33,12 +41,9 @@ func (s SectionServiceDefault) Create(section models.Section) (*models.Section, 
 	return s.repo.Create(section)
 }
 
-// Delete implements SectionServiceInterface.
 func (s SectionServiceDefault) Delete(id int) error {
 	return s.repo.Delete(id)
 }
-
-// GetAll implements SectionServiceInterface.
 func (s SectionServiceDefault) GetAll() ([]models.Section, error) {
 	data, err := s.repo.GetAll()
 	if err != nil {
@@ -52,12 +57,15 @@ func (s SectionServiceDefault) GetAll() ([]models.Section, error) {
 	return slicedData, nil
 }
 
-// GetByID implements SectionServiceInterface.
 func (s SectionServiceDefault) GetByID(id int) (models.Section, error) {
 	return s.repo.GetByID(id)
 }
 
 func (s *SectionServiceDefault) Update(id int, patchData models.UpdatePatchSectionRequest) (models.Section, error) {
+	_, err := s.warehouseService.GetByID(id)
+	if err != nil {
+		return models.Section{}, httperrors.BadRequestError{Message: "warehouse not found"}
+	}
 	sectionToUpdate, err := s.repo.GetByID(id)
 	if err != nil {
 		return models.Section{}, err

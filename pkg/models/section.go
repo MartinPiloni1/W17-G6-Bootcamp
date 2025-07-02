@@ -10,7 +10,6 @@ type Section struct {
 	MaximumCapacity    int            `json:"maximum_capacity"`
 	WarehouseID        int            `json:"warehouse_id"`
 	ProductTypeID      int            `json:"product_type_id"`
-	// ProductBatches     []	 `json:"product_batches"`
 }
 
 func (s Section) GetID() int {
@@ -28,10 +27,6 @@ type CreateSectionRequest struct {
 	ProductTypeID      int     `json:"product_type_id" validate:"required"`
 }
 
-// Usamos punteros para poder diferenciar entre un campo no enviado (nil)
-// y un campo enviado con su valor cero (ej: 0, "").
-// Las etiquetas de validación usan 'omitempty' para que solo se apliquen
-// si el campo está presente en la petición.
 type UpdatePatchSectionRequest struct {
 	SectionNumber      *string  `json:"section_number,omitempty" validate:"omitempty,min=1"`
 	CurrentTemperature *float64 `json:"current_temperature,omitempty"`

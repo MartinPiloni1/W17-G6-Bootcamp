@@ -14,10 +14,10 @@ import (
 )
 
 type SectionHandler struct {
-	sectionService service.SectionServiceInterface
+	sectionService service.SectionService
 }
 
-func NewSectionHandler(sectionService service.SectionServiceInterface) SectionHandler {
+func NewSectionHandler(sectionService service.SectionService) SectionHandler {
 	return SectionHandler{sectionService: sectionService}
 }
 
