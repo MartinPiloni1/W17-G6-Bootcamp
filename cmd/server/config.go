@@ -51,7 +51,7 @@ func (a *ServerChi) Run() (err error) {
 	employeeRouter := application.EmployeeRouter()
 
 	router.Mount("/healthcheck", healthRouter)
-	router.Mount("/employees", employeeRouter)
+	router.Mount("/api/v1/employees", employeeRouter)
 	err = http.ListenAndServe(a.ServerAddr, router)
 	return
 }

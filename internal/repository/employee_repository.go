@@ -15,25 +15,25 @@ func NewEmployeeRepository() EmployeeRepository {
 	return &EmployeeRepositoryImpl{filePath: os.Getenv("FILE_PATH_DEFAULT")}
 }
 
-func (e EmployeeRepositoryImpl) Create(employee models.Employee) (models.Employee, error) {
+func (e *EmployeeRepositoryImpl) Create(employee models.Employee) (models.Employee, error) {
 	dataList, err := utils.Read[models.Employee](e.filePath)
 	if err != nil {
 		return models.Employee{}, err
 	}
 
 	if _, exist := dataList[employee.Id]; exist {
-		return models.Employee{}, httperrors.ConflictError{Message: "Ya existe"}
+		return models.Employee{}, httperrors.ConflictError{Message: "already exist"}
 	}
 
 	for _, empIteration := range dataList {
 		if empIteration.CardNumberID == employee.CardNumberID {
-			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "Numero de tarjeta duplicado"}
+			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "duplicate card number"}
 		}
 	}
 
 	employee.Id, err = utils.GetNextID[models.Employee](e.filePath)
 	if err != nil {
-		return models.Employee{}, httperrors.ConflictError{Message: "error al obtener nextId"}
+		return models.Employee{}, httperrors.ConflictError{Message: "error generating sequential id"}
 	}
 	dataList[employee.Id] = employee
 
@@ -41,7 +41,7 @@ func (e EmployeeRepositoryImpl) Create(employee models.Employee) (models.Employe
 	return employee, nil
 }
 
-func (e EmployeeRepositoryImpl) GetAll() (map[int]models.Employee, error) {
+func (e *EmployeeRepositoryImpl) GetAll() (map[int]models.Employee, error) {
 	data, err := utils.Read[models.Employee](e.filePath)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (e EmployeeRepositoryImpl) GetAll() (map[int]models.Employee, error) {
 	return data, nil
 }
 
-func (e EmployeeRepositoryImpl) GetByID(id int) (models.Employee, error) {
+func (e *EmployeeRepositoryImpl) GetByID(id int) (models.Employee, error) {
 	data, err := utils.Read[models.Employee](e.filePath)
 	if err != nil {
 		return models.Employee{}, err
@@ -60,22 +60,22 @@ func (e EmployeeRepositoryImpl) GetByID(id int) (models.Employee, error) {
 			return emp, nil
 		}
 	}
-	return models.Employee{}, httperrors.NotFoundError{Message: "Empleado no encontrado"}
+	return models.Employee{}, httperrors.NotFoundError{Message: "employee not found"}
 }
 
-func (e EmployeeRepositoryImpl) Update(id int, employee models.Employee) (models.Employee, error) {
+func (e *EmployeeRepositoryImpl) Update(id int, employee models.Employee) (models.Employee, error) {
 	dataList, err := utils.Read[models.Employee](e.filePath)
 	if err != nil {
 		return models.Employee{}, err
 	}
 
 	if _, exist := dataList[id]; !exist {
-		return models.Employee{}, httperrors.NotFoundError{Message: "No existe el registro"}
+		return models.Employee{}, httperrors.NotFoundError{Message: "employee not found"}
 	}
 
 	for _, empIteration := range dataList {
 		if empIteration.CardNumberID == employee.CardNumberID && empIteration.Id != id {
-			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "Numero de tarjeta duplicado"}
+			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "duplicated card number"}
 		}
 	}
 
@@ -84,14 +84,14 @@ func (e EmployeeRepositoryImpl) Update(id int, employee models.Employee) (models
 	return employee, nil
 }
 
-func (e EmployeeRepositoryImpl) Delete(id int) error {
+func (e *EmployeeRepositoryImpl) Delete(id int) error {
 	dataList, err := utils.Read[models.Employee](e.filePath)
 	if err != nil {
 		return err
 	}
 
 	if _, exist := dataList[id]; !exist {
-		return httperrors.NotFoundError{Message: "No existe el id"}
+		return httperrors.NotFoundError{Message: "employee not found"}
 	}
 
 	delete(dataList, id)

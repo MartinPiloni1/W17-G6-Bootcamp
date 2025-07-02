@@ -11,13 +11,12 @@ import (
 	"strconv"
 )
 
-func NewEmployeeHandler(sv service.EmployeeService) EmployeeHandler {
-	return EmployeeHandler{sv: sv}
+type EmployeeHandler struct {
+	sv service.EmployeeService
 }
 
-type EmployeeHandler struct {
-	// sv is the service that will be used by the handler
-	sv service.EmployeeService
+func NewEmployeeHandler(sv service.EmployeeService) *EmployeeHandler {
+	return &EmployeeHandler{sv: sv}
 }
 
 func (h *EmployeeHandler) GetAll() http.HandlerFunc {
@@ -30,8 +29,7 @@ func (h *EmployeeHandler) GetAll() http.HandlerFunc {
 		}
 
 		response.JSON(w, http.StatusOK, map[string]any{
-			"message": "success",
-			"data":    data,
+			"data": data,
 		})
 	}
 }
@@ -55,13 +53,12 @@ func (h *EmployeeHandler) GetById() http.HandlerFunc {
 		}
 
 		response.JSON(w, http.StatusOK, map[string]any{
-			"message": "success",
-			"data":    data,
+			"data": data,
 		})
 	}
 }
 
-func (h *EmployeeHandler) Post() http.HandlerFunc {
+func (h *EmployeeHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var employee models.Employee
 		err := request.JSON(r, &employee)
@@ -79,13 +76,12 @@ func (h *EmployeeHandler) Post() http.HandlerFunc {
 		}
 
 		response.JSON(w, http.StatusOK, map[string]any{
-			"message": "success",
-			"data":    data,
+			"data": data,
 		})
 	}
 }
 
-func (h *EmployeeHandler) Patch() http.HandlerFunc {
+func (h *EmployeeHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var employee models.Employee
 		err := request.JSON(r, &employee)
@@ -125,13 +121,12 @@ func (h *EmployeeHandler) Patch() http.HandlerFunc {
 		}
 
 		response.JSON(w, http.StatusOK, map[string]any{
-			"message": "success",
-			"data":    data,
+			"data": data,
 		})
 	}
 }
 
-func (h *EmployeeHandler) DeleteById() http.HandlerFunc {
+func (h *EmployeeHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idReq := chi.URLParam(r, "id")
 
@@ -149,9 +144,6 @@ func (h *EmployeeHandler) DeleteById() http.HandlerFunc {
 			return
 		}
 
-		response.JSON(w, http.StatusOK, map[string]any{
-			"message": "success",
-			"data":    nil,
-		})
+		response.JSON(w, http.StatusNoContent, nil)
 	}
 }

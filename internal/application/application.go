@@ -20,16 +20,16 @@ func HealthRouter() chi.Router {
 }
 
 func EmployeeRouter() chi.Router {
-	// here we cand add the storage (if any) repository service and handler
-	//mount the endpoints and return to mount them in the Run()
 	router := chi.NewRouter()
+
 	repo := repository.NewEmployeeRepository()
 	service := service.NewEmployeeService(repo)
 	handler := handler.NewEmployeeHandler(service)
+
 	router.Get("/", handler.GetAll())
 	router.Get("/{id}", handler.GetById())
-	router.Post("/", handler.Post())
-	router.Patch("/{id}", handler.Patch())
-	router.Delete("/{id}", handler.DeleteById())
+	router.Post("/", handler.Create())
+	router.Patch("/{id}", handler.Update())
+	router.Delete("/{id}", handler.Delete())
 	return router
 }
