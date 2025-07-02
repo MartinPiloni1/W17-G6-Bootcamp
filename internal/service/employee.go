@@ -67,7 +67,7 @@ func (e EmployeeServiceDefault) Update(id int, employee models.EmployeeAttribute
 	if err != nil {
 		var notFoundError httperrors.NotFoundError
 		if errors.As(err, &notFoundError) {
-			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "warehouse_id does not exist"}
+			return models.Employee{}, httperrors.NotFoundError{Message: "warehouse_id does not exist"}
 		}
 		return models.Employee{}, err
 	}
