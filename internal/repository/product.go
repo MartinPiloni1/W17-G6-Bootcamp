@@ -67,25 +67,17 @@ func (p *ProductRepositoryFile) GetByID(id int) (models.Product, error) {
 	return product, nil
 }
 
-func (p *ProductRepositoryFile) Update(id int, productAttributes models.ProductAttributes) (models.Product, error) {
+func (p *ProductRepositoryFile) Update(id int, product models.Product) (models.Product, error) {
 	productData, err := utils.Read[models.Product](p.filePath)
 	if err != nil {
 		return models.Product{}, err
 	}
-
-	if _, exists := productData[id]; !exists {
-		return models.Product{},
-			httperrors.NotFoundError{Message: "Product not found"}
+	productData[id] = product
+	err = utils.Write(p.filePath, productData)
+	if err != nil {
+		return models.Product{}, err
 	}
-
-	updatedProduct := models.Product{
-		ID:                id,
-		ProductAttributes: productAttributes,
-	}
-	productData[id] = updatedProduct
-
-	utils.Write(p.filePath, productData)
-	return updatedProduct, nil
+	return product, nil
 }
 
 func (p *ProductRepositoryFile) Delete(id int) error {

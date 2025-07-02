@@ -10,6 +10,7 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/bootcamp-go/web/response"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-playground/validator"
 )
 
 type ProductHandler struct {
@@ -23,10 +24,19 @@ func NewProductHandler(sv service.ProductService) *ProductHandler {
 func (h ProductHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var newProduct models.ProductAttributes
-		err := json.NewDecoder(r.Body).Decode(&newProduct)
+
+		dec := json.NewDecoder(r.Body)
+		dec.DisallowUnknownFields()
+		err := dec.Decode(&newProduct)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
+			return
+		}
+
+		validator := validator.New()
+		err = validator.Struct(newProduct)
+		if err != nil {
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 
@@ -87,11 +97,19 @@ func (h ProductHandler) Update() http.HandlerFunc {
 			return
 		}
 
-		var updatedProduct models.ProductAttributes
-		err = json.NewDecoder(r.Body).Decode(&updatedProduct)
+		var updatedProduct models.ProductPatchRequest
+		dec := json.NewDecoder(r.Body)
+		dec.DisallowUnknownFields()
+		err = dec.Decode(&updatedProduct)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
+			return
+		}
+
+		validator := validator.New()
+		err = validator.Struct(updatedProduct)
+		if err != nil {
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 
