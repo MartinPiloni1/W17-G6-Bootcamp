@@ -9,3 +9,11 @@ type WarehouseService interface {
 	Update(id int, warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error)
 	Delete(id int) error
 }
+
+type BuyerService interface {
+	Create(newBuyer models.BuyerAttributes) (models.Buyer, error)
+	GetAll() ([]models.Buyer, error)
+	GetByID(id int) (models.Buyer, error)
+	Update(id int, BuyerData models.BuyerPatchRequest) (models.Buyer, error)
+	Delete(id int) error
+}

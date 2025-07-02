@@ -9,3 +9,12 @@ type WarehouseRepository interface {
 	Update(id int, warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error)
 	Delete(id int) error
 }
+
+type BuyerRepository interface {
+	Create(newBuyer models.BuyerAttributes) (models.Buyer, error)
+	GetAll() (map[int]models.Buyer, error)
+	GetByID(id int) (models.Buyer, error)
+	Update(id int, updatedBuyer models.Buyer) (models.Buyer, error)
+	Delete(id int) error
+	CardNumberIdAlreadyExist(newCardNumberId int) (bool, error)
+}
