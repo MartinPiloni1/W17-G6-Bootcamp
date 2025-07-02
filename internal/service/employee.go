@@ -1,10 +1,10 @@
 package service
 
 import (
-	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/mapper"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
 type EmployeeServiceImpl struct {
@@ -35,7 +35,7 @@ func (e EmployeeServiceImpl) GetAll() ([]models.Employee, error) {
 	if err != nil {
 		return nil, err
 	}
-	return mapper.NewEmployeeMapper().MapToSlice(employees), nil
+	return utils.MapToSlice[models.Employee](employees), nil
 }
 
 func (e EmployeeServiceImpl) GetByID(id int) (models.Employee, error) {
