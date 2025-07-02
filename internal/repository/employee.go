@@ -12,7 +12,7 @@ type EmployeeRepositoryImpl struct {
 }
 
 func NewEmployeeRepository() EmployeeRepository {
-	return &EmployeeRepositoryImpl{filePath: os.Getenv("FILE_PATH_DEFAULT")}
+	return &EmployeeRepositoryImpl{filePath: os.Getenv("FILE_PATH_EMPLOYEE")}
 }
 
 func (e *EmployeeRepositoryImpl) Create(employee models.Employee) (models.Employee, error) {

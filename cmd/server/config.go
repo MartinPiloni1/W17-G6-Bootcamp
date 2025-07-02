@@ -26,7 +26,7 @@ func LoadServerConf() (*ServerChi, error) {
 	serverAddr := os.Getenv("ADDRESS")
 
 	// here we can load more files if we use it
-	filePathDefault := os.Getenv("FILE_PATH_DEFAULT")
+	filePathDefault := os.Getenv("FILE_PATH_EMPLOYEE")
 
 	if serverAddr == "" {
 		serverAddr = ":8080"
