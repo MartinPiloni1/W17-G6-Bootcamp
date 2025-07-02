@@ -76,7 +76,7 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req models.SellerAttributes
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			response.Error(w, http.StatusUnprocessableEntity, "invalid json")
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 		created, err := h.sv.Create(req)
@@ -104,7 +104,7 @@ func (h *SellerHandler) Update() http.HandlerFunc {
 
 		var req models.SellerAttributes
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			response.Error(w, http.StatusUnprocessableEntity, "bad request body")
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 

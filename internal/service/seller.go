@@ -1,10 +1,10 @@
 package service
 
 import (
-	"errors"
 	"slices"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
@@ -19,7 +19,9 @@ func NewSellerService(repo repository.SellerRepository) SellerService {
 
 func (s SellerServiceDefault) Create(seller models.SellerAttributes) (models.Seller, error) {
 	if seller.CID <= 0 || seller.CompanyName == "" || seller.Address == "" || seller.Telephone == "" {
-		return models.Seller{}, errors.New("missing required fields")
+		return models.Seller{}, httperrors.BadRequestError{
+			Message: "Invalid seller data",
+		}
 	}
 
 	return s.rp.Create(seller)
@@ -54,7 +56,9 @@ func (s SellerServiceDefault) Update(id int, data *models.SellerAttributes) (mod
 		}
 		for _, existing := range all {
 			if existing.CID == data.CID && existing.ID != id {
-				return models.Seller{}, errors.New("cid already exists")
+				return models.Seller{}, httperrors.ConflictError{
+					Message: "CID already exists",
+				}
 			}
 		}
 	}
