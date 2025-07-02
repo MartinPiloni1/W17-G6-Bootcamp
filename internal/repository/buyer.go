@@ -13,7 +13,7 @@ type BuyerRepositoryFile struct {
 }
 
 func NewBuyerRepositoryFile() BuyerRepository {
-	return &BuyerRepositoryFile{filePath: os.Getenv("BUYER_FILE_PATH")}
+	return &BuyerRepositoryFile{filePath: os.Getenv("FILE_PATH_BUYER")}
 }
 
 func (r *BuyerRepositoryFile) Create(newBuyer models.BuyerAttributes) (models.Buyer, error) {
