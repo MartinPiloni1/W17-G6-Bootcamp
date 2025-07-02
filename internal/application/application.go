@@ -16,6 +16,36 @@ func HealthRouter() chi.Router {
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello World!"))
 	})
+
+	return router
+}
+
+func SellerRouter() chi.Router {
+	router := chi.NewRouter()
+	rp := repository.NewSellerRepository()
+	sv := service.NewSellerService(rp)
+	hd := handler.NewSellerHandler(sv)
+	router.Get("/", hd.GetAll())        // GET /seller         (lista todos)
+	router.Get("/{id}", hd.GetByID())   // GET /seller/{id}    (uno por id)
+	router.Post("/", hd.Create())       // POST /seller        (crear uno)
+	router.Patch("/{id}", hd.Update())  // PATCH /seller/{id}  (actualizar)
+	router.Delete("/{id}", hd.Delete()) // DELETE
+	return router
+}
+
+func WarehouseRouter() chi.Router {
+	rp := repository.NewWarehouseRepository()
+	sv := service.NewWarehouseService(rp)
+	hd := handler.NewWarehouseHandler(sv)
+
+	router := chi.NewRouter()
+
+	router.Get("/", hd.GetAll())
+	router.Post("/", hd.Create())
+	router.Get("/{id}", hd.GetById())
+	router.Patch("/{id}", hd.Update())
+	router.Delete("/{id}", hd.Delete())
+
 	return router
 }
 
@@ -44,6 +74,21 @@ func BuyersRouter() chi.Router {
 	router.Post("/", hd.Create())
 	router.Get("/", hd.GetAll())
 	router.Get("/{id}", hd.GetByID())
+	router.Patch("/{id}", hd.Update())
+	router.Delete("/{id}", hd.Delete())
+	return router
+}
+
+func EmployeeRouter() chi.Router {
+	router := chi.NewRouter()
+
+	rp := repository.NewEmployeeRepository()
+	sv := service.NewEmployeeService(rp)
+	hd := handler.NewEmployeeHandler(sv)
+
+	router.Get("/", hd.GetAll())
+	router.Get("/{id}", hd.GetById())
+	router.Post("/", hd.Create())
 	router.Patch("/{id}", hd.Update())
 	router.Delete("/{id}", hd.Delete())
 	return router

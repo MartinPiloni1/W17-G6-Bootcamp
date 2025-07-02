@@ -49,11 +49,17 @@ func (a *ServerChi) Run() (err error) {
 
 	healthRouter := application.HealthRouter()
 	productRouter := application.ProductRouter()
+	warehouseRouter := application.WarehouseRouter()
 	buyersRouter := application.BuyersRouter()
+	sellerRouter := application.SellerRouter()
+	employeeRouter := application.EmployeeRouter()
 
 	router.Mount("/healthcheck", healthRouter)
 	router.Mount("/api/v1/products", productRouter)
+	router.Mount("/api/v1/warehouses", warehouseRouter)
 	router.Mount("/api/v1/buyers", buyersRouter)
+	router.Mount("/api/v1/sellers", sellerRouter)
+	router.Mount("/api/v1/employees", employeeRouter)
 	err = http.ListenAndServe(a.ServerAddr, router)
 	return
 }
