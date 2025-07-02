@@ -20,8 +20,8 @@ func HealthRouter() chi.Router {
 
 func WarehouseRouter() chi.Router {
 	rp := repository.NewWarehouseRepository()
-	employeeRepo := repository.NewEmployeeRepository()
-	sv := service.NewWarehouseService(rp, employeeRepo)
+	employeeRp := repository.NewEmployeeRepository()
+	sv := service.NewWarehouseService(rp, employeeRp)
 	hd := handler.NewWarehouseHandler(sv)
 
 	router := chi.NewRouter()
@@ -53,15 +53,15 @@ func BuyersRouter() chi.Router {
 func EmployeeRouter() chi.Router {
 	router := chi.NewRouter()
 
-	repo := repository.NewEmployeeRepository()
-	warehouseRepo := repository.NewWarehouseRepository()
-	service := service.NewEmployeeService(repo, warehouseRepo)
-	handler := handler.NewEmployeeHandler(service)
+	rp := repository.NewEmployeeRepository()
+	warehouseRp := repository.NewWarehouseRepository()
+	sv := service.NewEmployeeService(rp, warehouseRp)
+	hd := handler.NewEmployeeHandler(sv)
 
-	router.Get("/", handler.GetAll())
-	router.Get("/{id}", handler.GetById())
-	router.Post("/", handler.Create())
-	router.Patch("/{id}", handler.Update())
-	router.Delete("/{id}", handler.Delete())
+	router.Get("/", hd.GetAll())
+	router.Get("/{id}", hd.GetById())
+	router.Post("/", hd.Create())
+	router.Patch("/{id}", hd.Update())
+	router.Delete("/{id}", hd.Delete())
 	return router
 }
