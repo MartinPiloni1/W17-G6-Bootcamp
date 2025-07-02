@@ -22,8 +22,8 @@ func HealthRouter() chi.Router {
 func ProductRouter() chi.Router {
 	router := chi.NewRouter()
 
-	rp := repository.NewProductRepository()
-	sv := service.NewProductService(rp)
+	rp := repository.NewProductRepositoryFile()
+	sv := service.NewProductServiceDefault(rp)
 	hd := handler.NewProductHandler(sv)
 
 	router.Post("/", hd.Create())
