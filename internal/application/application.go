@@ -21,15 +21,15 @@ func HealthRouter() chi.Router {
 
 func ProductRouter() chi.Router {
 	router := chi.NewRouter()
+
 	rp := repository.NewProductRepository()
 	sv := service.NewProductService(rp)
 	hd := handler.NewProductHandler(sv)
-	router.Group(func(r chi.Router) {
-		r.Get("/", hd.GetAll())
-		r.Get("/{id}", hd.GetById())
-		r.Post("/", hd.Create())
-		r.Patch("/{id}", hd.Update())
-		r.Delete("/{id}", hd.Delete())
-	})
+
+	router.Get("/", hd.GetAll())
+	router.Get("/{id}", hd.GetById())
+	router.Post("/", hd.Create())
+	router.Patch("/{id}", hd.Update())
+	router.Delete("/{id}", hd.Delete())
 	return router
 }

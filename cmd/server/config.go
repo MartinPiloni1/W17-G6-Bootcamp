@@ -18,7 +18,7 @@ type ServerChi struct {
 }
 
 func LoadServerConf() (*ServerChi, error) {
-	err := godotenv.Load(".env")
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Failed to load .env: %s", err)
 	}
