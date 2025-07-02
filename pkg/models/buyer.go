@@ -7,8 +7,8 @@ type Buyer struct {
 
 type BuyerAttributes struct {
 	CardNumberId int    `json:"card_number_id" validate:"required,gt=0"`
-	FirstName    string `json:"first_name" validate:"required"`
-	LastName     string `json:"last_name" validate:"required"`
+	FirstName    string `json:"first_name" validate:"required,min=1"`
+	LastName     string `json:"last_name" validate:"required,min=1"`
 }
 
 func (b Buyer) GetID() int {

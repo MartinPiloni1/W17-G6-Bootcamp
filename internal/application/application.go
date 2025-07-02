@@ -27,10 +27,10 @@ func BuyersRouter() chi.Router {
 	sv := service.NewBuyerServiceDefault(rp)
 	hd := handler.NewBuyerHandler(sv)
 
+	router.Post("/", hd.Create())
 	router.Get("/", hd.GetAll())
 	router.Get("/{id}", hd.GetByID())
-	router.Delete("/{id}", hd.Delete())
-	router.Post("/", hd.Create())
 	router.Patch("/{id}", hd.Update())
+	router.Delete("/{id}", hd.Delete())
 	return router
 }
