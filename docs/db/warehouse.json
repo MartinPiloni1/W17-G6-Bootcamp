@@ -1,11 +1,19 @@
 [
   {
-    "id": 2,
-    "warehouse_code": "SPR",
-    "address": "Av. Siempre Viva 742",
-    "telephone": "41009876",
-    "minimun_capacity": 20,
-    "minimun_temperature": 5
+    "id": 5,
+    "warehouse_code": "PAT",
+    "address": "Parque Industrial Sur, Mza. 3",
+    "telephone": "02991543210",
+    "minimun_capacity": 30,
+    "minimun_temperature": -2
+  },
+  {
+    "id": 3,
+    "warehouse_code": "PIL",
+    "address": "Ruta 8 km 35,5",
+    "telephone": "02304555555",
+    "minimun_capacity": 15,
+    "minimun_temperature": 8
   },
   {
     "id": 4,
@@ -14,6 +22,30 @@
     "telephone": "3516000123",
     "minimun_capacity": 25,
     "minimun_temperature": 4
+  },
+  {
+    "id": 10,
+    "warehouse_code": "LP",
+    "address": "Cambio por patch",
+    "telephone": "02304555555",
+    "minimun_capacity": 15,
+    "minimun_temperature": 8
+  },
+  {
+    "id": 12,
+    "warehouse_code": "LPM",
+    "address": "Ruta 8 km 35,5 nuevo desde post",
+    "telephone": "02304555555",
+    "minimun_capacity": 1,
+    "minimun_temperature": 8
+  },
+  {
+    "id": 2,
+    "warehouse_code": "SPR",
+    "address": "Av. Siempre Viva 742",
+    "telephone": "41009876",
+    "minimun_capacity": 20,
+    "minimun_temperature": 5
   },
   {
     "id": 1,
@@ -25,40 +57,8 @@
   },
   {
     "id": 11,
-    "warehouse_code": "LPML",
+    "warehouse_code": "LPMP",
     "address": "Ruta 8 km 35,5 nuevo desde post",
-    "telephone": "02304555555",
-    "minimun_capacity": 15,
-    "minimun_temperature": 8
-  },
-  {
-    "id": 10,
-    "warehouse_code": "LP",
-    "address": "Cambio por patch",
-    "telephone": "02304555555",
-    "minimun_capacity": 15,
-    "minimun_temperature": 8
-  },
-  {
-    "id": 5,
-    "warehouse_code": "PAT",
-    "address": "Parque Industrial Sur, Mza. 3",
-    "telephone": "02991543210",
-    "minimun_capacity": 30,
-    "minimun_temperature": -2
-  },
-  {
-    "id": 12,
-    "warehouse_code": "LPM",
-    "address": "Ruta 8 km 35,5 nuevo desde post",
-    "telephone": "02304555555",
-    "minimun_capacity": 1,
-    "minimun_temperature": 8
-  },
-  {
-    "id": 3,
-    "warehouse_code": "PIL",
-    "address": "Ruta 8 km 35,5",
     "telephone": "02304555555",
     "minimun_capacity": 15,
     "minimun_temperature": 8
