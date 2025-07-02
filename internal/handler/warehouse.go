@@ -15,8 +15,8 @@ type WarehouseHandler struct {
 	sv service.WarehouseService
 }
 
-func NewWarehouseHandler(sv service.WarehouseService) WarehouseHandler {
-	return WarehouseHandler{
+func NewWarehouseHandler(sv service.WarehouseService) *WarehouseHandler {
+	return &WarehouseHandler{
 		sv: sv,
 	}
 }
@@ -25,7 +25,7 @@ func (h WarehouseHandler) Create() http.HandlerFunc {
 		var warehouse models.WarehouseAttributes
 		err := json.NewDecoder(r.Body).Decode(&warehouse)
 		if err != nil {
-			response.Error(w, 422, "Invalid JSON body")
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 		warehouseData, err := h.sv.Create(warehouse)
@@ -60,7 +60,7 @@ func (h WarehouseHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			response.Error(w, 400, "Invalid Id format")
+			response.Error(w, http.StatusBadRequest, "Invalid Id format")
 			return
 		}
 
@@ -81,14 +81,14 @@ func (h WarehouseHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			response.Error(w, 400, "Invalid Id format")
+			response.Error(w, http.StatusBadRequest, "Invalid Id format")
 			return
 		}
 
 		var updatedWarehouse models.WarehouseAttributes
 		err = json.NewDecoder(r.Body).Decode(&updatedWarehouse)
 		if err != nil {
-			response.Error(w, 422, "Invalid JSON body")
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 
@@ -109,7 +109,7 @@ func (h WarehouseHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			response.Error(w, 400, "Invalid ID format")
+			response.Error(w, http.StatusBadRequest, "Invalid ID format")
 			return
 		}
 		err = h.sv.Delete(id)

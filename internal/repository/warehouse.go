@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
@@ -12,7 +13,7 @@ type WarehouseRepositoryFile struct {
 }
 
 func NewWarehouseRepository() *WarehouseRepositoryFile {
-	return &WarehouseRepositoryFile{filePath: os.Getenv("FILE_PATH_DEFAULT")}
+	return &WarehouseRepositoryFile{filePath: os.Getenv("FILE_PATH_WAREHOUSE")}
 }
 
 func (p *WarehouseRepositoryFile) Create(warehouseAtribbutes models.WarehouseAttributes) (models.Warehouse, error) {
@@ -47,20 +48,21 @@ func (p *WarehouseRepositoryFile) GetAll() (map[int]models.Warehouse, error) {
 		return map[int]models.Warehouse{}, err
 	}
 	if len(data) == 0 {
-		return map[int]models.Warehouse{}, httperrors.NotFoundError{Message: "data not find"}
+		return map[int]models.Warehouse{}, httperrors.NotFoundError{Message: "data not found"}
 	}
 	return data, nil
 }
 
 func (p *WarehouseRepositoryFile) GetByID(id int) (models.Warehouse, error) {
 	warehouseData, err := utils.Read[models.Warehouse](p.filePath)
+	fmt.Println(warehouseData)
 	if err != nil {
 		return models.Warehouse{}, err
 	}
 	warehouse, exists := warehouseData[id]
 	if !exists {
 		return models.Warehouse{},
-			httperrors.NotFoundError{Message: "Warehouse not found"}
+			httperrors.NotFoundError{Message: "warehouse not found"}
 	}
 	return warehouse, nil
 }

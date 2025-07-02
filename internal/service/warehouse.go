@@ -18,11 +18,20 @@ func NewWarehouseService(repo repository.WarehouseRepository) *WarehouseServiceD
 	}
 }
 
-func (p *WarehouseServiceDefault) Create(product models.WarehouseAttributes) (models.Warehouse, error) {
-	if product.WarehouseCode == "" {
+func (p *WarehouseServiceDefault) Create(warehouse models.WarehouseAttributes) (models.Warehouse, error) {
+	if warehouse.WarehouseCode == "" {
 		return models.Warehouse{}, httperrors.BadRequestError{Message: "the field WarehouseCode must not be empty"}
 	}
-	return p.rp.Create(product)
+	warehouses, err := p.rp.GetAll()
+	if err != nil {
+		return models.Warehouse{}, err
+	}
+	for _, w := range warehouses {
+		if w.WarehouseCode == warehouse.WarehouseCode {
+			return models.Warehouse{}, httperrors.ConflictError{Message: "the WarehouseCode already exists"}
+		}
+	}
+	return p.rp.Create(warehouse)
 }
 
 func (p *WarehouseServiceDefault) GetAll() ([]models.Warehouse, error) {
@@ -50,6 +59,15 @@ func (p *WarehouseServiceDefault) Update(id int, warehouseAttributes models.Ware
 	errZeroVelue := utils.ApplyNonZero(&warehouse.WarehouseAttributes, warehouseAttributes)
 	if errZeroVelue != nil {
 		return models.Warehouse{}, httperrors.BadRequestError{Message: "the input fields are not valid"}
+	}
+	warehouses, err := p.rp.GetAll()
+	if err != nil {
+		return models.Warehouse{}, err
+	}
+	for _, w := range warehouses {
+		if w.WarehouseCode == warehouse.WarehouseAttributes.WarehouseCode {
+			return models.Warehouse{}, httperrors.ConflictError{Message: "the WarehouseCode already exists"}
+		}
 	}
 	return p.rp.Update(id, warehouse.WarehouseAttributes)
 }
