@@ -2,8 +2,6 @@ package httperrors
 
 import (
 	"errors"
-	"github.com/bootcamp-go/web/response"
-	"net/http"
 )
 
 type NotFoundError struct {
