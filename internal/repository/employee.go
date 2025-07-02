@@ -7,22 +7,18 @@ import (
 	"os"
 )
 
-type EmployeeRepositoryImpl struct {
+type EmployeeRepositoryFile struct {
 	filePath string
 }
 
 func NewEmployeeRepository() EmployeeRepository {
-	return &EmployeeRepositoryImpl{filePath: os.Getenv("FILE_PATH_EMPLOYEE")}
+	return &EmployeeRepositoryFile{filePath: os.Getenv("FILE_PATH_EMPLOYEE")}
 }
 
-func (e *EmployeeRepositoryImpl) Create(employee models.Employee) (models.Employee, error) {
+func (e *EmployeeRepositoryFile) Create(employee models.Employee) (models.Employee, error) {
 	dataList, err := utils.Read[models.Employee](e.filePath)
 	if err != nil {
 		return models.Employee{}, err
-	}
-
-	if _, exist := dataList[employee.Id]; exist {
-		return models.Employee{}, httperrors.ConflictError{Message: "already exist"}
 	}
 
 	employee.Id, err = utils.GetNextID[models.Employee](e.filePath)
@@ -38,7 +34,7 @@ func (e *EmployeeRepositoryImpl) Create(employee models.Employee) (models.Employ
 	return employee, nil
 }
 
-func (e *EmployeeRepositoryImpl) GetAll() (map[int]models.Employee, error) {
+func (e *EmployeeRepositoryFile) GetAll() (map[int]models.Employee, error) {
 	data, err := utils.Read[models.Employee](e.filePath)
 	if err != nil {
 		return nil, err
@@ -46,7 +42,7 @@ func (e *EmployeeRepositoryImpl) GetAll() (map[int]models.Employee, error) {
 	return data, nil
 }
 
-func (e *EmployeeRepositoryImpl) GetByID(id int) (models.Employee, error) {
+func (e *EmployeeRepositoryFile) GetByID(id int) (models.Employee, error) {
 	data, err := utils.Read[models.Employee](e.filePath)
 	if err != nil {
 		return models.Employee{}, err
@@ -58,7 +54,7 @@ func (e *EmployeeRepositoryImpl) GetByID(id int) (models.Employee, error) {
 	return emp, nil
 }
 
-func (e *EmployeeRepositoryImpl) Update(id int, employee models.Employee) (models.Employee, error) {
+func (e *EmployeeRepositoryFile) Update(id int, employee models.Employee) (models.Employee, error) {
 	dataList, err := utils.Read[models.Employee](e.filePath)
 	if err != nil {
 		return models.Employee{}, err
@@ -76,7 +72,7 @@ func (e *EmployeeRepositoryImpl) Update(id int, employee models.Employee) (model
 	return employee, nil
 }
 
-func (e *EmployeeRepositoryImpl) Delete(id int) error {
+func (e *EmployeeRepositoryFile) Delete(id int) error {
 	dataList, err := utils.Read[models.Employee](e.filePath)
 	if err != nil {
 		return err

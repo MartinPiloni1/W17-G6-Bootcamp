@@ -42,19 +42,37 @@ func (e EmployeeServiceDefault) GetByID(id int) (models.Employee, error) {
 	return e.repo.GetByID(id)
 }
 
-func (e EmployeeServiceDefault) Update(id int, employee models.EmployeeAttributes) (models.Employee, error) {
-	existing, err := e.repo.GetAll()
+func (e EmployeeServiceDefault) Update(id int, attrs models.EmployeeAttributes) (models.Employee, error) {
+	dbEmployee, err := e.repo.GetByID(id)
 	if err != nil {
 		return models.Employee{}, err
 	}
-	for _, emp := range existing {
-		if emp.CardNumberID == employee.CardNumberID && emp.Id != id {
-			return models.Employee{}, httperrors.ConflictError{Message: "duplicated card number"}
-		}
+
+	if attrs.CardNumberID != "" {
+		dbEmployee.CardNumberID = attrs.CardNumberID
+	}
+	if attrs.FirstName != "" {
+		dbEmployee.FirstName = attrs.FirstName
+	}
+	if attrs.LastName != "" {
+		dbEmployee.LastName = attrs.LastName
+	}
+	if attrs.WarehouseID != 0 {
+		dbEmployee.WarehouseID = attrs.WarehouseID
 	}
 
-	modifiedEmployee := models.Employee{EmployeeAttributes: employee}
-	return e.repo.Update(id, modifiedEmployee)
+	if attrs.CardNumberID != "" {
+		existing, err := e.repo.GetAll()
+		if err != nil {
+			return models.Employee{}, err
+		}
+		for _, emp := range existing {
+			if emp.CardNumberID == dbEmployee.CardNumberID && emp.Id != id {
+				return models.Employee{}, httperrors.ConflictError{Message: "duplicated card number"}
+			}
+		}
+	}
+	return e.repo.Update(id, dbEmployee)
 }
 
 func (e EmployeeServiceDefault) Delete(id int) error {

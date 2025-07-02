@@ -40,8 +40,7 @@ func (h *EmployeeHandler) GetById() http.HandlerFunc {
 
 		id, err := strconv.Atoi(idReq)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			response.Error(w, http.StatusBadRequest, "Invalid id")
 			return
 		}
 
@@ -63,8 +62,7 @@ func (h *EmployeeHandler) Create() http.HandlerFunc {
 		var employee models.EmployeeAttributes
 		err := request.JSON(r, &employee)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			response.Error(w, http.StatusBadRequest, "Invalid employee")
 			return
 		}
 
@@ -92,39 +90,18 @@ func (h *EmployeeHandler) Update() http.HandlerFunc {
 		var employee models.EmployeeAttributes
 		err := request.JSON(r, &employee)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			response.Error(w, http.StatusBadRequest, "Invalid employee")
 			return
 		}
 
 		idReq := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idReq)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			response.Error(w, http.StatusBadRequest, "Invalid id")
 			return
 		}
 
-		dbEmployee, err := h.sv.GetByID(id)
-		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
-			return
-		}
-		if employee.CardNumberID != "" {
-			dbEmployee.CardNumberID = employee.CardNumberID
-		}
-		if employee.FirstName != "" {
-			dbEmployee.FirstName = employee.FirstName
-		}
-		if employee.LastName != "" {
-			dbEmployee.LastName = employee.LastName
-		}
-		if employee.WarehouseID != 0 {
-			dbEmployee.WarehouseID = employee.WarehouseID
-		}
-
-		data, err := h.sv.Update(id, dbEmployee.EmployeeAttributes)
+		data, err := h.sv.Update(id, employee)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -143,8 +120,7 @@ func (h *EmployeeHandler) Delete() http.HandlerFunc {
 
 		id, err := strconv.Atoi(idReq)
 		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
+			response.Error(w, http.StatusBadRequest, "Invalid id")
 			return
 		}
 
