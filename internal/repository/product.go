@@ -3,8 +3,8 @@ package repository
 import (
 	"os"
 
-	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
