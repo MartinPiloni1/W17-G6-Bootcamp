@@ -25,7 +25,7 @@ func (s *BuyerServiceDefault) Create(newBuyer models.BuyerAttributes) (models.Bu
 	}
 
 	if exist {
-		return models.Buyer{}, httperrors.ConflictError{Message: "Buyer already exist"}
+		return models.Buyer{}, httperrors.ConflictError{Message: "CardNumberId already in use"}
 	}
 	buyer, err := s.rp.Create(newBuyer)
 	return buyer, err
