@@ -1,13 +1,5 @@
 [
   {
-    "id": 3,
-    "warehouse_code": "PIL",
-    "address": "Ruta 8 km 35,5",
-    "telephone": "02304555555",
-    "minimun_capacity": 15,
-    "minimun_temperature": 8
-  },
-  {
     "id": 2,
     "warehouse_code": "SPR",
     "address": "Av. Siempre Viva 742",
@@ -54,5 +46,21 @@
     "telephone": "02991543210",
     "minimun_capacity": 30,
     "minimun_temperature": -2
+  },
+  {
+    "id": 12,
+    "warehouse_code": "LPM",
+    "address": "Ruta 8 km 35,5 nuevo desde post",
+    "telephone": "02304555555",
+    "minimun_capacity": 1,
+    "minimun_temperature": 8
+  },
+  {
+    "id": 3,
+    "warehouse_code": "PIL",
+    "address": "Ruta 8 km 35,5",
+    "telephone": "02304555555",
+    "minimun_capacity": 15,
+    "minimun_temperature": 8
   }
 ]
