@@ -85,8 +85,6 @@ func (h *SellerHandler) Create() http.HandlerFunc {
 			response.Error(w, statusCode, msg)
 			return
 		}
-
-		w.WriteHeader(http.StatusCreated)
 		response.JSON(w, http.StatusCreated, map[string]any{
 			"data": []any{created},
 		})
