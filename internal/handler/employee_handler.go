@@ -57,7 +57,7 @@ func (h *EmployeeHandler) GetById() http.HandlerFunc {
 
 func (h *EmployeeHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var employee models.Employee
+		var employee models.EmployeeAttributes
 		err := request.JSON(r, &employee)
 		if err != nil {
 			httperrors.RespondError(w, err)
@@ -78,7 +78,7 @@ func (h *EmployeeHandler) Create() http.HandlerFunc {
 
 func (h *EmployeeHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var employee models.Employee
+		var employee models.EmployeeAttributes
 		err := request.JSON(r, &employee)
 		if err != nil {
 			httperrors.RespondError(w, err)
@@ -110,7 +110,7 @@ func (h *EmployeeHandler) Update() http.HandlerFunc {
 			dbEmployee.WarehouseID = employee.WarehouseID
 		}
 
-		data, err := h.sv.Update(id, dbEmployee)
+		data, err := h.sv.Update(id, dbEmployee.EmployeeAttributes)
 		if err != nil {
 			httperrors.RespondError(w, err)
 			return

@@ -68,6 +68,7 @@ func (e *EmployeeRepositoryImpl) Update(id int, employee models.Employee) (model
 		return models.Employee{}, httperrors.NotFoundError{Message: "employee not found"}
 	}
 
+	employee.Id = id
 	dataList[id] = employee
 	if err := utils.Write[models.Employee](e.filePath, dataList); err != nil {
 		return models.Employee{}, err

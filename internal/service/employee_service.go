@@ -15,11 +15,7 @@ func NewEmployeeService(repo repository.EmployeeRepository) EmployeeService {
 	return &EmployeeServiceImpl{repo: repo}
 }
 
-func (e EmployeeServiceImpl) Create(employee models.Employee) (models.Employee, error) {
-	if employee.Id != 0 {
-		return models.Employee{}, httperrors.UnprocessableEntityError{Message: "employee has id"}
-	}
-
+func (e EmployeeServiceImpl) Create(employee models.EmployeeAttributes) (models.Employee, error) {
 	existing, err := e.repo.GetAll()
 	if err != nil {
 		return models.Employee{}, err
@@ -30,7 +26,8 @@ func (e EmployeeServiceImpl) Create(employee models.Employee) (models.Employee, 
 		}
 	}
 
-	return e.repo.Create(employee)
+	newEmployee := models.Employee{EmployeeAttributes: employee}
+	return e.repo.Create(newEmployee)
 }
 
 func (e EmployeeServiceImpl) GetAll() ([]models.Employee, error) {
@@ -45,7 +42,7 @@ func (e EmployeeServiceImpl) GetByID(id int) (models.Employee, error) {
 	return e.repo.GetByID(id)
 }
 
-func (e EmployeeServiceImpl) Update(id int, employee models.Employee) (models.Employee, error) {
+func (e EmployeeServiceImpl) Update(id int, employee models.EmployeeAttributes) (models.Employee, error) {
 	existing, err := e.repo.GetAll()
 	if err != nil {
 		return models.Employee{}, err
@@ -55,7 +52,8 @@ func (e EmployeeServiceImpl) Update(id int, employee models.Employee) (models.Em
 			return models.Employee{}, httperrors.UnprocessableEntityError{Message: "duplicated card number"}
 		}
 	}
-	return e.repo.Update(id, employee)
+	modifiedEmployee := models.Employee{EmployeeAttributes: employee}
+	return e.repo.Update(id, modifiedEmployee)
 }
 
 func (e EmployeeServiceImpl) Delete(id int) error {
