@@ -33,3 +33,18 @@ func ProductRouter() chi.Router {
 	router.Delete("/{id}", hd.Delete())
 	return router
 }
+
+func BuyersRouter() chi.Router {
+	router := chi.NewRouter()
+
+	rp := repository.NewBuyerRepositoryFile() // fileRepository
+	sv := service.NewBuyerServiceDefault(rp)
+	hd := handler.NewBuyerHandler(sv)
+
+	router.Post("/", hd.Create())
+	router.Get("/", hd.GetAll())
+	router.Get("/{id}", hd.GetByID())
+	router.Patch("/{id}", hd.Update())
+	router.Delete("/{id}", hd.Delete())
+	return router
+}
