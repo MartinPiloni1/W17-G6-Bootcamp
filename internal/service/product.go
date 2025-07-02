@@ -61,12 +61,12 @@ func (p *ProductServiceDefault) Update(id int, productAttributes models.ProductP
 			return models.Product{}, err
 		}
 
+		product.ProductCode = *productAttributes.ProductCode
 		for _, p := range products {
-			if p.ProductCode == product.ProductCode {
+			if p.ProductCode == product.ProductCode && p.ID != product.ID {
 				return models.Product{}, httperrors.ConflictError{Message: "A product with this product code already exists"}
 			}
 		}
-		product.ProductCode = *productAttributes.ProductCode
 	}
 
 	if productAttributes.Description != nil {
