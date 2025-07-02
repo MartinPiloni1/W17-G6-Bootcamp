@@ -63,3 +63,18 @@ func BuyersRouter() chi.Router {
 	router.Delete("/{id}", hd.Delete())
 	return router
 }
+
+func EmployeeRouter() chi.Router {
+	router := chi.NewRouter()
+
+	rp := repository.NewEmployeeRepository()
+	sv := service.NewEmployeeService(rp)
+	hd := handler.NewEmployeeHandler(sv)
+
+	router.Get("/", hd.GetAll())
+	router.Get("/{id}", hd.GetById())
+	router.Post("/", hd.Create())
+	router.Patch("/{id}", hd.Update())
+	router.Delete("/{id}", hd.Delete())
+	return router
+}

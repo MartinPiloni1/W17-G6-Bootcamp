@@ -25,3 +25,11 @@ type BuyerService interface {
 	Update(id int, BuyerData models.BuyerPatchRequest) (models.Buyer, error)
 	Delete(id int) error
 }
+
+type EmployeeService interface {
+	Create(Employee models.EmployeeAttributes) (models.Employee, error)
+	GetAll() ([]models.Employee, error)
+	GetByID(id int) (models.Employee, error)
+	Update(id int, employee models.EmployeeAttributes) (models.Employee, error)
+	Delete(id int) error
+}

@@ -1,6 +1,8 @@
 package httperrors
 
-import "errors"
+import (
+	"errors"
+)
 
 type NotFoundError struct {
 	Message string

@@ -25,3 +25,11 @@ type BuyerRepository interface {
 	Delete(id int) error
 	CardNumberIdAlreadyExist(newCardNumberId int) (bool, error)
 }
+
+type EmployeeRepository interface {
+	Create(Employee models.Employee) (models.Employee, error)
+	GetAll() (map[int]models.Employee, error)
+	GetByID(id int) (models.Employee, error)
+	Update(id int, data models.Employee) (models.Employee, error)
+	Delete(id int) error
+}

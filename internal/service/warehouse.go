@@ -13,9 +13,7 @@ type WarehouseServiceDefault struct {
 }
 
 func NewWarehouseService(repo repository.WarehouseRepository) *WarehouseServiceDefault {
-	return &WarehouseServiceDefault{
-		rp: repo,
-	}
+	return &WarehouseServiceDefault{rp: repo}
 }
 
 func (p *WarehouseServiceDefault) Create(warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error) {
