@@ -42,7 +42,6 @@ type EmployeeRepository interface {
 	Delete(id int) error
 }
 
-type SectionRepositoryInterface interface {
 type SectionRepository interface {
 	Create(section models.Section) (models.Section, error)
 	GetAll() (map[int]models.Section, error)
