@@ -96,7 +96,7 @@ func EmployeeRouter() chi.Router {
 
 func SectionRouter() chi.Router {
 	rp := repository.NewSectionRepository()
-	sv := service.NewSectionService(rp, repository.NewWarehouseRepository())
+	sv := service.NewSectionService(rp)
 	hd := handler.NewSectionHandler(sv)
 
 	router := chi.NewRouter()

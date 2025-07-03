@@ -1,14 +1,36 @@
 [
   {
-    "id": 9,
-    "section_number": "A-101-FRIGOoop",
+    "id": 2,
+    "section_number": "B-205-SECO",
+    "current_temperature": 21,
+    "minimum_temperature": 15,
+    "current_capacity": 1500,
+    "minimum_capacity": 250,
+    "maximum_capacity": 5000,
+    "warehouse_id": 1,
+    "product_type_id": 2
+  },
+  {
+    "id": 8,
+    "section_number": "A-101-FRIGOoo",
     "current_temperature": 1,
-    "minimum_temperature": 1,
+    "minimum_temperature": 3,
     "current_capacity": 1,
     "minimum_capacity": 1,
     "maximum_capacity": 1,
     "warehouse_id": 1,
     "product_type_id": 2
+  },
+  {
+    "id": 3,
+    "section_number": "F-003-CONGELADO",
+    "current_temperature": -18,
+    "minimum_temperature": -22,
+    "current_capacity": 0,
+    "minimum_capacity": 50,
+    "maximum_capacity": 800,
+    "warehouse_id": 2,
+    "product_type_id": 3
   },
   {
     "id": 11,
@@ -33,19 +55,30 @@
     "product_type_id": 4
   },
   {
-    "id": 1,
-    "section_number": "A-101-FRIGO",
-    "current_temperature": 4.5,
-    "minimum_temperature": 2,
-    "current_capacity": 550,
-    "minimum_capacity": 100,
-    "maximum_capacity": 1000,
-    "warehouse_id": 1,
-    "product_type_id": 1
+    "id": 10,
+    "section_number": "A-101-FRIGOoopa",
+    "current_temperature": 1,
+    "minimum_temperature": 1,
+    "current_capacity": 1,
+    "minimum_capacity": 1,
+    "maximum_capacity": 1,
+    "warehouse_id": 12,
+    "product_type_id": 2
   },
   {
-    "id": 12,
-    "section_number": "A-101-FRIGOoopaxza",
+    "id": 7,
+    "section_number": "A-101-FRIGOofsdfo",
+    "current_temperature": -25,
+    "minimum_temperature": 3,
+    "current_capacity": 400,
+    "minimum_capacity": 100,
+    "maximum_capacity": 750,
+    "warehouse_id": 2,
+    "product_type_id": 5
+  },
+  {
+    "id": 9,
+    "section_number": "A-101-FRIGOoop",
     "current_temperature": 1,
     "minimum_temperature": 1,
     "current_capacity": 1,
@@ -66,39 +99,6 @@
     "product_type_id": 1
   },
   {
-    "id": 10,
-    "section_number": "A-101-FRIGOoopa",
-    "current_temperature": 1,
-    "minimum_temperature": 1,
-    "current_capacity": 1,
-    "minimum_capacity": 1,
-    "maximum_capacity": 1,
-    "warehouse_id": 12,
-    "product_type_id": 2
-  },
-  {
-    "id": 2,
-    "section_number": "B-205-SECO",
-    "current_temperature": 21,
-    "minimum_temperature": 15,
-    "current_capacity": 1500,
-    "minimum_capacity": 250,
-    "maximum_capacity": 5000,
-    "warehouse_id": 1,
-    "product_type_id": 2
-  },
-  {
-    "id": 8,
-    "section_number": "A-101-FRIGOoo",
-    "current_temperature": 1,
-    "minimum_temperature": 3,
-    "current_capacity": 1,
-    "minimum_capacity": 1,
-    "maximum_capacity": 1,
-    "warehouse_id": 1,
-    "product_type_id": 2
-  },
-  {
     "id": 5,
     "section_number": "B-206-SECO",
     "current_temperature": 22,
@@ -110,25 +110,36 @@
     "product_type_id": 2
   },
   {
-    "id": 7,
-    "section_number": "F-004-ULTRA-CONG",
-    "current_temperature": -25,
-    "minimum_temperature": -30,
-    "current_capacity": 400,
-    "minimum_capacity": 100,
-    "maximum_capacity": 750,
-    "warehouse_id": 3,
-    "product_type_id": 5
+    "id": 13,
+    "section_number": "A-101-FRIGOdsfdsoo",
+    "current_temperature": 1,
+    "minimum_temperature": 1,
+    "current_capacity": 1,
+    "minimum_capacity": 1,
+    "maximum_capacity": 1,
+    "warehouse_id": 1,
+    "product_type_id": 1
   },
   {
-    "id": 3,
-    "section_number": "F-003-CONGELADO",
-    "current_temperature": -18,
-    "minimum_temperature": -22,
-    "current_capacity": 0,
-    "minimum_capacity": 50,
-    "maximum_capacity": 800,
-    "warehouse_id": 2,
-    "product_type_id": 3
+    "id": 1,
+    "section_number": "A-101-FRIGO",
+    "current_temperature": 4.5,
+    "minimum_temperature": 2,
+    "current_capacity": 550,
+    "minimum_capacity": 100,
+    "maximum_capacity": 1000,
+    "warehouse_id": 1,
+    "product_type_id": 1
+  },
+  {
+    "id": 12,
+    "section_number": "A-101-FRIGOoopaxza",
+    "current_temperature": 1,
+    "minimum_temperature": 1,
+    "current_capacity": 1,
+    "minimum_capacity": 1,
+    "maximum_capacity": 1,
+    "warehouse_id": 1,
+    "product_type_id": 2
   }
 ]
