@@ -11,18 +11,18 @@ import (
 
 type SectionServiceDefault struct {
 	repo             repository.SectionRepository
-	warehouseService WarehouseService 
+	warehouseRepository repository.WarehouseRepository 
 }
 
-func NewSectionService(repo repository.SectionRepository, warehouseService WarehouseService) SectionService {
+func NewSectionService(repo repository.SectionRepository, warehouseRepository repository.WarehouseRepository) SectionService {
 	return &SectionServiceDefault{
 		repo:             repo,
-		warehouseService: warehouseService,
+		warehouseRepository: warehouseRepository,
 	}
 }
 
 func (s SectionServiceDefault) Create(section models.Section) (models.Section, error) {
-	_, err := s.warehouseService.GetByID(section.WarehouseID)
+	_, err := s.warehouseRepository.GetByID(section.WarehouseID)
 	if err != nil {
 		return models.Section{}, httperrors.BadRequestError{Message: "Warehouse not found"}
 	}
@@ -62,7 +62,7 @@ func (s SectionServiceDefault) GetByID(id int) (models.Section, error) {
 }
 
 func (s *SectionServiceDefault) Update(id int, patchData models.UpdateSectionRequest) (models.Section, error) {
-	_, err := s.warehouseService.GetByID(id)
+	_, err := s.warehouseRepository.GetByID(id)
 	if err != nil {
 		return models.Section{}, httperrors.BadRequestError{Message: "Warehouse not found"}
 	}
