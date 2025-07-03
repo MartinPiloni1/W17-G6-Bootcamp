@@ -5,6 +5,7 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
+	"slices"
 )
 
 type EmployeeServiceDefault struct {
@@ -35,7 +36,12 @@ func (e EmployeeServiceDefault) GetAll() ([]models.Employee, error) {
 	if err != nil {
 		return nil, err
 	}
-	return utils.MapToSlice[models.Employee](employees), nil
+
+	slicedData := utils.MapToSlice(employees)
+	slices.SortFunc(slicedData, func(a, b models.Employee) int {
+		return a.Id - b.Id
+	})
+	return slicedData, nil
 }
 
 func (e EmployeeServiceDefault) GetByID(id int) (models.Employee, error) {
