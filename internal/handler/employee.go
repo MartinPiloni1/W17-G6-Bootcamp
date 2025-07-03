@@ -132,6 +132,6 @@ func (h *EmployeeHandler) Delete() http.HandlerFunc {
 			return
 		}
 
-		response.JSON(w, http.StatusNoContent, nil)
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
