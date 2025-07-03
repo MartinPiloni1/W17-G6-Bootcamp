@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/bootcamp-go/web/response"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator"
@@ -31,7 +31,7 @@ func (h SectionHandler) GetAll() http.HandlerFunc {
 		}
 
 		response.JSON(w, http.StatusOK, map[string]any{
-			"data":    data,
+			"data": data,
 		})
 	}
 }
@@ -130,7 +130,7 @@ func (h *SectionHandler) Update() http.HandlerFunc {
 		}
 
 		var req models.UpdateSectionRequest
-		
+
 		dec := json.NewDecoder(r.Body)
 		dec.DisallowUnknownFields()
 

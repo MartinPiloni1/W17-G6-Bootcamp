@@ -1,10 +1,11 @@
 package repository
 
 import (
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 	"os"
+
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
 type EmployeeRepositoryFile struct {

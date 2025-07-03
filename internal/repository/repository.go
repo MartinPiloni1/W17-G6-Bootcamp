@@ -1,6 +1,6 @@
 package repository
 
-import "github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
+import "github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 
 type ProductRepository interface {
 	Create(product models.ProductAttributes) (models.Product, error)
