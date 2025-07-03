@@ -93,3 +93,18 @@ func EmployeeRouter() chi.Router {
 	router.Delete("/{id}", hd.Delete())
 	return router
 }
+
+func SectionRouter() chi.Router {
+	rp := repository.NewSectionRepository()
+	sv := service.NewSectionService(rp, repository.NewWarehouseRepository())
+	hd := handler.NewSectionHandler(sv)
+
+	router := chi.NewRouter()
+
+	router.Get("/", hd.GetAll())
+	router.Get("/{id}", hd.GetByID())
+	router.Delete("/{id}", hd.Delete())
+	router.Post("/", hd.Create())
+	router.Patch("/{id}", hd.Update())
+	return router
+}

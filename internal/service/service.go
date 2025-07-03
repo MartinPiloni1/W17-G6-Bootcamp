@@ -40,3 +40,11 @@ type EmployeeService interface {
 	Update(id int, employee models.EmployeeAttributes) (models.Employee, error)
 	Delete(id int) error
 }
+
+type SectionService interface {
+	Create(section models.Section) (models.Section, error)
+	GetAll() ([]models.Section, error)
+	GetByID(id int) (models.Section, error)
+	Update(id int, data models.UpdateSectionRequest) (models.Section, error)
+	Delete(id int) error
+}

@@ -41,3 +41,11 @@ type EmployeeRepository interface {
 	Update(id int, data models.Employee) (models.Employee, error)
 	Delete(id int) error
 }
+
+type SectionRepository interface {
+	Create(section models.Section) (models.Section, error)
+	GetAll() (map[int]models.Section, error)
+	GetByID(id int) (models.Section, error)
+	Update(id int, data models.Section) (models.Section, error)
+	Delete(id int) error
+}
