@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "description": "Yogurt natural",
+    "expiration_rate": 5,
+    "freezing_rate": 3,
+    "height": 6.4,
+    "length": 4.5,
+    "width": 1.2,
+    "netweight": 0.5,
+    "product_code": "YOG01",
+    "recommended_freezing_temperature": -18,
+    "product_type_id": 10,
+    "seller_id": 100
+  },
+  {
+    "id": 3,
+    "description": "Yogurt congelado",
+    "expiration_rate": 5,
+    "freezing_rate": 3,
+    "height": 6.4,
+    "length": 4.5,
+    "width": 1.2,
+    "netweight": 0.5,
+    "product_code": "YOG06",
+    "recommended_freezing_temperature": -18,
+    "product_type_id": 10,
+    "seller_id": 100
+  },
+  {
+    "id": 4,
+    "description": "Yogurt congelado",
+    "expiration_rate": 5,
+    "freezing_rate": 3,
+    "height": 6.4,
+    "length": 4.5,
+    "width": 1.2,
+    "netweight": 0.5,
+    "product_code": "YOG02",
+    "recommended_freezing_temperature": -18,
+    "product_type_id": 10,
+    "seller_id": 100
+  }
+]
