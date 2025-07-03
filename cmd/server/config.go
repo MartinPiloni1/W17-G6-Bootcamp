@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -13,8 +12,7 @@ import (
 )
 
 type ServerChi struct {
-	ServerAddr     string
-	LoaderFilePath string // here whe can add diverse filepaths to the
+	ServerAddr string
 }
 
 func LoadServerConf() (*ServerChi, error) {
@@ -25,21 +23,12 @@ func LoadServerConf() (*ServerChi, error) {
 	// default values
 	serverAddr := os.Getenv("ADDRESS")
 
-	// here we can load more files if we use it
-	filePathDefault := os.Getenv("FILE_PATH_DEFAULT")
-
 	if serverAddr == "" {
 		serverAddr = ":8080"
 	}
 
-	// here we should validate if they are setted
-	if filePathDefault == "" {
-		return &ServerChi{}, fmt.Errorf("env variables not setted")
-	}
-
 	return &ServerChi{
-		ServerAddr:     serverAddr,
-		LoaderFilePath: filePathDefault,
+		ServerAddr: serverAddr,
 	}, nil
 }
 

@@ -3,20 +3,20 @@ package service
 import (
 	"slices"
 
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
 type SectionServiceDefault struct {
-	repo             repository.SectionRepository
-	warehouseRepository repository.WarehouseRepository 
+	repo                repository.SectionRepository
+	warehouseRepository repository.WarehouseRepository
 }
 
 func NewSectionService(repo repository.SectionRepository, warehouseRepository repository.WarehouseRepository) SectionService {
 	return &SectionServiceDefault{
-		repo:             repo,
+		repo:                repo,
 		warehouseRepository: warehouseRepository,
 	}
 }

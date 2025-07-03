@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
 	"github.com/bootcamp-go/web/response"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator"
@@ -30,7 +30,7 @@ func (h *BuyerHandler) Create() http.HandlerFunc {
 
 		err := dec.Decode(&newBuyer)
 		if err != nil {
-			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
+			response.Error(w, http.StatusBadRequest, "Invalid JSON body")
 			return
 		}
 
@@ -106,7 +106,7 @@ func (h *BuyerHandler) Update() http.HandlerFunc {
 		dec.DisallowUnknownFields()
 		err = dec.Decode(&patchReq)
 		if err != nil {
-			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
+			response.Error(w, http.StatusBadRequest, "Invalid JSON body")
 			return
 		}
 

@@ -1,11 +1,11 @@
 package repository
 
 import (
-	"fmt"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/models"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 	"os"
+
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
 type WarehouseRepositoryFile struct {
@@ -55,7 +55,6 @@ func (p *WarehouseRepositoryFile) GetAll() (map[int]models.Warehouse, error) {
 
 func (p *WarehouseRepositoryFile) GetByID(id int) (models.Warehouse, error) {
 	warehouseData, err := utils.Read[models.Warehouse](p.filePath)
-	fmt.Println(warehouseData)
 	if err != nil {
 		return models.Warehouse{}, err
 	}
