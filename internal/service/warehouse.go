@@ -69,6 +69,7 @@ func (p *WarehouseServiceDefault) Update(id int, warehouseAttributes models.Ware
 		return models.Warehouse{}, httperrors.BadRequestError{Message: "the input fields are not valid"}
 	}
 	warehouses, err := p.rp.GetAll()
+	delete(warehouses, id)
 	if err != nil {
 		return models.Warehouse{}, err
 	}
