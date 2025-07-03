@@ -1,15 +1,15 @@
 package models
 
 type Section struct {
-	ID                 int            `json:"id"`
-	SectionNumber      string         `json:"section_number"`
-	CurrentTemperature float64        `json:"current_temperature"`
-	MinimumTemperature float64        `json:"minimum_temperature"`
-	CurrentCapacity    int            `json:"current_capacity"`
-	MinimumCapacity    int            `json:"minimum_capacity"`
-	MaximumCapacity    int            `json:"maximum_capacity"`
-	WarehouseID        int            `json:"warehouse_id"`
-	ProductTypeID      int            `json:"product_type_id"`
+	ID                 int     `json:"id"`
+	SectionNumber      string  `json:"section_number"`
+	CurrentTemperature float64 `json:"current_temperature"`
+	MinimumTemperature float64 `json:"minimum_temperature"`
+	CurrentCapacity    int     `json:"current_capacity"`
+	MinimumCapacity    int     `json:"minimum_capacity"`
+	MaximumCapacity    int     `json:"maximum_capacity"`
+	WarehouseID        int     `json:"warehouse_id"`
+	ProductTypeID      int     `json:"product_type_id"`
 }
 
 func (s Section) GetID() int {
@@ -17,7 +17,7 @@ func (s Section) GetID() int {
 }
 
 type CreateSectionRequest struct {
-	SectionNumber      string  `json:"section_number" validate:"required, min=1"`
+	SectionNumber      string  `json:"section_number" validate:"required,min=1"`
 	CurrentTemperature float64 `json:"current_temperature" validate:"required"`
 	MinimumTemperature float64 `json:"minimum_temperature" validate:"required"`
 	CurrentCapacity    int     `json:"current_capacity" validate:"required,gte=0"`
