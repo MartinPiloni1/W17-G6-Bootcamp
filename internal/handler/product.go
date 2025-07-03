@@ -29,7 +29,7 @@ func (h ProductHandler) Create() http.HandlerFunc {
 		dec.DisallowUnknownFields()
 		err := dec.Decode(&newProduct)
 		if err != nil {
-			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
+			response.Error(w, http.StatusBadRequest, "Invalid JSON body")
 			return
 		}
 
@@ -102,7 +102,7 @@ func (h ProductHandler) Update() http.HandlerFunc {
 		dec.DisallowUnknownFields()
 		err = dec.Decode(&updatedProduct)
 		if err != nil {
-			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
+			response.Error(w, http.StatusBadRequest, "Invalid JSON body")
 			return
 		}
 

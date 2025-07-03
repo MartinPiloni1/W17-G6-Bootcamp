@@ -30,7 +30,7 @@ func (h *BuyerHandler) Create() http.HandlerFunc {
 
 		err := dec.Decode(&newBuyer)
 		if err != nil {
-			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
+			response.Error(w, http.StatusBadRequest, "Invalid JSON body")
 			return
 		}
 
@@ -106,7 +106,7 @@ func (h *BuyerHandler) Update() http.HandlerFunc {
 		dec.DisallowUnknownFields()
 		err = dec.Decode(&patchReq)
 		if err != nil {
-			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
+			response.Error(w, http.StatusBadRequest, "Invalid JSON body")
 			return
 		}
 
