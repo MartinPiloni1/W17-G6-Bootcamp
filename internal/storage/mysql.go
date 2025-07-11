@@ -10,13 +10,12 @@ import (
 
 func NewMySQLConfig(host, port, user, pass, dbname string) mysql.Config {
 	return mysql.Config{
-		User:      user,
-		Passwd:    pass,
-		Net:       "tcp",
-		Addr:      fmt.Sprintf("%s:%s", host, port),
-		DBName:    dbname,
-		ParseTime: true,
-		// Params:               map[string]string{"charset": "utf8mb4,utf8"},
+		User:                 user,
+		Passwd:               pass,
+		Net:                  "tcp",
+		Addr:                 fmt.Sprintf("%s:%s", host, port),
+		DBName:               dbname,
+		ParseTime:            true,
 		AllowNativePasswords: true,
 		MultiStatements:      true,
 	}
