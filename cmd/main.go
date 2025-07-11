@@ -9,7 +9,7 @@ import (
 func main() {
 
 	// conf and env
-	app, err := server.LoadServerConf(true)
+	app, err := server.LoadServerConf()
 	if err != nil {
 		log.Fatal(err.Error())
 	}

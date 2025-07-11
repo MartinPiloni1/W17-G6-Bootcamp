@@ -18,13 +18,13 @@ type ServerChi struct {
 	DBConf     mysql.Config
 }
 
-func LoadServerConf(withEnvFile bool) (*ServerChi, error) {
-	if withEnvFile {
-		err := godotenv.Load()
-		if err != nil {
-			return nil, fmt.Errorf("Failed to load env file: %w", err)
-		}
+func LoadServerConf() (*ServerChi, error) {
+
+	err := godotenv.Load()
+	if err != nil {
+		return nil, fmt.Errorf("Failed to load env file: %w", err)
 	}
+
 	// default values
 	serverAddr := os.Getenv("ADDRESS")
 
