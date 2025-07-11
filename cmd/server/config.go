@@ -14,8 +14,8 @@ import (
 )
 
 type ServerChi struct {
-	ServerAddr string
-	DBConf     mysql.Config
+	ServerAddr     string
+	DatabaseConfig mysql.Config
 }
 
 func LoadServerConf() (*ServerChi, error) {
@@ -44,11 +44,11 @@ func LoadServerConf() (*ServerChi, error) {
 		Pass == "" {
 		return nil, fmt.Errorf("DB conn settings not established")
 	}
-	dbConf := storage.NewMySQLConfig(Host, Port, User, Pass, Name)
+	dbConfig := storage.NewMySQLConfig(Host, Port, User, Pass, Name)
 
 	return &ServerChi{
-		ServerAddr: serverAddr,
-		DBConf:     dbConf,
+		ServerAddr:     serverAddr,
+		DatabaseConfig: dbConfig,
 	}, nil
 }
 
@@ -56,7 +56,7 @@ func (a *ServerChi) Run() (err error) {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger) // logger
 
-	freshDB, err := storage.InitMySQLConnection(a.DBConf)
+	freshDB, err := storage.InitMySQLConnection(a.DatabaseConfig)
 	if err != nil {
 		return err
 	}
