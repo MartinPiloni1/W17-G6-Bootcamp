@@ -10,12 +10,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Carga .env y retorna los datos de configuración
+// Loads .env and returns the configuration data
 func LoadEnv() {
 	_ = godotenv.Load()
 }
 
-// Obtiene el DSN y config para MySQL
+// Gets the DSN and config for MySQL
 func GetDBConfigFromEnv() mysql.Config {
 	return mysql.Config{
 		User:                 os.Getenv("DB_USER"),
@@ -29,41 +29,41 @@ func GetDBConfigFromEnv() mysql.Config {
 	}
 }
 
-// Intenta abrir la base de datos y si no existe, la crea y vuelve a intentar.
+// Attempts to open the database and if it does not exist, creates it and tries again.
 func MustOpenDB() *sql.DB {
 	LoadEnv()
 	cfg := GetDBConfigFromEnv()
 	for {
 		db, err := sql.Open("mysql", cfg.FormatDSN())
 		if err != nil {
-			log.Fatalf("No se pudo abrir DB: %v", err)
+			log.Fatalf("Could not open DB: %v", err)
 		}
 
-		// Intenta el ping real, posible error de "no existe base"
+		// Attempts the real ping, possible error of "database does not exist"
 		pingErr := db.Ping()
 		if pingErr == nil {
-			// ¡OK!
+			// OK!
 			return db
 		}
 
-		// Detecta error "unknown database"
+		// Detects "unknown database" error
 		if merr, ok := pingErr.(*mysql.MySQLError); ok && merr.Number == 1049 {
-			log.Printf("La base de datos %s no existe. Intentando crearla...", cfg.DBName)
-			// Conecta sin DB para crear la database
+			log.Printf("Database %s does not exist. Trying to create it...", cfg.DBName)
+			// Connects without DB to create the database
 			dbConfigSinDB := cfg
 			dbConfigSinDB.DBName = ""
 			dbAux, err := sql.Open("mysql", dbConfigSinDB.FormatDSN())
 			if err != nil {
-				log.Fatalf("No se pudo conectar sin DB para crear la database: %v", err)
+				log.Fatalf("Could not connect without DB to create the database: %v", err)
 			}
 			defer dbAux.Close()
 			_, err = dbAux.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS `%s`", cfg.DBName))
 			if err != nil {
-				log.Fatalf("Error creando la base %s: %v", cfg.DBName, err)
+				log.Fatalf("Error creating the database %s: %v", cfg.DBName, err)
 			}
-			log.Printf("Base de datos %s creada. Retentando conexión...", cfg.DBName)
-			continue // vuelve a intentar de nuevo
+			log.Printf("Database %s created. Retrying connection...", cfg.DBName)
+			continue // try again
 		}
-		log.Fatalf("No se pudo conectar a la base de datos: %v", pingErr)
+		log.Fatalf("Could not connect to the database: %v", pingErr)
 	}
 }
