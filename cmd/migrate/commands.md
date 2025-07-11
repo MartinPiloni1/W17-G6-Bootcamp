@@ -1,2 +1,2 @@
-# Para correr las migraciones en orden usamos:
+# To run migrations:
 go run cmd/migrate/main.go

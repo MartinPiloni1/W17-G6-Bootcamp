@@ -1,2 +1,2 @@
-# Para correr el seed usamos:
+# To load seed data:
 go run cmd/seed/main.go
