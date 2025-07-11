@@ -1,34 +1,36 @@
 package server
 
 import (
-	"log"
+	config "github.com/aaguero_meli/W17-G6-Bootcamp/cmd/db"
+	"github.com/go-sql-driver/mysql"
 	"net/http"
 	"os"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/application"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/joho/godotenv"
 )
 
 type ServerChi struct {
-	ServerAddr string
+	ServerAddr     string
+	DatabaseConfig mysql.Config
 }
 
 func LoadServerConf() (*ServerChi, error) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Failed to load .env: %s", err)
-	}
-	// default values
-	serverAddr := os.Getenv("ADDRESS")
+	config.LoadEnv() // Cargar .env sólo una vez
 
+	// La dirección, sigue igual:
+	serverAddr := os.Getenv("ADDRESS")
 	if serverAddr == "" {
 		serverAddr = ":8080"
 	}
 
+	// Delegar la parte de DB en la función común:
+	dbConfig := config.GetDBConfigFromEnv()
+
 	return &ServerChi{
-		ServerAddr: serverAddr,
+		ServerAddr:     serverAddr,
+		DatabaseConfig: dbConfig,
 	}, nil
 }
 
