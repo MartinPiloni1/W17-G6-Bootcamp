@@ -61,9 +61,9 @@ func (repository *ProductRepositoryDB) Create(productAttribbutes models.ProductA
 		return models.Product{}, err
 	}
 
-	newProduct := models.Product{
-		ID:                int(lastId),
-		ProductAttributes: productAttribbutes,
+	newProduct, err := repository.GetByID(int(lastId))
+	if err != nil {
+		return models.Product{}, err
 	}
 	return newProduct, nil
 }
@@ -172,7 +172,47 @@ func (repository *ProductRepositoryDB) GetByID(id int) (models.Product, error) {
 }
 
 func (repository *ProductRepositoryDB) Update(id int, product models.Product) (models.Product, error) {
-	panic("implement")
+	const query = `
+		UPDATE products
+		SET
+			description                         = ?,
+			expiration_rate                     = ?,
+			freezing_rate                       = ?,
+			height                              = ?,
+			length                              = ?,
+			width                               = ?,
+			netweight                           = ?,
+			product_code                        = ?,
+			recommended_freezing_temperature    = ?,
+			product_type_id                     = ?,
+			seller_id                           = ?
+		WHERE id = ?
+    `
+
+	_, err := repository.db.Exec(
+		query,
+		product.Description,
+		product.ExpirationRate,
+		product.FreezingRate,
+		product.Height,
+		product.Length,
+		product.Width,
+		product.NetWeight,
+		product.ProductCode,
+		product.RecommendedFreezingTemperature,
+		product.ProductTypeID,
+		product.SellerID,
+		id,
+	)
+	if err != nil {
+		return models.Product{}, err
+	}
+
+	updatedProduct, err := repository.GetByID(product.ID)
+	if err != nil {
+		return models.Product{}, err
+	}
+	return updatedProduct, nil
 }
 
 func (repository *ProductRepositoryDB) Delete(id int) error {
