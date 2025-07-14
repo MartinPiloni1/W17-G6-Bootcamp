@@ -1,8 +1,6 @@
 package service
 
 import (
-	"slices"
-
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
@@ -45,19 +43,11 @@ func (service *ProductServiceDefault) Create(product models.ProductAttributes) (
 }
 
 /*
-GetAll retrieves all products from the repository, sorts them by ascending ID,
-and returns the sorted slice or an error.
+GetAll retrieves all products from the repository, returning a slice
+containing every product or an error.
 */
 func (service *ProductServiceDefault) GetAll() ([]models.Product, error) {
-	data, err := service.repository.GetAll()
-	if err != nil {
-		return []models.Product{}, err
-	}
-
-	slices.SortFunc(data, func(a, b models.Product) int {
-		return a.ID - b.ID
-	})
-	return data, nil
+	return service.repository.GetAll()
 }
 
 /*
