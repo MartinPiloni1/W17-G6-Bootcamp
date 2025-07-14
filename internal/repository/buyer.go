@@ -153,7 +153,6 @@ func (r *BuyerRepositoryDB) Update(ctx context.Context, id int, updatedBuyer mod
 	}
 
 	return updatedBuyer, nil
-	// return r.GetByID(ctx, int(id))
 }
 
 // Deletes a Buyer by its id if it exists
