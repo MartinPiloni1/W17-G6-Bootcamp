@@ -6,7 +6,6 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
 type ProductServiceDefault struct {
@@ -38,11 +37,10 @@ func (p *ProductServiceDefault) GetAll() ([]models.Product, error) {
 		return []models.Product{}, err
 	}
 
-	slicedData := utils.MapToSlice(data)
-	slices.SortFunc(slicedData, func(a, b models.Product) int {
+	slices.SortFunc(data, func(a, b models.Product) int {
 		return a.ID - b.ID
 	})
-	return slicedData, nil
+	return data, nil
 }
 
 func (p *ProductServiceDefault) GetByID(id int) (models.Product, error) {

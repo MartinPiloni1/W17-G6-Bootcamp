@@ -1,6 +1,7 @@
 package application
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/handler"
@@ -49,10 +50,10 @@ func WarehouseRouter() chi.Router {
 	return router
 }
 
-func ProductRouter() chi.Router {
+func ProductRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
-	rp := repository.NewProductRepositoryFile()
+	rp := repository.NewProductRepositoryDB(db)
 	sv := service.NewProductServiceDefault(rp)
 	hd := handler.NewProductHandler(sv)
 

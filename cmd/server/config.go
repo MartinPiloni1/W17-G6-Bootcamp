@@ -63,7 +63,7 @@ func (a *ServerChi) Run() (err error) {
 	fmt.Println(freshDB) // TODO: remove when in use
 
 	healthRouter := application.HealthRouter()
-	productRouter := application.ProductRouter()
+	productRouter := application.ProductRouter(freshDB)
 	warehouseRouter := application.WarehouseRouter()
 	buyersRouter := application.BuyersRouter()
 	sellerRouter := application.SellerRouter()

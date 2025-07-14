@@ -1,101 +1,88 @@
 package repository
 
 import (
-	"os"
+	"database/sql"
+	"fmt"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
-type ProductRepositoryFile struct {
-	filePath string
+type ProductRepositoryDB struct {
+	db *sql.DB
 }
 
-func NewProductRepositoryFile() ProductRepository {
-	filePath := os.Getenv("FILE_PATH_PRODUCTS")
-	return &ProductRepositoryFile{
-		filePath: filePath,
+func NewProductRepositoryDB(db *sql.DB) ProductRepository {
+	return &ProductRepositoryDB{
+		db: db,
 	}
 }
 
-func (p *ProductRepositoryFile) Create(productAttribbutes models.ProductAttributes) (models.Product, error) {
-	productData, err := utils.Read[models.Product](p.filePath)
-	if err != nil {
-		return models.Product{}, err
-	}
-
-	newId, err := utils.GetNextID[models.Product](p.filePath)
-	if err != nil {
-		return models.Product{}, err
-	}
-
-	newProduct := models.Product{
-		ID:                newId,
-		ProductAttributes: productAttribbutes,
-	}
-
-	productData[newId] = newProduct
-
-	err = utils.Write(p.filePath, productData)
-	if err != nil {
-		return models.Product{}, err
-	}
-
-	return newProduct, nil
+func (repository *ProductRepositoryDB) Create(productAttribbutes models.ProductAttributes) (models.Product, error) {
+	panic("implement")
 }
 
-func (p *ProductRepositoryFile) GetAll() (map[int]models.Product, error) {
-	productData, err := utils.Read[models.Product](p.filePath)
+func (repository *ProductRepositoryDB) GetAll() ([]models.Product, error) {
+	query := `
+		SELECT
+			id,
+			description,
+			expiration_rate,
+			freezing_rate,
+			height,
+			length,
+			width,
+			netweight,
+			product_code,
+			recommended_freezing_temperature,
+			product_type_id,
+			seller_id
+		FROM products 
+	`
+
+	rows, err := repository.db.Query(query)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("database error: %w", err)
 	}
-	return productData, nil
+	defer rows.Close()
+
+	var products []models.Product
+	for rows.Next() {
+		var p models.Product
+		err = rows.Scan(
+			&p.ID,
+			&p.Description,
+			&p.ExpirationRate,
+			&p.FreezingRate,
+			&p.Height,
+			&p.Length,
+			&p.Width,
+			&p.NetWeight,
+			&p.ProductCode,
+			&p.RecommendedFreezingTemperature,
+			&p.ProductTypeID,
+			&p.SellerID,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("database scan error: %w", err)
+		}
+
+		products = append(products, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("database error: %w", err)
+	}
+	return products, nil
 }
 
-func (p *ProductRepositoryFile) GetByID(id int) (models.Product, error) {
-	productData, err := utils.Read[models.Product](p.filePath)
-	if err != nil {
-		return models.Product{}, err
-	}
-
-	product, exists := productData[id]
-	if !exists {
-		return models.Product{},
-			httperrors.NotFoundError{Message: "Product not found"}
-	}
-	return product, nil
+func (repository *ProductRepositoryDB) GetByID(id int) (models.Product, error) {
+	panic("implement")
 }
 
-func (p *ProductRepositoryFile) Update(id int, product models.Product) (models.Product, error) {
-	productData, err := utils.Read[models.Product](p.filePath)
-	if err != nil {
-		return models.Product{}, err
-	}
-	productData[id] = product
-	err = utils.Write(p.filePath, productData)
-	if err != nil {
-		return models.Product{}, err
-	}
-	return product, nil
+func (repository *ProductRepositoryDB) Update(id int, product models.Product) (models.Product, error) {
+	panic("implement")
 }
 
-func (p *ProductRepositoryFile) Delete(id int) error {
-	productData, err := utils.Read[models.Product](p.filePath)
-	if err != nil {
-		return err
-	}
-
-	if _, exists := productData[id]; !exists {
-		return httperrors.NotFoundError{Message: "Product not found"}
-	}
-
-	delete(productData, id)
-
-	err = utils.Write(p.filePath, productData)
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (repository *ProductRepositoryDB) Delete(id int) error {
+	panic("implement")
 }
