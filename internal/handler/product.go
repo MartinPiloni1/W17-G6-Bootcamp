@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
@@ -33,6 +34,8 @@ func (handler ProductHandler) Create() http.HandlerFunc {
 			return
 		}
 
+		newProduct.Description = strings.TrimSpace(newProduct.Description)
+		newProduct.ProductCode = strings.TrimSpace(newProduct.ProductCode)
 		validator := validator.New()
 		err = validator.Struct(newProduct)
 		if err != nil {
@@ -106,6 +109,12 @@ func (handler ProductHandler) Update() http.HandlerFunc {
 			return
 		}
 
+		if updatedProduct.Description != nil {
+			*updatedProduct.Description = strings.TrimSpace(*updatedProduct.Description)
+		}
+		if updatedProduct.ProductCode != nil {
+			*updatedProduct.ProductCode = strings.TrimSpace(*updatedProduct.ProductCode)
+		}
 		validator := validator.New()
 		err = validator.Struct(updatedProduct)
 		if err != nil {
