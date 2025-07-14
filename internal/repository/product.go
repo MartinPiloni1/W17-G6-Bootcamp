@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
@@ -53,17 +52,20 @@ func (repository *ProductRepositoryDB) Create(productAttribbutes models.ProductA
 		productAttribbutes.SellerID,
 	)
 	if err != nil {
-		return models.Product{}, err
+		return models.Product{},
+			httperrors.InternalServerError{Message: "Database error"}
 	}
 
 	lastId, err := result.LastInsertId()
 	if err != nil {
-		return models.Product{}, err
+		return models.Product{},
+			httperrors.InternalServerError{Message: "Database error"}
 	}
 
 	newProduct, err := repository.GetByID(int(lastId))
 	if err != nil {
-		return models.Product{}, err
+		return models.Product{},
+			httperrors.InternalServerError{Message: "Database error"}
 	}
 	return newProduct, nil
 }
@@ -88,7 +90,8 @@ func (repository *ProductRepositoryDB) GetAll() ([]models.Product, error) {
 
 	rows, err := repository.db.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("database error: %w", err)
+		return nil,
+			httperrors.InternalServerError{Message: "Database error"}
 	}
 	defer rows.Close()
 
@@ -110,14 +113,16 @@ func (repository *ProductRepositoryDB) GetAll() ([]models.Product, error) {
 			&product.SellerID,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("database scan error: %w", err)
+			return nil,
+				httperrors.InternalServerError{Message: "Database error"}
 		}
 
 		products = append(products, product)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("database error: %w", err)
+		return nil,
+			httperrors.InternalServerError{Message: "Database error"}
 	}
 	return products, nil
 }
@@ -165,7 +170,8 @@ func (repository *ProductRepositoryDB) GetByID(id int) (models.Product, error) {
 		return models.Product{},
 			httperrors.NotFoundError{Message: "Product not found"}
 	} else if err != nil {
-		return models.Product{}, fmt.Errorf("database scan error: %w", err)
+		return models.Product{},
+			httperrors.InternalServerError{Message: "Database error"}
 	}
 
 	return product, nil
@@ -205,12 +211,14 @@ func (repository *ProductRepositoryDB) Update(id int, product models.Product) (m
 		id,
 	)
 	if err != nil {
-		return models.Product{}, err
+		return models.Product{},
+			httperrors.InternalServerError{Message: "Database error"}
 	}
 
 	updatedProduct, err := repository.GetByID(product.ID)
 	if err != nil {
-		return models.Product{}, err
+		return models.Product{},
+			httperrors.InternalServerError{Message: "Database error"}
 	}
 	return updatedProduct, nil
 }
@@ -223,12 +231,12 @@ func (repository *ProductRepositoryDB) Delete(id int) error {
 
 	res, err := repository.db.Exec(query, id)
 	if err != nil {
-		return err
+		return httperrors.InternalServerError{Message: "Database error"}
 	}
 
 	count, err := res.RowsAffected()
 	if err != nil {
-		return err
+		return httperrors.InternalServerError{Message: "Database error"}
 	} else if count == 0 {
 		return httperrors.NotFoundError{Message: "Product not found"}
 	}
