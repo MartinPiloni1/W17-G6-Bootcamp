@@ -11,6 +11,6 @@ CREATE TABLE products (
     product_code                     VARCHAR(50)  NOT NULL UNIQUE,
     recommended_freezing_temperature NUMERIC(5,2) NOT NULL,
     product_type_id                  INT NOT NULL,
-    seller_id                        INT NOT NULL
-    PRIMARY KEY (`id`)
+    seller_id                        INT NOT NULL,
+    PRIMARY KEY (id)
 );

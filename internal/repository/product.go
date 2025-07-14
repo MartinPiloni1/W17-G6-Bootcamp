@@ -138,7 +138,7 @@ func (repository *ProductRepositoryDB) GetByID(id int) (models.Product, error) {
 			product_type_id,
 			seller_id
 		FROM products 
-		WHEREE id = ?
+		WHERE id = ?
 	`
 
 	row := repository.db.QueryRow(query, id)
