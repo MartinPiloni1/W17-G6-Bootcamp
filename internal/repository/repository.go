@@ -49,3 +49,8 @@ type SectionRepository interface {
 	Update(id int, data models.Section) (models.Section, error)
 	Delete(id int) error
 }
+
+type CarriesRepository interface {
+	Create(carryAttributes models.CarryAttributes) (models.Carry, error)
+	GetReportByLocalityId(localityId int) ([]models.CarryReport, error)
+}
