@@ -1,8 +1,6 @@
 package service
 
 import (
-	"slices"
-
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
@@ -13,10 +11,12 @@ type WarehouseServiceDefault struct {
 	rp repository.WarehouseRepository
 }
 
+// NewWarehouseService creates a new warehouse service.
 func NewWarehouseService(repo repository.WarehouseRepository) *WarehouseServiceDefault {
 	return &WarehouseServiceDefault{rp: repo}
 }
 
+// Create validates and adds a new warehouse.
 func (p *WarehouseServiceDefault) Create(warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error) {
 	if warehouseAttributes.WarehouseCode == "" {
 		return models.Warehouse{}, httperrors.BadRequestError{Message: "the field WarehouseCode must not be empty"}
@@ -42,23 +42,22 @@ func (p *WarehouseServiceDefault) Create(warehouseAttributes models.WarehouseAtt
 	return p.rp.Create(warehouseAttributes)
 }
 
+// GetAll returns all warehouses.
 func (p *WarehouseServiceDefault) GetAll() ([]models.Warehouse, error) {
 	result, err := p.rp.GetAll()
 	if err != nil {
 		return []models.Warehouse{}, err
 	}
-	slicedData := utils.MapToSlice(result)
-	slices.SortFunc(slicedData, func(a, b models.Warehouse) int {
-		return a.Id - b.Id
-	})
-	return slicedData, nil
+	return result, nil
 
 }
 
+// GetByID returns a warehouse by ID.
 func (p *WarehouseServiceDefault) GetByID(id int) (models.Warehouse, error) {
 	return p.rp.GetByID(id)
 }
 
+// Update modifies a warehouse by ID.
 func (p *WarehouseServiceDefault) Update(id int, warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error) {
 	warehouse, err := p.rp.GetByID(id)
 	if err != nil {
@@ -69,18 +68,18 @@ func (p *WarehouseServiceDefault) Update(id int, warehouseAttributes models.Ware
 		return models.Warehouse{}, httperrors.BadRequestError{Message: "the input fields are not valid"}
 	}
 	warehouses, err := p.rp.GetAll()
-	delete(warehouses, id)
 	if err != nil {
 		return models.Warehouse{}, err
 	}
 	for _, w := range warehouses {
-		if w.WarehouseCode == warehouse.WarehouseAttributes.WarehouseCode {
+		if w.WarehouseCode == warehouse.WarehouseAttributes.WarehouseCode && w.Id != id {
 			return models.Warehouse{}, httperrors.ConflictError{Message: "the WarehouseCode already exists"}
 		}
 	}
 	return p.rp.Update(id, warehouse.WarehouseAttributes)
 }
 
+// Delete removes a warehouse by ID.
 func (p *WarehouseServiceDefault) Delete(id int) error {
 	return p.rp.Delete(id)
 }

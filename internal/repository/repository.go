@@ -17,11 +17,18 @@ type SellerRepository interface {
 	Update(id int, data *models.SellerAttributes) (models.Seller, error)
 	Delete(id int) error
 }
+
+// WarehouseRepository provides methods for warehouse data access.
 type WarehouseRepository interface {
-	GetAll() (map[int]models.Warehouse, error)
+	// GetAll returns all warehouses.
+	GetAll() ([]models.Warehouse, error)
+	// Create adds a new warehouse.
 	Create(warehouseAtribbutes models.WarehouseAttributes) (models.Warehouse, error)
+	// GetByID returns a warehouse by its ID.
 	GetByID(id int) (models.Warehouse, error)
+	// Update modifies a warehouse by its ID.
 	Update(id int, warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error)
+	// Delete removes a warehouse by its ID.
 	Delete(id int) error
 }
 
