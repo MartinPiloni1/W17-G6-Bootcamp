@@ -26,8 +26,8 @@ func NewProductServiceDefault(repo repository.ProductRepository) ProductService 
 Create validates that no existing product shares the same ProductCode,
 then delegates to the repository to persist a new product.
 */
-func (svc *ProductServiceDefault) Create(product models.ProductAttributes) (models.Product, error) {
-	products, err := svc.repo.GetAll()
+func (s *ProductServiceDefault) Create(product models.ProductAttributes) (models.Product, error) {
+	products, err := s.repo.GetAll()
 	if err != nil {
 		return models.Product{}, err
 	}
@@ -39,23 +39,23 @@ func (svc *ProductServiceDefault) Create(product models.ProductAttributes) (mode
 		}
 	}
 
-	return svc.repo.Create(product)
+	return s.repo.Create(product)
 }
 
 /*
 GetAll retrieves all products from the repository, returning a slice
 containing every product or an error.
 */
-func (svc *ProductServiceDefault) GetAll() ([]models.Product, error) {
-	return svc.repo.GetAll()
+func (s *ProductServiceDefault) GetAll() ([]models.Product, error) {
+	return s.repo.GetAll()
 }
 
 /*
 GetByID fetches a single product by its ID.
 Returns the product or ErrNotFound if no such product exists.
 */
-func (svc *ProductServiceDefault) GetByID(id int) (models.Product, error) {
-	return svc.repo.GetByID(id)
+func (s *ProductServiceDefault) GetByID(id int) (models.Product, error) {
+	return s.repo.GetByID(id)
 }
 
 /*
@@ -64,14 +64,14 @@ from the provided ProductPatchRequest, enforces uniqueness of ProductCode,
 and then persists the updated Product via the repository.
 Returns the updated Product or an error
 */
-func (svc *ProductServiceDefault) Update(id int, productAttributes models.ProductPatchRequest) (models.Product, error) {
-	product, err := svc.repo.GetByID(id)
+func (s *ProductServiceDefault) Update(id int, productAttributes models.ProductPatchRequest) (models.Product, error) {
+	product, err := s.repo.GetByID(id)
 	if err != nil {
 		return models.Product{}, err
 	}
 
 	if productAttributes.ProductCode != nil {
-		products, err := svc.repo.GetAll()
+		products, err := s.repo.GetAll()
 		if err != nil {
 			return models.Product{}, err
 		}
@@ -116,13 +116,13 @@ func (svc *ProductServiceDefault) Update(id int, productAttributes models.Produc
 		product.SellerID = *productAttributes.SellerID
 	}
 
-	return svc.repo.Update(id, product)
+	return s.repo.Update(id, product)
 }
 
 /*
 Delete removes the Product with the given ID from the datastore.
 Returns nil on success or an error if the repository fails.
 */
-func (svc *ProductServiceDefault) Delete(id int) error {
-	return svc.repo.Delete(id)
+func (s *ProductServiceDefault) Delete(id int) error {
+	return s.repo.Delete(id)
 }
