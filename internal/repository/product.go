@@ -29,7 +29,7 @@ func NewProductRepositoryDB(db *sql.DB) ProductRepository {
 
 /*
 Create inserts a new product record into the database using the given
-ProductAttributes, then fetches and returns the complete Product
+ProductAttributes, then returns the complete Product
 (including its auto-generated ID). If any database operation fails,
 it returns an InternalServerError.
 */
@@ -77,10 +77,9 @@ func (r *ProductRepositoryDB) Create(productAttributes models.ProductAttributes)
 			httperrors.InternalServerError{Message: "Database error"}
 	}
 
-	newProduct, err := r.GetByID(int(lastId))
-	if err != nil {
-		return models.Product{},
-			httperrors.InternalServerError{Message: "Database error"}
+	newProduct := models.Product{
+		ID:                int(lastId),
+		ProductAttributes: productAttributes,
 	}
 	return newProduct, nil
 }
@@ -205,10 +204,10 @@ func (r *ProductRepositoryDB) GetByID(id int) (models.Product, error) {
 /*
 Update modifies the product record with the given ID in the database,
 setting each column to the corresponding field in the provided models.Product.
-After the UPDATE statement, it reloads and returns the updated Product.
+After the UPDATE statement, it returns the updated Product.
 On any database failure, it returns an InternalServerError.
 */
-func (r *ProductRepositoryDB) Update(id int, product models.Product) (models.Product, error) {
+func (r *ProductRepositoryDB) Update(id int, updatedProduct models.Product) (models.Product, error) {
 	const query = `
 		UPDATE products
 		SET
@@ -228,17 +227,17 @@ func (r *ProductRepositoryDB) Update(id int, product models.Product) (models.Pro
 
 	_, err := r.db.Exec(
 		query,
-		product.Description,
-		product.ExpirationRate,
-		product.FreezingRate,
-		product.Height,
-		product.Length,
-		product.Width,
-		product.NetWeight,
-		product.ProductCode,
-		product.RecommendedFreezingTemperature,
-		product.ProductTypeID,
-		product.SellerID,
+		updatedProduct.Description,
+		updatedProduct.ExpirationRate,
+		updatedProduct.FreezingRate,
+		updatedProduct.Height,
+		updatedProduct.Length,
+		updatedProduct.Width,
+		updatedProduct.NetWeight,
+		updatedProduct.ProductCode,
+		updatedProduct.RecommendedFreezingTemperature,
+		updatedProduct.ProductTypeID,
+		updatedProduct.SellerID,
 		id,
 	)
 	if err != nil {
@@ -246,11 +245,6 @@ func (r *ProductRepositoryDB) Update(id int, product models.Product) (models.Pro
 			httperrors.InternalServerError{Message: "Database error"}
 	}
 
-	updatedProduct, err := r.GetByID(product.ID)
-	if err != nil {
-		return models.Product{},
-			httperrors.InternalServerError{Message: "Database error"}
-	}
 	return updatedProduct, nil
 }
 
