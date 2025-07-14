@@ -26,10 +26,10 @@ func SellerRouter() chi.Router {
 	repository := repository.NewSellerRepository()
 	service := service.NewSellerService(repository)
 	handler := handler.NewSellerHandler(service)
-	router.Get("/", handler.GetAll())        // GET /seller         (lista todos)
-	router.Get("/{id}", handler.GetByID())   // GET /seller/{id}    (uno por id)
-	router.Post("/", handler.Create())       // POST /seller        (crear uno)
-	router.Patch("/{id}", handler.Update())  // PATCH /seller/{id}  (actualizar)
+	router.Get("/", handler.GetAll())        // GET /seller         (list all)
+	router.Get("/{id}", handler.GetByID())   // GET /seller/{id}    (one per id)
+	router.Post("/", handler.Create())       // POST /seller        (create one)
+	router.Patch("/{id}", handler.Update())  // PATCH /seller/{id}  (update)
 	router.Delete("/{id}", handler.Delete()) // DELETE
 	return router
 }

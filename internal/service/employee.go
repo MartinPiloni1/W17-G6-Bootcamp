@@ -1,8 +1,6 @@
 package service
 
 import (
-	"slices"
-
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
@@ -43,9 +41,6 @@ func (e EmployeeServiceDefault) GetAll() ([]models.Employee, error) {
 		return nil, err
 	}
 
-	slices.SortFunc(employees, func(a, b models.Employee) int {
-		return a.Id - b.Id
-	})
 	return employees, nil
 }
 

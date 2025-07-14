@@ -13,8 +13,3 @@ type EmployeeAttributes struct {
 	LastName     string `json:"last_name" validate:"required,min=1"`
 	WarehouseID  int    `json:"warehouse_id" validate:"required,gt=0"`
 }
-
-// GetID returns the unique identifier of the Employee.
-func (e Employee) GetID() int {
-	return e.Id
-}
