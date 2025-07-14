@@ -7,33 +7,38 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 )
 
-type SellerRepositoryMysql struct {
+type SellerRepositoryDB struct {
 	db *sql.DB
 }
 
 func NewSellerRepository(db *sql.DB) SellerRepository {
-	return &SellerRepositoryMysql{db: db}
+	return &SellerRepositoryDB{db: db}
 }
 
 // This function gets a seller by its ID from the database.
 // If the seller is not found, it returns a NotFoundError.
-func (r SellerRepositoryMysql) GetByID(id int) (models.Seller, error) {
-	var s models.Seller
+func (r SellerRepositoryDB) GetByID(id int) (models.Seller, error) {
+	var seller models.Seller
 	const query = `
-		SELECT id, cid, company_name, address, telephone, locality_id 
+		SELECT id, 
+			cid, 
+			company_name, 
+			address, 
+			telephone, 
+			locality_id 
 		FROM sellers 
 		WHERE id = ?
 	`
-	err := r.db.QueryRow(query, id).Scan(&s.ID, &s.CID, &s.CompanyName, &s.Address, &s.Telephone, &s.LocalityID)
+	err := r.db.QueryRow(query, id).Scan(&seller.ID, &seller.CID, &seller.CompanyName, &seller.Address, &seller.Telephone, &seller.LocalityID)
 	if err == sql.ErrNoRows {
 		return models.Seller{}, httperrors.NotFoundError{Message: "Seller not found"}
 	}
-	return s, err
+	return seller, err
 }
 
 // This function retrieves all sellers from the database.
 // It returns a slice of Seller models or an error if the query fails.
-func (r SellerRepositoryMysql) GetAll() ([]models.Seller, error) {
+func (r SellerRepositoryDB) GetAll() ([]models.Seller, error) {
 	const query = `
 		SELECT id, cid, company_name, address, telephone, locality_id 
 		FROM sellers
@@ -56,21 +61,7 @@ func (r SellerRepositoryMysql) GetAll() ([]models.Seller, error) {
 
 // This function creates a new seller in the database.
 // It checks if the locality ID exists before inserting the seller.
-func (r *SellerRepositoryMysql) Create(att models.SellerAttributes) (models.Seller, error) {
-	const queryCheckLocality = `
-		SELECT id, locality_name, province_name, country_name
-		FROM localities 
-		WHERE id = ?
-	`
-	var locExists int
-	err := r.db.QueryRow(queryCheckLocality, att.LocalityID).Scan(&locExists)
-	if err != nil {
-		return models.Seller{}, err
-	}
-	if locExists == 0 {
-		return models.Seller{}, httperrors.ConflictError{Message: "Locality ID does not exist"}
-	}
-
+func (r *SellerRepositoryDB) Create(att models.SellerAttributes) (models.Seller, error) {
 	const queryInsertSeller = `
 		INSERT INTO sellers (cid, company_name, address, telephone, locality_id) 
 		VALUES (?, ?, ?, ?, ?)
@@ -88,7 +79,7 @@ func (r *SellerRepositoryMysql) Create(att models.SellerAttributes) (models.Sell
 
 // This function deletes a seller by its ID from the database.
 // If the seller does not exist, it returns a NotFoundError.
-func (r *SellerRepositoryMysql) Delete(id int) error {
+func (r *SellerRepositoryDB) Delete(id int) error {
 	const queryDelete = `DELETE FROM sellers WHERE id = ?`
 	res, err := r.db.Exec(queryDelete, id)
 	if err != nil {
@@ -103,7 +94,7 @@ func (r *SellerRepositoryMysql) Delete(id int) error {
 
 // This function updates an existing seller's attributes in the database.
 // It first retrieves the seller by ID, then updates the fields that are provided in the attributes
-func (r *SellerRepositoryMysql) Update(id int, att *models.SellerAttributes) (models.Seller, error) {
+func (r *SellerRepositoryDB) Update(id int, att *models.SellerAttributes) (models.Seller, error) {
 	actual, err := r.GetByID(id)
 	if err != nil {
 		return models.Seller{}, err
