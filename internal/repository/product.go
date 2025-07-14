@@ -20,7 +20,52 @@ func NewProductRepositoryDB(db *sql.DB) ProductRepository {
 }
 
 func (repository *ProductRepositoryDB) Create(productAttribbutes models.ProductAttributes) (models.Product, error) {
-	panic("implement")
+	const query = `
+		INSERT INTO products (
+			description,
+			expiration_rate,
+			freezing_rate,
+			height,
+			length,
+			width,
+			netweight,
+			product_code,
+			recommended_freezing_temperature,
+			product_type_id,
+			seller_id
+		) VALUES (
+			?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+		)
+	`
+
+	result, err := repository.db.Exec(
+		query,
+		productAttribbutes.Description,
+		productAttribbutes.ExpirationRate,
+		productAttribbutes.FreezingRate,
+		productAttribbutes.Height,
+		productAttribbutes.Length,
+		productAttribbutes.Width,
+		productAttribbutes.NetWeight,
+		productAttribbutes.ProductCode,
+		productAttribbutes.RecommendedFreezingTemperature,
+		productAttribbutes.ProductTypeID,
+		productAttribbutes.SellerID,
+	)
+	if err != nil {
+		return models.Product{}, err
+	}
+
+	lastId, err := result.LastInsertId()
+	if err != nil {
+		return models.Product{}, err
+	}
+
+	newProduct := models.Product{
+		ID:                int(lastId),
+		ProductAttributes: productAttribbutes,
+	}
+	return newProduct, nil
 }
 
 func (repository *ProductRepositoryDB) GetAll() ([]models.Product, error) {
