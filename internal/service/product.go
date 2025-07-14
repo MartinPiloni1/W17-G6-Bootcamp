@@ -11,23 +11,23 @@ ProductServiceDefault is the implementation of ProductService interface,
 delegating persistence to a ProductRepository.
 */
 type ProductServiceDefault struct {
-	repository repository.ProductRepository
+	repo repository.ProductRepository
 }
 
 /*
 NewProductServiceDefault constructs a ProductServiceDefault
 with the given repository.
 */
-func NewProductServiceDefault(repository repository.ProductRepository) ProductService {
-	return &ProductServiceDefault{repository: repository}
+func NewProductServiceDefault(repo repository.ProductRepository) ProductService {
+	return &ProductServiceDefault{repo: repo}
 }
 
 /*
 Create validates that no existing product shares the same ProductCode,
 then delegates to the repository to persist a new product.
 */
-func (service *ProductServiceDefault) Create(product models.ProductAttributes) (models.Product, error) {
-	products, err := service.repository.GetAll()
+func (svc *ProductServiceDefault) Create(product models.ProductAttributes) (models.Product, error) {
+	products, err := svc.repo.GetAll()
 	if err != nil {
 		return models.Product{}, err
 	}
@@ -39,23 +39,23 @@ func (service *ProductServiceDefault) Create(product models.ProductAttributes) (
 		}
 	}
 
-	return service.repository.Create(product)
+	return svc.repo.Create(product)
 }
 
 /*
 GetAll retrieves all products from the repository, returning a slice
 containing every product or an error.
 */
-func (service *ProductServiceDefault) GetAll() ([]models.Product, error) {
-	return service.repository.GetAll()
+func (svc *ProductServiceDefault) GetAll() ([]models.Product, error) {
+	return svc.repo.GetAll()
 }
 
 /*
 GetByID fetches a single product by its ID.
 Returns the product or ErrNotFound if no such product exists.
 */
-func (service *ProductServiceDefault) GetByID(id int) (models.Product, error) {
-	return service.repository.GetByID(id)
+func (svc *ProductServiceDefault) GetByID(id int) (models.Product, error) {
+	return svc.repo.GetByID(id)
 }
 
 /*
@@ -64,14 +64,14 @@ from the provided ProductPatchRequest, enforces uniqueness of ProductCode,
 and then persists the updated Product via the repository.
 Returns the updated Product or an error
 */
-func (service *ProductServiceDefault) Update(id int, productAttributes models.ProductPatchRequest) (models.Product, error) {
-	product, err := service.repository.GetByID(id)
+func (svc *ProductServiceDefault) Update(id int, productAttributes models.ProductPatchRequest) (models.Product, error) {
+	product, err := svc.repo.GetByID(id)
 	if err != nil {
 		return models.Product{}, err
 	}
 
 	if productAttributes.ProductCode != nil {
-		products, err := service.repository.GetAll()
+		products, err := svc.repo.GetAll()
 		if err != nil {
 			return models.Product{}, err
 		}
@@ -116,13 +116,13 @@ func (service *ProductServiceDefault) Update(id int, productAttributes models.Pr
 		product.SellerID = *productAttributes.SellerID
 	}
 
-	return service.repository.Update(id, product)
+	return svc.repo.Update(id, product)
 }
 
 /*
 Delete removes the Product with the given ID from the datastore.
 Returns nil on success or an error if the repository fails.
 */
-func (service *ProductServiceDefault) Delete(id int) error {
-	return service.repository.Delete(id)
+func (svc *ProductServiceDefault) Delete(id int) error {
+	return svc.repo.Delete(id)
 }

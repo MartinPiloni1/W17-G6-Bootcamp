@@ -16,12 +16,12 @@ import (
 
 // ProductHandler handles HTTP requests for product resources.
 type ProductHandler struct {
-	service service.ProductService
+	svc service.ProductService
 }
 
 // NewProductHandler constructs a new ProductHandler with the given service.
-func NewProductHandler(service service.ProductService) *ProductHandler {
-	return &ProductHandler{service: service}
+func NewProductHandler(svc service.ProductService) *ProductHandler {
+	return &ProductHandler{svc: svc}
 }
 
 /*
@@ -29,7 +29,7 @@ Create returns an http.HandlerFunc that decodes a JSON payload,
 validates it, delegates creation to the service layer, and writes
 the appropriate JSON response.
 */
-func (handler ProductHandler) Create() http.HandlerFunc {
+func (h ProductHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var newProduct models.ProductAttributes
 
@@ -50,7 +50,7 @@ func (handler ProductHandler) Create() http.HandlerFunc {
 			return
 		}
 
-		productData, err := handler.service.Create(newProduct)
+		productData, err := h.svc.Create(newProduct)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -67,9 +67,9 @@ func (handler ProductHandler) Create() http.HandlerFunc {
 GetAll returns an http.HandlerFunc that fetches all products
 from the service layer and writes them as JSON.
 */
-func (handler ProductHandler) GetAll() http.HandlerFunc {
+func (h ProductHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		productData, err := handler.service.GetAll()
+		productData, err := h.svc.GetAll()
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -86,7 +86,7 @@ func (handler ProductHandler) GetAll() http.HandlerFunc {
 GetById returns an http.HandlerFunc that parses the product ID
 from the URL, retrieves the product, and writes it as JSON.
 */
-func (handler ProductHandler) GetById() http.HandlerFunc {
+func (h ProductHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil || id <= 0 {
@@ -94,7 +94,7 @@ func (handler ProductHandler) GetById() http.HandlerFunc {
 			return
 		}
 
-		product, err := handler.service.GetByID(id)
+		product, err := h.svc.GetByID(id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -112,7 +112,7 @@ Update returns an http.HandlerFunc that parses the id URL parameter,
 decodes a partial-product JSON payload, validates it, delegates the update
 to the service layer, and responds with the updated product.
 */
-func (handler ProductHandler) Update() http.HandlerFunc {
+func (h ProductHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil || id <= 0 {
@@ -142,7 +142,7 @@ func (handler ProductHandler) Update() http.HandlerFunc {
 			return
 		}
 
-		product, err := handler.service.Update(id, updatedProduct)
+		product, err := h.svc.Update(id, updatedProduct)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -159,7 +159,7 @@ func (handler ProductHandler) Update() http.HandlerFunc {
 Delete returns an http.HandlerFunc that parses the id URL parameter,
 delegates deletion to the service layer, and responds with no content.
 */
-func (handler ProductHandler) Delete() http.HandlerFunc {
+func (h ProductHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil || id <= 0 {
@@ -167,7 +167,7 @@ func (handler ProductHandler) Delete() http.HandlerFunc {
 			return
 		}
 
-		err = handler.service.Delete(id)
+		err = h.svc.Delete(id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
