@@ -36,7 +36,7 @@ type BuyerRepository interface {
 
 type EmployeeRepository interface {
 	Create(Employee models.Employee) (models.Employee, error)
-	GetAll() (map[int]models.Employee, error)
+	GetAll() ([]models.Employee, error)
 	GetByID(id int) (models.Employee, error)
 	Update(id int, data models.Employee) (models.Employee, error)
 	Delete(id int) error

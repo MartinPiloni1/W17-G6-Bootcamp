@@ -3,6 +3,7 @@ package application
 import (
 	"net/http"
 
+	"database/sql"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/handler"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
@@ -22,29 +23,29 @@ func HealthRouter() chi.Router {
 
 func SellerRouter() chi.Router {
 	router := chi.NewRouter()
-	rp := repository.NewSellerRepository()
-	sv := service.NewSellerService(rp)
-	hd := handler.NewSellerHandler(sv)
-	router.Get("/", hd.GetAll())        // GET /seller         (lista todos)
-	router.Get("/{id}", hd.GetByID())   // GET /seller/{id}    (uno por id)
-	router.Post("/", hd.Create())       // POST /seller        (crear uno)
-	router.Patch("/{id}", hd.Update())  // PATCH /seller/{id}  (actualizar)
-	router.Delete("/{id}", hd.Delete()) // DELETE
+	repository := repository.NewSellerRepository()
+	service := service.NewSellerService(repository)
+	handler := handler.NewSellerHandler(service)
+	router.Get("/", handler.GetAll())        // GET /seller         (lista todos)
+	router.Get("/{id}", handler.GetByID())   // GET /seller/{id}    (uno por id)
+	router.Post("/", handler.Create())       // POST /seller        (crear uno)
+	router.Patch("/{id}", handler.Update())  // PATCH /seller/{id}  (actualizar)
+	router.Delete("/{id}", handler.Delete()) // DELETE
 	return router
 }
 
 func WarehouseRouter() chi.Router {
-	rp := repository.NewWarehouseRepository()
-	sv := service.NewWarehouseService(rp)
-	hd := handler.NewWarehouseHandler(sv)
+	repository := repository.NewWarehouseRepository()
+	service := service.NewWarehouseService(repository)
+	handler := handler.NewWarehouseHandler(service)
 
 	router := chi.NewRouter()
 
-	router.Get("/", hd.GetAll())
-	router.Post("/", hd.Create())
-	router.Get("/{id}", hd.GetById())
-	router.Patch("/{id}", hd.Update())
-	router.Delete("/{id}", hd.Delete())
+	router.Get("/", handler.GetAll())
+	router.Post("/", handler.Create())
+	router.Get("/{id}", handler.GetById())
+	router.Patch("/{id}", handler.Update())
+	router.Delete("/{id}", handler.Delete())
 
 	return router
 }
@@ -52,59 +53,59 @@ func WarehouseRouter() chi.Router {
 func ProductRouter() chi.Router {
 	router := chi.NewRouter()
 
-	rp := repository.NewProductRepositoryFile()
-	sv := service.NewProductServiceDefault(rp)
-	hd := handler.NewProductHandler(sv)
+	repository := repository.NewProductRepositoryFile()
+	service := service.NewProductServiceDefault(repository)
+	handler := handler.NewProductHandler(service)
 
-	router.Post("/", hd.Create())
-	router.Get("/", hd.GetAll())
-	router.Get("/{id}", hd.GetById())
-	router.Patch("/{id}", hd.Update())
-	router.Delete("/{id}", hd.Delete())
+	router.Post("/", handler.Create())
+	router.Get("/", handler.GetAll())
+	router.Get("/{id}", handler.GetById())
+	router.Patch("/{id}", handler.Update())
+	router.Delete("/{id}", handler.Delete())
 	return router
 }
 
 func BuyersRouter() chi.Router {
 	router := chi.NewRouter()
 
-	rp := repository.NewBuyerRepositoryFile() // fileRepository
-	sv := service.NewBuyerServiceDefault(rp)
-	hd := handler.NewBuyerHandler(sv)
+	repository := repository.NewBuyerRepositoryFile() // fileRepository
+	service := service.NewBuyerServiceDefault(repository)
+	handler := handler.NewBuyerHandler(service)
 
-	router.Post("/", hd.Create())
-	router.Get("/", hd.GetAll())
-	router.Get("/{id}", hd.GetByID())
-	router.Patch("/{id}", hd.Update())
-	router.Delete("/{id}", hd.Delete())
+	router.Post("/", handler.Create())
+	router.Get("/", handler.GetAll())
+	router.Get("/{id}", handler.GetByID())
+	router.Patch("/{id}", handler.Update())
+	router.Delete("/{id}", handler.Delete())
 	return router
 }
 
-func EmployeeRouter() chi.Router {
+func EmployeeRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
-	rp := repository.NewEmployeeRepository()
-	sv := service.NewEmployeeService(rp)
-	hd := handler.NewEmployeeHandler(sv)
+	repository := repository.NewEmployeeRepository(db)
+	service := service.NewEmployeeService(repository)
+	handler := handler.NewEmployeeHandler(service)
 
-	router.Get("/", hd.GetAll())
-	router.Get("/{id}", hd.GetById())
-	router.Post("/", hd.Create())
-	router.Patch("/{id}", hd.Update())
-	router.Delete("/{id}", hd.Delete())
+	router.Get("/", handler.GetAll())
+	router.Get("/{id}", handler.GetById())
+	router.Post("/", handler.Create())
+	router.Patch("/{id}", handler.Update())
+	router.Delete("/{id}", handler.Delete())
 	return router
 }
 
 func SectionRouter() chi.Router {
-	rp := repository.NewSectionRepository()
-	sv := service.NewSectionService(rp)
-	hd := handler.NewSectionHandler(sv)
+	repository := repository.NewSectionRepository()
+	service := service.NewSectionService(repository)
+	handler := handler.NewSectionHandler(service)
 
 	router := chi.NewRouter()
 
-	router.Get("/", hd.GetAll())
-	router.Get("/{id}", hd.GetByID())
-	router.Delete("/{id}", hd.Delete())
-	router.Post("/", hd.Create())
-	router.Patch("/{id}", hd.Update())
+	router.Get("/", handler.GetAll())
+	router.Get("/{id}", handler.GetByID())
+	router.Delete("/{id}", handler.Delete())
+	router.Post("/", handler.Create())
+	router.Patch("/{id}", handler.Update())
 	return router
 }

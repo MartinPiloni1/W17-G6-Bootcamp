@@ -60,24 +60,23 @@ func (a *ServerChi) Run() (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Println(freshDB) // TODO: remove when in use
 
 	healthRouter := application.HealthRouter()
 	productRouter := application.ProductRouter()
 	warehouseRouter := application.WarehouseRouter()
 	buyersRouter := application.BuyersRouter()
 	sellerRouter := application.SellerRouter()
-	employeeRouter := application.EmployeeRouter()
+	employeeRouter := application.EmployeeRouter(freshDB)
 	sectionRouter := application.SectionRouter()
 
 	router.Mount("/healthcheck", healthRouter)
 	router.Route("/api/v1", func(r chi.Router) {
-		router.Mount("/products", productRouter)
-		router.Mount("/warehouses", warehouseRouter)
-		router.Mount("/buyers", buyersRouter)
-		router.Mount("/sellers", sellerRouter)
-		router.Mount("/employees", employeeRouter)
-		router.Mount("/sections", sectionRouter)
+		r.Mount("/products", productRouter)
+		r.Mount("/warehouses", warehouseRouter)
+		r.Mount("/buyers", buyersRouter)
+		r.Mount("/sellers", sellerRouter)
+		r.Mount("/employees", employeeRouter)
+		r.Mount("/sections", sectionRouter)
 	})
 
 	err = http.ListenAndServe(a.ServerAddr, router)
