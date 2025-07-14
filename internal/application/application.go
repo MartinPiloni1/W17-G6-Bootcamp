@@ -118,6 +118,6 @@ func CarryRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
 	router.Post("/", handlerC.Create())
-
+	router.Get("/reportCarries", handlerC.GetReportByLocalityId())
 	return router
 }

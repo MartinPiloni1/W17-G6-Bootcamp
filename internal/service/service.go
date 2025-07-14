@@ -52,4 +52,6 @@ type SectionService interface {
 type CarryService interface {
 	// Create validates and creates a new carry.
 	Create(carryAttributes models.CarryAttributes) (models.Carry, error)
+	// GetReportByLocalityId retrieves a report of carries by locality ID.
+	GetReportByLocalityId(localityId string) ([]models.CarryReport, error)
 }

@@ -34,3 +34,12 @@ func (p *CarryServiceDefault) Create(carryAttributes models.CarryAttributes) (mo
 	}
 	return p.rp.Create(carryAttributes)
 }
+
+// GetReportByLocalityId retrieves a report of carries by locality ID.
+func (p *CarryServiceDefault) GetReportByLocalityId(localityId string) ([]models.CarryReport, error) {
+	result, err := p.rp.GetReportByLocalityId(localityId)
+	if result == nil {
+		return nil, httperrors.NotFoundError{Message: "no carries found for the given locality ID"}
+	}
+	return result, err
+}
