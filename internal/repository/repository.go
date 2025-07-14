@@ -59,9 +59,9 @@ type EmployeeRepository interface {
 }
 
 type SectionRepository interface {
-	Create(section models.Section) (models.Section, error)
-	GetAll() (map[int]models.Section, error)
-	GetByID(id int) (models.Section, error)
-	Update(id int, data models.Section) (models.Section, error)
-	Delete(id int) error
+	Create(ctx context.Context, section models.Section) (models.Section, error)
+	GetAll(ctx context.Context) ([]models.Section, error)
+	GetByID(ctx context.Context, id int) (models.Section, error)
+	Update(ctx context.Context, id int, data models.Section) (models.Section, error)
+	Delete(ctx context.Context, id int) error
 }
