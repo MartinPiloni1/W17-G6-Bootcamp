@@ -176,5 +176,21 @@ func (repository *ProductRepositoryDB) Update(id int, product models.Product) (m
 }
 
 func (repository *ProductRepositoryDB) Delete(id int) error {
-	panic("implement")
+	const query = `
+		DELETE FROM products
+		WHERE id=?	
+    `
+
+	res, err := repository.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	count, err := res.RowsAffected()
+	if err != nil {
+		return err
+	} else if count == 0 {
+		return httperrors.NotFoundError{Message: "Product not found"}
+	}
+	return nil
 }
