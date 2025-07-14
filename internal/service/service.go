@@ -9,6 +9,7 @@ type ProductService interface {
 	Update(id int, productAttributes models.ProductPatchRequest) (models.Product, error)
 	Delete(id int) error
 }
+
 type SellerService interface {
 	Create(seller models.SellerAttributes) (models.Seller, error)
 	GetAll() ([]models.Seller, error)
