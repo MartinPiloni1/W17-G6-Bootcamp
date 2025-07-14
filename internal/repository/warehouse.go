@@ -2,8 +2,10 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/go-sql-driver/mysql"
 	"log"
 )
 
@@ -35,7 +37,13 @@ func (p *WarehouseRepositoryDB) Create(warehouseAttributes models.WarehouseAttri
 		warehouseAttributes.MinimunTemperature,
 	)
 	if err != nil {
-		return models.Warehouse{}, httperrors.InternalServerError{Message: "error creating warehouse"}
+		var me *mysql.MySQLError
+		if errors.As(err, &me) {
+			if me.Number == 1062 {
+				return models.Warehouse{}, httperrors.ConflictError{Message: "the WarehouseCode already exists"}
+			}
+			return models.Warehouse{}, httperrors.InternalServerError{Message: "error creating carry"}
+		}
 	}
 	lastInsertId, err := result.LastInsertId()
 	if err != nil {

@@ -30,15 +30,6 @@ func (p *WarehouseServiceDefault) Create(warehouseAttributes models.WarehouseAtt
 	if warehouseAttributes.MinimunCapacity <= 0 {
 		return models.Warehouse{}, httperrors.BadRequestError{Message: "the field MinimunCapacity must not be zero or negative"}
 	}
-	warehouses, err := p.rp.GetAll()
-	if err != nil {
-		return models.Warehouse{}, err
-	}
-	for _, w := range warehouses {
-		if w.WarehouseCode == warehouseAttributes.WarehouseCode {
-			return models.Warehouse{}, httperrors.ConflictError{Message: "the WarehouseCode already exists"}
-		}
-	}
 	return p.rp.Create(warehouseAttributes)
 }
 
