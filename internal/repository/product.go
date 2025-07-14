@@ -53,7 +53,8 @@ func (r *ProductRepositoryDB) Create(ctx context.Context, productAttributes mode
 		)
 	`
 
-	result, err := r.db.Exec(
+	result, err := r.db.ExecContext(
+		ctx,
 		query,
 		productAttributes.Description,
 		productAttributes.ExpirationRate,
@@ -108,7 +109,7 @@ func (r *ProductRepositoryDB) GetAll(ctx context.Context) ([]models.Product, err
 		FROM products 
 	`
 
-	rows, err := r.db.Query(query)
+	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil,
 			httperrors.InternalServerError{Message: "Database error"}
@@ -171,7 +172,7 @@ func (r *ProductRepositoryDB) GetByID(ctx context.Context, id int) (models.Produ
 		WHERE id = ?
 	`
 
-	row := r.db.QueryRow(query, id)
+	row := r.db.QueryRowContext(ctx, query, id)
 	if err := row.Err(); err != nil {
 		return models.Product{}, err
 	}
@@ -226,7 +227,8 @@ func (r *ProductRepositoryDB) Update(ctx context.Context, id int, updatedProduct
 		WHERE id = ?
     `
 
-	_, err := r.db.Exec(
+	_, err := r.db.ExecContext(
+		ctx,
 		query,
 		updatedProduct.Description,
 		updatedProduct.ExpirationRate,
@@ -260,7 +262,7 @@ func (r *ProductRepositoryDB) Delete(ctx context.Context, id int) error {
 		WHERE id=?	
     `
 
-	res, err := r.db.Exec(query, id)
+	res, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return httperrors.InternalServerError{Message: "Database error"}
 	}
