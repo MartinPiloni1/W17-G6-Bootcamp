@@ -38,7 +38,7 @@ type ProductPatchRequest struct {
 }
 
 /*
-Product represents a product record, including its automatically assigned ID
+Product represents a product entry, including its automatically assigned ID
 plus all attributes.
 */
 type Product struct {
