@@ -62,6 +62,20 @@ func (r SellerRepositoryDB) GetAll() ([]models.Seller, error) {
 // This function creates a new seller in the database.
 // It checks if the locality ID exists before inserting the seller.
 func (r *SellerRepositoryDB) Create(att models.SellerAttributes) (models.Seller, error) {
+	const queryCheckLocality = `
+		SELECT id, locality_name, province_name, country_name
+		FROM localities 
+		WHERE id = ?
+	`
+	var locExists int
+	err := r.db.QueryRow(queryCheckLocality, att.LocalityID).Scan(&locExists)
+	if err != nil {
+		return models.Seller{}, err
+	}
+	if locExists == 0 {
+		return models.Seller{}, httperrors.ConflictError{Message: "Locality ID does not exist"}
+	}
+
 	const queryInsertSeller = `
 		INSERT INTO sellers (cid, company_name, address, telephone, locality_id) 
 		VALUES (?, ?, ?, ?, ?)

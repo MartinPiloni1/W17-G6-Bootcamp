@@ -17,6 +17,13 @@ type SellerRepository interface {
 	Update(id int, data *models.SellerAttributes) (models.Seller, error)
 	Delete(id int) error
 }
+
+type LocalityRepository interface {
+	Create(locality models.Locality) (models.Locality, error)
+	GetByID(id string) (models.Locality, error)
+	GetSellerReport(id *string) ([]models.SellerReport, error)
+}
+
 type WarehouseRepository interface {
 	GetAll() (map[int]models.Warehouse, error)
 	Create(warehouseAtribbutes models.WarehouseAttributes) (models.Warehouse, error)
