@@ -14,6 +14,11 @@ type ProductRepository interface {
 	Delete(ctx context.Context, id int) error
 }
 
+type ProductRecordRepository interface {
+	Create(ctx context.Context, productRecord models.ProductRecordAttributes) (models.ProductRecord, error)
+	GetRecordsPerProduct(ctx context.Context, id int) (models.ProductRecordReport, error)
+}
+
 type SellerRepository interface {
 	Create(seller models.SellerAttributes) (models.Seller, error)
 	GetAll() (map[int]models.Seller, error)

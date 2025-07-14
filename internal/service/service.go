@@ -13,6 +13,12 @@ type ProductService interface {
 	Update(ctx context.Context, id int, productAttributes models.ProductPatchRequest) (models.Product, error)
 	Delete(ctx context.Context, id int) error
 }
+
+type ProductRecordService interface {
+	Create(ctx context.Context, productRecord models.ProductRecordAttributes) (models.ProductRecord, error)
+	GetRecordsPerProduct(ctx context.Context, id int) (models.ProductRecordReport, error)
+}
+
 type SellerService interface {
 	Create(seller models.SellerAttributes) (models.Seller, error)
 	GetAll() ([]models.Seller, error)

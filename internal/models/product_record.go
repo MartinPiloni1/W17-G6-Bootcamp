@@ -17,3 +17,9 @@ type ProductRecord struct {
 	ID int `json:"id" validate:"required,gt=0"`
 	ProductRecordAttributes
 }
+
+type ProductRecordReport struct {
+	ProductID   int    `json:"product_id"`
+	Description string `json:"description"`
+	RecordCount int    `json:"records_count"`
+}

@@ -1,4 +1,3 @@
-
 CREATE TABLE products (
     id                               INT NOT NULL AUTO_INCREMENT,
     description                      TEXT NOT NULL,
