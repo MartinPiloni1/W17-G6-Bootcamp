@@ -31,6 +31,7 @@ the appropriate JSON response.
 */
 func (h ProductHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		var newProduct models.ProductAttributes
 
 		decoder := json.NewDecoder(r.Body)
@@ -50,7 +51,7 @@ func (h ProductHandler) Create() http.HandlerFunc {
 			return
 		}
 
-		productData, err := h.svc.Create(newProduct)
+		productData, err := h.svc.Create(ctx, newProduct)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -69,7 +70,8 @@ from the service layer and writes them as JSON.
 */
 func (h ProductHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		productData, err := h.svc.GetAll()
+		ctx := r.Context()
+		productData, err := h.svc.GetAll(ctx)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -88,13 +90,14 @@ from the URL, retrieves the product, and writes it as JSON.
 */
 func (h ProductHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil || id <= 0 {
 			response.Error(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
 
-		product, err := h.svc.GetByID(id)
+		product, err := h.svc.GetByID(ctx, id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -114,6 +117,7 @@ to the service layer, and responds with the updated product.
 */
 func (h ProductHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil || id <= 0 {
 			response.Error(w, http.StatusBadRequest, "Invalid ID")
@@ -142,7 +146,7 @@ func (h ProductHandler) Update() http.HandlerFunc {
 			return
 		}
 
-		product, err := h.svc.Update(id, updatedProduct)
+		product, err := h.svc.Update(ctx, id, updatedProduct)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -161,13 +165,14 @@ delegates deletion to the service layer, and responds with no content.
 */
 func (h ProductHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil || id <= 0 {
 			response.Error(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
 
-		err = h.svc.Delete(id)
+		err = h.svc.Delete(ctx, id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)

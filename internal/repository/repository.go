@@ -1,13 +1,17 @@
 package repository
 
-import "github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
+import (
+	"context"
+
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
+)
 
 type ProductRepository interface {
-	Create(product models.ProductAttributes) (models.Product, error)
-	GetAll() ([]models.Product, error)
-	GetByID(id int) (models.Product, error)
-	Update(id int, product models.Product) (models.Product, error)
-	Delete(id int) error
+	Create(ctx context.Context, product models.ProductAttributes) (models.Product, error)
+	GetAll(ctx context.Context) ([]models.Product, error)
+	GetByID(ctx context.Context, id int) (models.Product, error)
+	Update(ctx context.Context, id int, product models.Product) (models.Product, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type SellerRepository interface {

@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
@@ -26,8 +28,8 @@ func NewProductServiceDefault(repo repository.ProductRepository) ProductService 
 Create validates that no existing product shares the same ProductCode,
 then delegates to the repository to persist a new product.
 */
-func (s *ProductServiceDefault) Create(product models.ProductAttributes) (models.Product, error) {
-	products, err := s.repo.GetAll()
+func (s *ProductServiceDefault) Create(ctx context.Context, product models.ProductAttributes) (models.Product, error) {
+	products, err := s.repo.GetAll(ctx)
 	if err != nil {
 		return models.Product{}, err
 	}
@@ -39,23 +41,23 @@ func (s *ProductServiceDefault) Create(product models.ProductAttributes) (models
 		}
 	}
 
-	return s.repo.Create(product)
+	return s.repo.Create(ctx, product)
 }
 
 /*
 GetAll retrieves all products from the repository, returning a slice
 containing every product or an error.
 */
-func (s *ProductServiceDefault) GetAll() ([]models.Product, error) {
-	return s.repo.GetAll()
+func (s *ProductServiceDefault) GetAll(ctx context.Context) ([]models.Product, error) {
+	return s.repo.GetAll(ctx)
 }
 
 /*
 GetByID fetches a single product by its ID.
 Returns the product or ErrNotFound if no such product exists.
 */
-func (s *ProductServiceDefault) GetByID(id int) (models.Product, error) {
-	return s.repo.GetByID(id)
+func (s *ProductServiceDefault) GetByID(ctx context.Context, id int) (models.Product, error) {
+	return s.repo.GetByID(ctx, id)
 }
 
 /*
@@ -64,14 +66,14 @@ from the provided ProductPatchRequest, enforces uniqueness of ProductCode,
 and then persists the updated Product via the repository.
 Returns the updated Product or an error
 */
-func (s *ProductServiceDefault) Update(id int, productAttributes models.ProductPatchRequest) (models.Product, error) {
-	product, err := s.repo.GetByID(id)
+func (s *ProductServiceDefault) Update(ctx context.Context, id int, productAttributes models.ProductPatchRequest) (models.Product, error) {
+	product, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return models.Product{}, err
 	}
 
 	if productAttributes.ProductCode != nil {
-		products, err := s.repo.GetAll()
+		products, err := s.repo.GetAll(ctx)
 		if err != nil {
 			return models.Product{}, err
 		}
@@ -116,13 +118,13 @@ func (s *ProductServiceDefault) Update(id int, productAttributes models.ProductP
 		product.SellerID = *productAttributes.SellerID
 	}
 
-	return s.repo.Update(id, product)
+	return s.repo.Update(ctx, id, product)
 }
 
 /*
 Delete removes the Product with the given ID from the datastore.
 Returns nil on success or an error if the repository fails.
 */
-func (s *ProductServiceDefault) Delete(id int) error {
-	return s.repo.Delete(id)
+func (s *ProductServiceDefault) Delete(ctx context.Context, id int) error {
+	return s.repo.Delete(ctx, id)
 }

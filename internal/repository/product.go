@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 
@@ -33,7 +34,7 @@ ProductAttributes, then returns the complete Product
 (including its auto-generated ID). If any database operation fails,
 it returns an InternalServerError.
 */
-func (r *ProductRepositoryDB) Create(productAttributes models.ProductAttributes) (models.Product, error) {
+func (r *ProductRepositoryDB) Create(ctx context.Context, productAttributes models.ProductAttributes) (models.Product, error) {
 	const query = `
 		INSERT INTO products (
 			description,
@@ -89,7 +90,7 @@ GetAll retrieves all product records from the database.
 It scans each row into a models.Product and returns the slice.
 On any database error, it returns an InternalServerError.
 */
-func (r *ProductRepositoryDB) GetAll() ([]models.Product, error) {
+func (r *ProductRepositoryDB) GetAll(ctx context.Context) ([]models.Product, error) {
 	const query = `
 		SELECT
 			id,
@@ -151,7 +152,7 @@ GetByID retrieves a single Product by its integer ID.
 If no matching row exists, returns a NotFoundError.
 On other database errors, returns an InternalServerError.
 */
-func (r *ProductRepositoryDB) GetByID(id int) (models.Product, error) {
+func (r *ProductRepositoryDB) GetByID(ctx context.Context, id int) (models.Product, error) {
 	const query = `
 		SELECT
 			id,
@@ -207,7 +208,7 @@ setting each column to the corresponding field in the provided models.Product.
 After the UPDATE statement, it returns the updated Product.
 On any database failure, it returns an InternalServerError.
 */
-func (r *ProductRepositoryDB) Update(id int, updatedProduct models.Product) (models.Product, error) {
+func (r *ProductRepositoryDB) Update(ctx context.Context, id int, updatedProduct models.Product) (models.Product, error) {
 	const query = `
 		UPDATE products
 		SET
@@ -253,7 +254,7 @@ Delete removes the product record with the specified ID from the database.
 If the deletion fails due to a DB error, it returns an InternalServerError.
 If the product does not exist it returns a NotFoundError.
 */
-func (r *ProductRepositoryDB) Delete(id int) error {
+func (r *ProductRepositoryDB) Delete(ctx context.Context, id int) error {
 	const query = `
 		DELETE FROM products
 		WHERE id=?	
