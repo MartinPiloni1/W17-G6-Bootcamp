@@ -1,10 +1,6 @@
 package repository
 
-import (
-	"context"
-
-	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
-)
+import "github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 
 type ProductRepository interface {
 	Create(ctx context.Context, product models.ProductAttributes) (models.Product, error)
