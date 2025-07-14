@@ -4,3 +4,8 @@ INSERT INTO employees (card_number_id, first_name, last_name, warehouse_id) VALU
         ('GHI003', 'Marta', 'Perez', 2),
         ('JKL004', 'Lucia', 'Romero', 2),
         ('MNO005', 'Sergio', 'Castro', 3);
+
+INSERT INTO `buyers` (`card_number_id`, `first_name`, `last_name`) VALUES
+        (12345678, 'Juan', 'Pérez'),
+        (23456789, 'Ana', 'Gómez'),
+        (34567890, 'Luis', 'Martínez');

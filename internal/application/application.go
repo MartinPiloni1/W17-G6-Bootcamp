@@ -1,6 +1,7 @@
 package application
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/handler"
@@ -64,18 +65,18 @@ func ProductRouter() chi.Router {
 	return router
 }
 
-func BuyersRouter() chi.Router {
+func BuyersRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
-	rp := repository.NewBuyerRepositoryFile() // fileRepository
-	sv := service.NewBuyerServiceDefault(rp)
-	hd := handler.NewBuyerHandler(sv)
+	repository := repository.NewBuyerRepositoryDB(db)
+	service := service.NewBuyerServiceDefault(repository)
+	handler := handler.NewBuyerHandler(service)
 
-	router.Post("/", hd.Create())
-	router.Get("/", hd.GetAll())
-	router.Get("/{id}", hd.GetByID())
-	router.Patch("/{id}", hd.Update())
-	router.Delete("/{id}", hd.Delete())
+	router.Post("/", handler.Create())
+	router.Get("/", handler.GetAll())
+	router.Get("/{id}", handler.GetByID())
+	router.Patch("/{id}", handler.Update())
+	router.Delete("/{id}", handler.Delete())
 	return router
 }
 

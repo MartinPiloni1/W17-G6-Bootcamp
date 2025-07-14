@@ -1,25 +1,25 @@
 package service
 
 import (
-	"slices"
+	"context"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
 type BuyerServiceDefault struct {
-	rp repository.BuyerRepository
+	repository repository.BuyerRepository
 }
 
-func NewBuyerServiceDefault(rp repository.BuyerRepository) BuyerService {
-	return &BuyerServiceDefault{rp: rp}
+func NewBuyerServiceDefault(repositoryInstance repository.BuyerRepository) BuyerService {
+	return &BuyerServiceDefault{repository: repositoryInstance}
 }
 
-func (s *BuyerServiceDefault) Create(newBuyer models.BuyerAttributes) (models.Buyer, error) {
+// creates a buyers if it has an unique CardNumberId that dosent already exist in the db
+func (s *BuyerServiceDefault) Create(ctx context.Context, newBuyer models.BuyerAttributes) (models.Buyer, error) {
 	// check if the cardNumber already exist
-	exist, err := s.rp.CardNumberIdAlreadyExist(newBuyer.CardNumberId)
+	exist, err := s.repository.CardNumberIdAlreadyExist(ctx, newBuyer.CardNumberId)
 	if err != nil {
 		return models.Buyer{}, err
 	}
@@ -27,35 +27,40 @@ func (s *BuyerServiceDefault) Create(newBuyer models.BuyerAttributes) (models.Bu
 	if exist {
 		return models.Buyer{}, httperrors.ConflictError{Message: "CardNumberId already in use"}
 	}
-	buyer, err := s.rp.Create(newBuyer)
+	buyer, err := s.repository.Create(ctx, newBuyer)
 	return buyer, err
 }
 
-func (s *BuyerServiceDefault) GetAll() ([]models.Buyer, error) {
-	buyerData, err := s.rp.GetAll()
+// Get all buyers
+func (s *BuyerServiceDefault) GetAll(ctx context.Context) ([]models.Buyer, error) {
+	buyerData, err := s.repository.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	data := utils.MapToSlice(buyerData)
-	slices.SortFunc(data, func(a, b models.Buyer) int {
-		return a.Id - b.Id
-	})
-	return data, err
+	return buyerData, err
 }
 
-func (s *BuyerServiceDefault) GetByID(id int) (models.Buyer, error) {
-	buyer, err := s.rp.GetByID(id)
+// Get one user based on his id
+func (s *BuyerServiceDefault) GetByID(ctx context.Context, id int) (models.Buyer, error) {
+	buyer, err := s.repository.GetByID(ctx, id)
 	return buyer, err
 }
 
-func (s *BuyerServiceDefault) Update(id int, BuyerData models.BuyerPatchRequest) (models.Buyer, error) {
-	buyer, err := s.rp.GetByID(id)
+// Update updates the Buyer identified by the given ID with the provided patch data.
+// It retrieves the existing Buyer from the repository, applies any non-nil fields
+// from BuyerData, and checks for CardNumberId conflicts before saving.
+//
+// Returns the updated Buyer struct if successful. If the Buyer is not found,
+// a not found error is returned. If the provided CardNumberId is already in use
+// by another Buyer, a conflict error is returned. Any other database or internal
+// errors are also returned.
+func (s *BuyerServiceDefault) Update(ctx context.Context, id int, BuyerData models.BuyerPatchRequest) (models.Buyer, error) {
+	buyer, err := s.repository.GetByID(ctx, id)
 	if err != nil {
 		return models.Buyer{}, err
 	}
 	if BuyerData.CardNumberId != nil {
-		exist, err := s.rp.CardNumberIdAlreadyExist(*BuyerData.CardNumberId)
+		exist, err := s.repository.CardNumberIdAlreadyExist(ctx, *BuyerData.CardNumberId)
 		if err != nil {
 			return models.Buyer{}, err
 		}
@@ -73,11 +78,12 @@ func (s *BuyerServiceDefault) Update(id int, BuyerData models.BuyerPatchRequest)
 		buyer.LastName = *BuyerData.LastName
 	}
 
-	updatedBuyer, err := s.rp.Update(id, buyer)
+	updatedBuyer, err := s.repository.Update(ctx, id, buyer)
 	return updatedBuyer, err
 }
 
-func (s *BuyerServiceDefault) Delete(id int) error {
-	err := s.rp.Delete(id)
+// Delete Buyer based on his id
+func (s *BuyerServiceDefault) Delete(ctx context.Context, id int) error {
+	err := s.repository.Delete(ctx, id)
 	return err
 }
