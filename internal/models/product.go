@@ -1,5 +1,9 @@
 package models
 
+/*
+ProductAttributes represents all the required attributes needed
+to create a product.
+*/
 type ProductAttributes struct {
 	Description                    string  `json:"description" validate:"required,min=5,max=500"`
 	ExpirationRate                 int     `json:"expiration_rate" validate:"required,gte=0"`
@@ -14,10 +18,11 @@ type ProductAttributes struct {
 	SellerID                       int     `json:"seller_id,omitempty" validate:"omitempty,gt=0"`
 }
 
-// Usamos punteros para poder diferenciar entre un campo no enviado (nil)
-// y un campo enviado con su valor cero (ej: 0, "").
-// Las etiquetas de validación usan 'omitempty' para que solo se apliquen
-// si el campo está presente en la petición.
+/*
+ProductPatchRequest holds optional fields for partial updates.
+Fields are pointers so that we can diferentiate empty fields and fields
+with default values.
+*/
 type ProductPatchRequest struct {
 	Description                    *string  `json:"description,omitempty" validate:"omitempty,min=5,max=500"`
 	ExpirationRate                 *int     `json:"expiration_rate,omitempty" validate:"omitempty,gte=0"`
@@ -32,6 +37,10 @@ type ProductPatchRequest struct {
 	SellerID                       *int     `json:"seller_id,omitempty" validate:"omitempty,gt=0"`
 }
 
+/*
+Product represents a product record, including its automatically assigned ID
+plus all attributes.
+*/
 type Product struct {
 	ID int `json:"id"`
 	ProductAttributes

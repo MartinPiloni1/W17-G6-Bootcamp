@@ -8,16 +8,31 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 )
 
+/*
+ProductRepositoryDB is a SQL implementation of ProductRepository.
+It uses the provided *sql.DB connection to perform CRUD operations
+against the products table in the database.
+*/
 type ProductRepositoryDB struct {
 	db *sql.DB
 }
 
+/*
+NewProductRepositoryDB constructs a ProductRepositoryDB that uses
+the given *sql.DB for all data operations.
+*/
 func NewProductRepositoryDB(db *sql.DB) ProductRepository {
 	return &ProductRepositoryDB{
 		db: db,
 	}
 }
 
+/*
+Create inserts a new product record into the database using the given
+ProductAttributes, then fetches and returns the complete Product
+(including its auto-generated ID). If any database operation fails,
+it returns an InternalServerError.
+*/
 func (repository *ProductRepositoryDB) Create(productAttribbutes models.ProductAttributes) (models.Product, error) {
 	const query = `
 		INSERT INTO products (
@@ -70,6 +85,11 @@ func (repository *ProductRepositoryDB) Create(productAttribbutes models.ProductA
 	return newProduct, nil
 }
 
+/*
+GetAll retrieves all product records from the database.
+It scans each row into a models.Product and returns the slice.
+On any database error, it returns an InternalServerError.
+*/
 func (repository *ProductRepositoryDB) GetAll() ([]models.Product, error) {
 	const query = `
 		SELECT
@@ -127,6 +147,11 @@ func (repository *ProductRepositoryDB) GetAll() ([]models.Product, error) {
 	return products, nil
 }
 
+/*
+GetByID retrieves a single Product by its integer ID.
+If no matching row exists, returns a NotFoundError.
+On other database errors, returns an InternalServerError.
+*/
 func (repository *ProductRepositoryDB) GetByID(id int) (models.Product, error) {
 	const query = `
 		SELECT
@@ -177,6 +202,12 @@ func (repository *ProductRepositoryDB) GetByID(id int) (models.Product, error) {
 	return product, nil
 }
 
+/*
+Update modifies the product record with the given ID in the database,
+setting each column to the corresponding field in the provided models.Product.
+After the UPDATE statement, it reloads and returns the updated Product.
+On any database failure, it returns an InternalServerError.
+*/
 func (repository *ProductRepositoryDB) Update(id int, product models.Product) (models.Product, error) {
 	const query = `
 		UPDATE products
@@ -223,6 +254,11 @@ func (repository *ProductRepositoryDB) Update(id int, product models.Product) (m
 	return updatedProduct, nil
 }
 
+/*
+Delete removes the product record with the specified ID from the database.
+If the deletion fails due to a DB error, it returns an InternalServerError.
+If the product does not exist it returns a NotFoundError.
+*/
 func (repository *ProductRepositoryDB) Delete(id int) error {
 	const query = `
 		DELETE FROM products

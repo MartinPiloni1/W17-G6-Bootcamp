@@ -14,14 +14,21 @@ import (
 	"github.com/go-playground/validator"
 )
 
+// ProductHandler handles HTTP requests for product resources.
 type ProductHandler struct {
 	service service.ProductService
 }
 
+// NewProductHandler constructs a new ProductHandler with the given service.
 func NewProductHandler(service service.ProductService) *ProductHandler {
 	return &ProductHandler{service: service}
 }
 
+/*
+Create returns an http.HandlerFunc that decodes a JSON payload,
+validates it, delegates creation to the service layer, and writes
+the appropriate JSON response.
+*/
 func (handler ProductHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var newProduct models.ProductAttributes
@@ -56,6 +63,10 @@ func (handler ProductHandler) Create() http.HandlerFunc {
 	}
 }
 
+/*
+GetAll returns an http.HandlerFunc that fetches all products
+from the service layer and writes them as JSON.
+*/
 func (handler ProductHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		productData, err := handler.service.GetAll()
@@ -71,6 +82,10 @@ func (handler ProductHandler) GetAll() http.HandlerFunc {
 	}
 }
 
+/*
+GetById returns an http.HandlerFunc that parses the product ID
+from the URL, retrieves the product, and writes it as JSON.
+*/
 func (handler ProductHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -92,6 +107,11 @@ func (handler ProductHandler) GetById() http.HandlerFunc {
 	}
 }
 
+/*
+Update returns an http.HandlerFunc that parses the id URL parameter,
+decodes a partial-product JSON payload, validates it, delegates the update
+to the service layer, and responds with the updated product.
+*/
 func (handler ProductHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -135,6 +155,10 @@ func (handler ProductHandler) Update() http.HandlerFunc {
 	}
 }
 
+/*
+Delete returns an http.HandlerFunc that parses the id URL parameter,
+delegates deletion to the service layer, and responds with no content.
+*/
 func (handler ProductHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))

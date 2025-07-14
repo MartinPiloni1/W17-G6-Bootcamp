@@ -50,6 +50,12 @@ func WarehouseRouter() chi.Router {
 	return router
 }
 
+/*
+ProductRouter creates and returns a chi.Router configured
+with all CRUD endpoints for products.
+
+db: an open *sql.DB connection used by the repository.
+*/
 func ProductRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
