@@ -1,6 +1,7 @@
 package application
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/handler"
@@ -106,5 +107,17 @@ func SectionRouter() chi.Router {
 	router.Delete("/{id}", hd.Delete())
 	router.Post("/", hd.Create())
 	router.Patch("/{id}", hd.Update())
+	return router
+}
+
+func CarryRouter(db *sql.DB) chi.Router {
+	repositoryC := repository.NewCarryRepositoryDb(db)
+	serviceC := service.NewCarryService(repositoryC)
+	handlerC := handler.NewCarryHandler(serviceC)
+
+	router := chi.NewRouter()
+
+	router.Post("/", handlerC.Create())
+
 	return router
 }

@@ -48,3 +48,8 @@ type SectionService interface {
 	Update(id int, data models.UpdateSectionRequest) (models.Section, error)
 	Delete(id int) error
 }
+
+type CarryService interface {
+	// Create validates and creates a new carry.
+	Create(carryAttributes models.CarryAttributes) (models.Carry, error)
+}
