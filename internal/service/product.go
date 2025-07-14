@@ -9,30 +9,31 @@ import (
 )
 
 type ProductServiceDefault struct {
-	rp repository.ProductRepository
+	repository repository.ProductRepository
 }
 
-func NewProductServiceDefault(repo repository.ProductRepository) ProductService {
-	return &ProductServiceDefault{rp: repo}
+func NewProductServiceDefault(repository repository.ProductRepository) ProductService {
+	return &ProductServiceDefault{repository: repository}
 }
 
-func (p *ProductServiceDefault) Create(product models.ProductAttributes) (models.Product, error) {
-	products, err := p.rp.GetAll()
+func (service *ProductServiceDefault) Create(product models.ProductAttributes) (models.Product, error) {
+	products, err := service.repository.GetAll()
 	if err != nil {
 		return models.Product{}, err
 	}
 
 	for _, p := range products {
 		if p.ProductCode == product.ProductCode {
-			return models.Product{}, httperrors.ConflictError{Message: "A product with this product code already exists"}
+			return models.Product{},
+				httperrors.ConflictError{Message: "A product with this product code already exists"}
 		}
 	}
 
-	return p.rp.Create(product)
+	return service.repository.Create(product)
 }
 
-func (p *ProductServiceDefault) GetAll() ([]models.Product, error) {
-	data, err := p.rp.GetAll()
+func (service *ProductServiceDefault) GetAll() ([]models.Product, error) {
+	data, err := service.repository.GetAll()
 	if err != nil {
 		return []models.Product{}, err
 	}
@@ -43,18 +44,18 @@ func (p *ProductServiceDefault) GetAll() ([]models.Product, error) {
 	return data, nil
 }
 
-func (p *ProductServiceDefault) GetByID(id int) (models.Product, error) {
-	return p.rp.GetByID(id)
+func (service *ProductServiceDefault) GetByID(id int) (models.Product, error) {
+	return service.repository.GetByID(id)
 }
 
-func (p *ProductServiceDefault) Update(id int, productAttributes models.ProductPatchRequest) (models.Product, error) {
-	product, err := p.rp.GetByID(id)
+func (service *ProductServiceDefault) Update(id int, productAttributes models.ProductPatchRequest) (models.Product, error) {
+	product, err := service.repository.GetByID(id)
 	if err != nil {
 		return models.Product{}, err
 	}
 
 	if productAttributes.ProductCode != nil {
-		products, err := p.rp.GetAll()
+		products, err := service.repository.GetAll()
 		if err != nil {
 			return models.Product{}, err
 		}
@@ -62,7 +63,8 @@ func (p *ProductServiceDefault) Update(id int, productAttributes models.ProductP
 		product.ProductCode = *productAttributes.ProductCode
 		for _, p := range products {
 			if p.ProductCode == product.ProductCode && p.ID != product.ID {
-				return models.Product{}, httperrors.ConflictError{Message: "A product with this product code already exists"}
+				return models.Product{},
+					httperrors.ConflictError{Message: "A product with this product code already exists"}
 			}
 		}
 	}
@@ -98,9 +100,9 @@ func (p *ProductServiceDefault) Update(id int, productAttributes models.ProductP
 		product.SellerID = *productAttributes.SellerID
 	}
 
-	return p.rp.Update(id, product)
+	return service.repository.Update(id, product)
 }
 
-func (p *ProductServiceDefault) Delete(id int) error {
-	return p.rp.Delete(id)
+func (service *ProductServiceDefault) Delete(id int) error {
+	return service.repository.Delete(id)
 }

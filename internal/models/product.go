@@ -36,7 +36,3 @@ type Product struct {
 	ID int `json:"id"`
 	ProductAttributes
 }
-
-func (p Product) GetID() int {
-	return p.ID
-}

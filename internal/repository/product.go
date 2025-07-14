@@ -94,26 +94,26 @@ func (repository *ProductRepositoryDB) GetAll() ([]models.Product, error) {
 
 	var products []models.Product
 	for rows.Next() {
-		var p models.Product
+		var product models.Product
 		err = rows.Scan(
-			&p.ID,
-			&p.Description,
-			&p.ExpirationRate,
-			&p.FreezingRate,
-			&p.Height,
-			&p.Length,
-			&p.Width,
-			&p.NetWeight,
-			&p.ProductCode,
-			&p.RecommendedFreezingTemperature,
-			&p.ProductTypeID,
-			&p.SellerID,
+			&product.ID,
+			&product.Description,
+			&product.ExpirationRate,
+			&product.FreezingRate,
+			&product.Height,
+			&product.Length,
+			&product.Width,
+			&product.NetWeight,
+			&product.ProductCode,
+			&product.RecommendedFreezingTemperature,
+			&product.ProductTypeID,
+			&product.SellerID,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("database scan error: %w", err)
 		}
 
-		products = append(products, p)
+		products = append(products, product)
 	}
 
 	if err := rows.Err(); err != nil {

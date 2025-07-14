@@ -53,15 +53,15 @@ func WarehouseRouter() chi.Router {
 func ProductRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
-	rp := repository.NewProductRepositoryDB(db)
-	sv := service.NewProductServiceDefault(rp)
-	hd := handler.NewProductHandler(sv)
+	repository := repository.NewProductRepositoryDB(db)
+	service := service.NewProductServiceDefault(repository)
+	handler := handler.NewProductHandler(service)
 
-	router.Post("/", hd.Create())
-	router.Get("/", hd.GetAll())
-	router.Get("/{id}", hd.GetById())
-	router.Patch("/{id}", hd.Update())
-	router.Delete("/{id}", hd.Delete())
+	router.Post("/", handler.Create())
+	router.Get("/", handler.GetAll())
+	router.Get("/{id}", handler.GetById())
+	router.Patch("/{id}", handler.Update())
+	router.Delete("/{id}", handler.Delete())
 	return router
 }
 

@@ -14,20 +14,20 @@ import (
 )
 
 type ProductHandler struct {
-	sv service.ProductService
+	service service.ProductService
 }
 
-func NewProductHandler(sv service.ProductService) *ProductHandler {
-	return &ProductHandler{sv: sv}
+func NewProductHandler(service service.ProductService) *ProductHandler {
+	return &ProductHandler{service: service}
 }
 
-func (h ProductHandler) Create() http.HandlerFunc {
+func (handler ProductHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var newProduct models.ProductAttributes
 
-		dec := json.NewDecoder(r.Body)
-		dec.DisallowUnknownFields()
-		err := dec.Decode(&newProduct)
+		decoder := json.NewDecoder(r.Body)
+		decoder.DisallowUnknownFields()
+		err := decoder.Decode(&newProduct)
 		if err != nil {
 			response.Error(w, http.StatusBadRequest, "Invalid JSON body")
 			return
@@ -40,7 +40,7 @@ func (h ProductHandler) Create() http.HandlerFunc {
 			return
 		}
 
-		productData, err := h.sv.Create(newProduct)
+		productData, err := handler.service.Create(newProduct)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -53,9 +53,9 @@ func (h ProductHandler) Create() http.HandlerFunc {
 	}
 }
 
-func (h ProductHandler) GetAll() http.HandlerFunc {
+func (handler ProductHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		productData, err := h.sv.GetAll()
+		productData, err := handler.service.GetAll()
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -68,7 +68,7 @@ func (h ProductHandler) GetAll() http.HandlerFunc {
 	}
 }
 
-func (h ProductHandler) GetById() http.HandlerFunc {
+func (handler ProductHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil || id <= 0 {
@@ -76,7 +76,7 @@ func (h ProductHandler) GetById() http.HandlerFunc {
 			return
 		}
 
-		product, err := h.sv.GetByID(id)
+		product, err := handler.service.GetByID(id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -89,7 +89,7 @@ func (h ProductHandler) GetById() http.HandlerFunc {
 	}
 }
 
-func (h ProductHandler) Update() http.HandlerFunc {
+func (handler ProductHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil || id <= 0 {
@@ -98,9 +98,9 @@ func (h ProductHandler) Update() http.HandlerFunc {
 		}
 
 		var updatedProduct models.ProductPatchRequest
-		dec := json.NewDecoder(r.Body)
-		dec.DisallowUnknownFields()
-		err = dec.Decode(&updatedProduct)
+		decoder := json.NewDecoder(r.Body)
+		decoder.DisallowUnknownFields()
+		err = decoder.Decode(&updatedProduct)
 		if err != nil {
 			response.Error(w, http.StatusBadRequest, "Invalid JSON body")
 			return
@@ -113,7 +113,7 @@ func (h ProductHandler) Update() http.HandlerFunc {
 			return
 		}
 
-		product, err := h.sv.Update(id, updatedProduct)
+		product, err := handler.service.Update(id, updatedProduct)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -126,7 +126,7 @@ func (h ProductHandler) Update() http.HandlerFunc {
 	}
 }
 
-func (h ProductHandler) Delete() http.HandlerFunc {
+func (handler ProductHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil || id <= 0 {
@@ -134,7 +134,7 @@ func (h ProductHandler) Delete() http.HandlerFunc {
 			return
 		}
 
-		err = h.sv.Delete(id)
+		err = handler.service.Delete(id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
