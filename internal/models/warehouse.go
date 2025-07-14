@@ -6,7 +6,7 @@ type Warehouse struct {
 	WarehouseAttributes
 }
 
-// WarehouseAttributes holds the details of a warehouse.
+// WarehouseAttributes holds the details of a warehouse without the ID field.
 type WarehouseAttributes struct {
 	WarehouseCode      string  `json:"warehouse_code"`
 	Address            string  `json:"address"`

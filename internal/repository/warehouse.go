@@ -10,12 +10,12 @@ import (
 )
 
 type WarehouseRepositoryDB struct {
-	TableName string
-	db        *sql.DB
+	db *sql.DB
 }
 
+// NewWarehouseRepositoryDb creates a new instance of WarehouseRepositoryDB.
 func NewWarehouseRepositoryDb(db *sql.DB) *WarehouseRepositoryDB {
-	return &WarehouseRepositoryDB{TableName: "warehouse", db: db}
+	return &WarehouseRepositoryDB{db: db}
 }
 
 // Create adds a new warehouse and returns the created warehouse.
@@ -42,7 +42,7 @@ func (p *WarehouseRepositoryDB) Create(warehouseAttributes models.WarehouseAttri
 			if me.Number == 1062 {
 				return models.Warehouse{}, httperrors.ConflictError{Message: "the WarehouseCode already exists"}
 			}
-			return models.Warehouse{}, httperrors.InternalServerError{Message: "error creating carry"}
+			return models.Warehouse{}, httperrors.InternalServerError{Message: "error creating warehouse"}
 		}
 	}
 	lastInsertId, err := result.LastInsertId()
