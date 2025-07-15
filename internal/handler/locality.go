@@ -12,8 +12,6 @@ import (
 	"github.com/bootcamp-go/web/response"
 )
 
-// ---- Handler Struct ----
-
 type LocalityHandler struct {
 	service service.LocalityService
 }

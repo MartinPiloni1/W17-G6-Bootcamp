@@ -18,10 +18,6 @@ func NewLocalityRepository(db *sql.DB) LocalityRepository {
 // This function creates a new locality in the database.
 // It checks if all required fields are provided and if the locality ID already exists.
 func (r *LocalityRepositoryDB) Create(locality models.Locality) (models.Locality, error) {
-	if locality.ID == "" || locality.LocalityName == "" || locality.ProvinceName == "" || locality.CountryName == "" {
-		return models.Locality{}, httperrors.UnprocessableEntityError{Message: "All fields are required"}
-	}
-
 	var exists int
 	const queryCheckExists = `
         SELECT COUNT(*) 
@@ -68,45 +64,44 @@ func (r *LocalityRepositoryDB) GetByID(id string) (models.Locality, error) {
 // This function retrieves a report of sellers by locality.
 // If an ID is provided, it returns the report for that specific locality.
 // If no ID is provided, it returns the report for all localities.
-func (r *LocalityRepositoryDB) GetSellerReport(id *string) ([]models.SellerReport, error) {
+func (r *LocalityRepositoryDB) GetSellerReport(localityID *string) ([]models.SellerReport, error) {
 	var rows *sql.Rows
 	var err error
 
-	const querySellerReportByID = `
-        SELECT l.id, l.locality_name, COUNT(s.id)
-        FROM localities l
-        LEFT JOIN sellers s ON l.id = s.locality_id
-        WHERE l.id = ?
-        GROUP BY l.id, l.locality_name
-    `
-
-	if id != nil {
-		rows, err = r.db.Query(querySellerReportByID, id)
+	if localityID != nil && *localityID != "" {
+		rows, err = r.db.Query(`
+            SELECT l.id, l.locality_name, COUNT(s.id)
+            FROM localities l
+            LEFT JOIN sellers s ON l.id = s.locality_id
+            WHERE l.id = ?
+            GROUP BY l.id, l.locality_name
+        `, *localityID)
 	} else {
-		const querySellerReportAll = `
-        SELECT l.id, l.locality_name, COUNT(s.id)
-        FROM localities l
-        LEFT JOIN sellers s ON l.id = s.locality_id
-        GROUP BY l.id, l.locality_name
-    	`
-		rows, err = r.db.Query(querySellerReportAll)
+		rows, err = r.db.Query(`
+            SELECT l.id, l.locality_name, COUNT(s.id)
+            FROM localities l
+            LEFT JOIN sellers s ON l.id = s.locality_id
+            GROUP BY l.id, l.locality_name
+        `)
 	}
-
 	if err != nil {
-		return nil, err
+		return nil, httperrors.InternalServerError{Message: "Error obtaining Report by LocalityId"}
 	}
 	defer rows.Close()
 
 	var reports []models.SellerReport
 	for rows.Next() {
-		var r models.SellerReport
-		if err := rows.Scan(&r.LocalityID, &r.LocalityName, &r.SellersCount); err != nil {
-			return nil, err
+		var report models.SellerReport
+		if err := rows.Scan(
+			&report.LocalityID,
+			&report.LocalityName,
+			&report.SellersCount,
+		); err != nil {
+			return nil, httperrors.InternalServerError{Message: "Error reading Seller data"}
 		}
-		reports = append(reports, r)
+		reports = append(reports, report)
 	}
-
-	if id != nil && len(reports) == 0 {
+	if localityID != nil && len(reports) == 0 {
 		return nil, httperrors.NotFoundError{Message: "Locality not found"}
 	}
 	return reports, nil

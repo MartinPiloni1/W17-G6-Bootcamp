@@ -63,7 +63,7 @@ func (r SellerRepositoryDB) GetAll() ([]models.Seller, error) {
 // It checks if the locality ID exists before inserting the seller.
 func (r *SellerRepositoryDB) Create(att models.SellerAttributes) (models.Seller, error) {
 	const queryCheckLocality = `
-		SELECT id, locality_name, province_name, country_name
+		SELECT 1
 		FROM localities 
 		WHERE id = ?
 	`
