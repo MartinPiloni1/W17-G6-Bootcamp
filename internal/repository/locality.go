@@ -2,9 +2,12 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
+	"log"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/go-sql-driver/mysql"
 )
 
 type LocalityRepositoryDB struct {
@@ -16,31 +19,25 @@ func NewLocalityRepository(db *sql.DB) LocalityRepository {
 }
 
 // This function creates a new locality in the database.
-// It checks if all required fields are provided and if the locality ID already exists.
+// It returns the created locality or an error if the insertion fails.
 func (r *LocalityRepositoryDB) Create(locality models.Locality) (models.Locality, error) {
-	var exists int
-	const queryCheckExists = `
-        SELECT COUNT(*) 
-        FROM localities 
-        WHERE id = ?
-    `
-	err := r.db.QueryRow(queryCheckExists, locality.ID).Scan(&exists)
-	if err != nil {
-		return models.Locality{}, err
-	}
-	if exists > 0 {
-		return models.Locality{}, httperrors.ConflictError{Message: "Locality id already exists"}
-	}
-
 	const queryInsertLocality = `
         INSERT INTO localities (id, locality_name, province_name, country_name)
         VALUES (?, ?, ?, ?)
     `
-	_, err = r.db.Exec(queryInsertLocality, locality.ID, locality.LocalityName, locality.ProvinceName, locality.CountryName)
+	_, err := r.db.Exec(queryInsertLocality, locality.ID, locality.LocalityName, locality.ProvinceName, locality.CountryName)
 	if err != nil {
+		var sqlErr *mysql.MySQLError
+		if errors.As(err, &sqlErr) {
+			if sqlErr.Number == 1062 {
+				return models.Locality{}, httperrors.ConflictError{Message: "The locality ID already exists"}
+			}
+			if sqlErr.Number == 1452 {
+				return models.Locality{}, httperrors.NotFoundError{Message: "The locality ID does not exist"}
+			}
+		}
 		return models.Locality{}, err
 	}
-
 	return locality, nil
 }
 
@@ -58,7 +55,10 @@ func (r *LocalityRepositoryDB) GetByID(id string) (models.Locality, error) {
 	if err == sql.ErrNoRows {
 		return models.Locality{}, httperrors.NotFoundError{Message: "Locality not found"}
 	}
-	return locality, err
+	if err != nil {
+		return models.Locality{}, httperrors.InternalServerError{Message: "DB error: " + err.Error()}
+	}
+	return locality, nil
 }
 
 // This function retrieves a report of sellers by locality.
@@ -87,7 +87,12 @@ func (r *LocalityRepositoryDB) GetSellerReport(localityID *string) ([]models.Sel
 	if err != nil {
 		return nil, httperrors.InternalServerError{Message: "Error obtaining Report by LocalityId"}
 	}
-	defer rows.Close()
+
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("error closing rows: %v", err)
+		}
+	}()
 
 	var reports []models.SellerReport
 	for rows.Next() {

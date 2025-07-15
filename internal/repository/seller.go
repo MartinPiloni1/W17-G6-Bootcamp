@@ -2,9 +2,12 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
+	"log"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/go-sql-driver/mysql"
 )
 
 type SellerRepositoryDB struct {
@@ -47,7 +50,12 @@ func (r SellerRepositoryDB) GetAll() ([]models.Seller, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("error closing rows: %v", err)
+		}
+	}()
+
 	var sellers []models.Seller
 	for rows.Next() {
 		var s models.Seller
@@ -60,29 +68,26 @@ func (r SellerRepositoryDB) GetAll() ([]models.Seller, error) {
 }
 
 // This function creates a new seller in the database.
-// It checks if the locality ID exists before inserting the seller.
+// It takes a SellerAttributes struct as input and returns the created Seller or an error.
+// It checks for unique constraints on the CID and foreign key constraints on the locality_id.
 func (r *SellerRepositoryDB) Create(att models.SellerAttributes) (models.Seller, error) {
-	const queryCheckLocality = `
-		SELECT 1
-		FROM localities 
-		WHERE id = ?
-	`
-	var locExists int
-	err := r.db.QueryRow(queryCheckLocality, att.LocalityID).Scan(&locExists)
-	if err != nil {
-		return models.Seller{}, httperrors.InternalServerError{Message: "Locality not found"}
-	}
-	if locExists == 0 {
-		return models.Seller{}, httperrors.ConflictError{Message: "Locality ID does not exist"}
-	}
-
 	const queryInsertSeller = `
-		INSERT INTO sellers (cid, company_name, address, telephone, locality_id) 
-		VALUES (?, ?, ?, ?, ?)
-	`
+        INSERT INTO sellers (cid, company_name, address, telephone, locality_id) 
+        VALUES (?, ?, ?, ?, ?)
+    `
 	res, err := r.db.Exec(queryInsertSeller, att.CID, att.CompanyName, att.Address, att.Telephone, att.LocalityID)
 	if err != nil {
-		return models.Seller{}, err
+		var sqlErr *mysql.MySQLError
+		if errors.As(err, &sqlErr) {
+			switch sqlErr.Number {
+			case 1062:
+				return models.Seller{}, httperrors.ConflictError{Message: "Seller CID already exists"}
+			case 1452:
+				//No existe la FK (locality_id)
+				return models.Seller{}, httperrors.ConflictError{Message: "Locality ID does not exist"}
+			}
+		}
+		return models.Seller{}, httperrors.InternalServerError{Message: "Error creating seller"}
 	}
 	id, _ := res.LastInsertId()
 	return models.Seller{
