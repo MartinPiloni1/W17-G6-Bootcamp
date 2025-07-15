@@ -91,3 +91,19 @@ func (h *LocalityHandler) GetSellerReport() http.HandlerFunc {
 		})
 	}
 }
+
+// GetReportByLocalityId handles the retrieval of a report by locality ID.
+func (h *LocalityHandler) GetReportByLocalityId() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		localityId := r.URL.Query().Get("id")
+		result, err := h.service.GetReportByLocalityId(localityId)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+		response.JSON(w, http.StatusOK, map[string]any{
+			"data": result,
+		})
+	}
+}

@@ -26,6 +26,8 @@ type LocalityRepository interface {
 	Create(locality models.Locality) (models.Locality, error)
 	GetByID(id string) (models.Locality, error)
 	GetSellerReport(id *string) ([]models.SellerReport, error)
+	// GetReportByLocalityId retrieves a report of carries by locality ID.
+	GetReportByLocalityId(localityId string) ([]models.CarryReport, error)
 }
 
 // WarehouseRepository provides methods for warehouse data access.
@@ -66,9 +68,8 @@ type SectionRepository interface {
 	Delete(id int) error
 }
 
-type CarriesRepository interface {
+// CarryRepository provides methods for carry data access.
+type CarryRepository interface {
 	// Create creates a new carry.
 	Create(carryAttributes models.CarryAttributes) (models.Carry, error)
-	// GetReportByLocalityId retrieves a report of carries by locality ID.
-	GetReportByLocalityId(localityId string) ([]models.CarryReport, error)
 }

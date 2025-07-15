@@ -112,3 +112,58 @@ func (r *LocalityRepositoryDB) GetSellerReport(localityID *string) ([]models.Sel
 	}
 	return reports, nil
 }
+
+// GetReportByLocalityId retrieves a report of carries by locality ID.
+func (r *LocalityRepositoryDB) GetReportByLocalityId(localityId string) ([]models.CarryReport, error) {
+	var (
+		query string
+		rows  *sql.Rows
+		err   error
+	)
+	if localityId == "" {
+		query = `
+			SELECT
+               l.id AS locality_id,
+               l.locality_name,
+            COALESCE(COUNT(c.id), 0) AS carries_count
+            FROM carries c
+            RIGHT JOIN localities l ON c.locality_id = l.id
+            GROUP BY 1, 2;
+		`
+		rows, err = r.db.Query(query)
+	} else {
+		query = `
+			SELECT
+                l.id AS locality_id,
+                l.locality_name,
+            COALESCE(COUNT(c.id), 0) AS carries_count
+            FROM carries c
+            RIGHT JOIN localities l ON c.locality_id = l.id
+			WHERE l.id = ?
+			GROUP BY 1, 2;
+		`
+		rows, err = r.db.Query(query, localityId)
+	}
+	if err != nil {
+		return nil, httperrors.InternalServerError{Message: "error obtaining Report by LocalityId"}
+	}
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("error closing rows: %v", err)
+		}
+	}()
+
+	var reportCarries []models.CarryReport
+	for rows.Next() {
+		var reportCarry models.CarryReport
+		if err := rows.Scan(
+			&reportCarry.LocalityId,
+			&reportCarry.LocalityName,
+			&reportCarry.CarriesCount,
+		); err != nil {
+			return nil, httperrors.InternalServerError{Message: "error reading Report by LocalityId data"}
+		}
+		reportCarries = append(reportCarries, reportCarry)
+	}
+	return reportCarries, nil
+}

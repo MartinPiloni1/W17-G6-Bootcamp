@@ -6,7 +6,6 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/go-sql-driver/mysql"
-	"log"
 )
 
 type CarryRepositoryDB struct {
@@ -61,59 +60,4 @@ func (p *CarryRepositoryDB) Create(carryAttributes models.CarryAttributes) (mode
 	}
 
 	return newCarry, nil
-}
-
-// GetReportByLocalityId retrieves a report of carries by locality ID.
-func (p *CarryRepositoryDB) GetReportByLocalityId(localityId string) ([]models.CarryReport, error) {
-	var (
-		query string
-		rows  *sql.Rows
-		err   error
-	)
-	if localityId == "" {
-		query = `
-			SELECT
-				c.locality_id,
-				l.locality_name,
-				COUNT(c.id) AS carries_count
-			FROM carries c
-			INNER JOIN localities l ON c.locality_id = l.id
-			GROUP BY c.locality_id, l.locality_name
-		`
-		rows, err = p.db.Query(query)
-	} else {
-		query = `
-			SELECT
-				c.locality_id,
-				l.locality_name,
-				COUNT(c.id) AS carries_count
-			FROM carries c
-			LEFT JOIN localities l ON c.locality_id = l.id
-			WHERE c.locality_id = ?
-			GROUP BY c.locality_id, l.locality_name
-		`
-		rows, err = p.db.Query(query, localityId)
-	}
-	if err != nil {
-		return nil, httperrors.InternalServerError{Message: "error obtaining Report by LocalityId"}
-	}
-	defer func() {
-		if err := rows.Close(); err != nil {
-			log.Printf("error closing rows: %v", err)
-		}
-	}()
-
-	var reportCarries []models.CarryReport
-	for rows.Next() {
-		var reportCarry models.CarryReport
-		if err := rows.Scan(
-			&reportCarry.LocalityId,
-			&reportCarry.LocalityName,
-			&reportCarry.CarriesCount,
-		); err != nil {
-			return nil, httperrors.InternalServerError{Message: "error reading warehouse data"}
-		}
-		reportCarries = append(reportCarries, reportCarry)
-	}
-	return reportCarries, nil
 }

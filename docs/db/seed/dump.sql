@@ -50,3 +50,23 @@ INSERT INTO sellers (cid, company_name, address, telephone, locality_id) VALUES
 (6, 'Bäckerei Berlin', 'Unter den Linden 77', '+4930123456', '10115'),
 (7, 'Supermercado Español', 'Calle Gran Vía 1', '34911223344', '28001'),
 (8, 'Chivitería El Prado', 'Av. 18 de Julio 1010', '59829123456', '11000');
+
+
+
+INSERT INTO carries (cid, company_name, address, telephone, locality_id) VALUES
+("CID1217", 'Alkemy', 'Monroe 860', '47470000', '6700'),
+("CID2332", 'Globant', 'Av. Córdoba 1200', '40334000', '1001'),
+("CID#232", 'Mercado Libre', 'Alem 876', '45450000', '1001'),
+("CID4434", 'Tech Solutions', 'Av. Pellegrini 900', '3411234567', '2000'),
+("CID2445", 'Panaderia El Sol', 'Av. Colon 1000', '3511112222', '5000'),
+("CID3326", 'Bäckerei Berlin', 'Unter den Linden 77', '+4930123456', '10115');
+
+
+INSERT INTO warehouse (warehouse_code, address, telephone, minimun_capacity, minimun_temperature) VALUES
+    ("DHK", 'Monroe 860', '47470000', '10', '10'),
+    ("CBA", 'Cordoba 1234', '3516000123', '25', '4'),
+    ("DHMP", 'Monroe 860', '47470000', '10', '10'),
+    ("PAT", 'Parque industrial sur', '02991543210', '30', '-2'),
+    ("CBA2", 'Cordoba 5678', '3516000456', '20', '4'),
+    ("DHK2", 'Monroe 1234', '47470001', '15', '10'),
+    ("CBA3", 'Cordoba 91011', '3516000789', '25', '4');,

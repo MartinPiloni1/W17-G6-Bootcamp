@@ -10,13 +10,13 @@ import (
 )
 
 type CarryHandler struct {
-	sv service.CarryService
+	service service.CarryService
 }
 
 // NewCarryHandler creates a new CarryHandler instance with the provided CarryService.
 func NewCarryHandler(sv service.CarryService) *CarryHandler {
 	return &CarryHandler{
-		sv: sv,
+		service: sv,
 	}
 }
 
@@ -29,7 +29,7 @@ func (h CarryHandler) Create() http.HandlerFunc {
 			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
-		carryData, err := h.sv.Create(carry)
+		carryData, err := h.service.Create(carry)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -37,22 +37,6 @@ func (h CarryHandler) Create() http.HandlerFunc {
 		}
 		response.JSON(w, http.StatusCreated, map[string]any{
 			"data": carryData,
-		})
-	}
-}
-
-// GetReportByLocalityId handles the retrieval of a report by locality ID.
-func (h CarryHandler) GetReportByLocalityId() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		localityId := r.URL.Query().Get("id")
-		result, err := h.sv.GetReportByLocalityId(localityId)
-		if err != nil {
-			statusCode, msg := httperrors.GetErrorData(err)
-			response.Error(w, statusCode, msg)
-			return
-		}
-		response.JSON(w, http.StatusCreated, map[string]any{
-			"data": result,
 		})
 	}
 }

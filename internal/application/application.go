@@ -45,6 +45,7 @@ func LocalityRouter(db *sql.DB) chi.Router {
 	router.Post("/", localityHandler.Create())
 	router.Get("/{id}", localityHandler.GetByID())
 	router.Get("/reportSellers", localityHandler.GetSellerReport())
+	router.Get("/reportCarries", localityHandler.GetReportByLocalityId())
 	return router
 }
 
@@ -127,13 +128,12 @@ func SectionRouter() chi.Router {
 }
 
 func CarryRouter(db *sql.DB) chi.Router {
-	repositoryC := repository.NewCarryRepositoryDb(db)
-	serviceC := service.NewCarryService(repositoryC)
-	handlerC := handler.NewCarryHandler(serviceC)
+	carryRepository := repository.NewCarryRepositoryDb(db)
+	carryService := service.NewCarryService(carryRepository)
+	carryHandler := handler.NewCarryHandler(carryService)
 
 	router := chi.NewRouter()
+	router.Post("/", carryHandler.Create())
 
-	router.Post("/", handlerC.Create())
-	router.Get("/reportCarries", handlerC.GetReportByLocalityId())
 	return router
 }

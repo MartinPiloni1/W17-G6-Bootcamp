@@ -26,6 +26,8 @@ type LocalityService interface {
 	Create(l models.Locality) (models.Locality, error)
 	GetByID(id string) (models.Locality, error)
 	GetSellerReport(id *string) ([]models.SellerReport, error)
+	// GetReportByLocalityId retrieves a report of carries by locality ID.
+	GetReportByLocalityId(localityId string) ([]models.CarryReport, error)
 }
 
 // WarehouseService defines warehouse operations.
@@ -66,9 +68,8 @@ type SectionService interface {
 	Delete(id int) error
 }
 
+// CarryService defines operations for managing carries.
 type CarryService interface {
 	// Create validates and creates a new carry.
 	Create(carryAttributes models.CarryAttributes) (models.Carry, error)
-	// GetReportByLocalityId retrieves a report of carries by locality ID.
-	GetReportByLocalityId(localityId string) ([]models.CarryReport, error)
 }
