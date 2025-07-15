@@ -37,6 +37,13 @@ func (s *ProductServiceDefault) GetByID(ctx context.Context, id int) (models.Pro
 	return s.repo.GetByID(ctx, id)
 }
 
+// GetRecordsPerProduct returns a list of ProductRecordCount entries.
+// If id is nil, it retrieves counts for all products; otherwise it returns
+// the record count for the single product identified by id.
+func (s *ProductServiceDefault) GetRecordsPerProduct(ctx context.Context, id *int) ([]models.ProductRecordCount, error) {
+	return s.repo.GetRecordsPerProduct(ctx, id)
+}
+
 // Update retrieves an existing Product by its ID, applies any non-nil fields
 // from the provided ProductPatchRequest, and then persists the updated Product
 // via the repository. Returns the updated Product or an error

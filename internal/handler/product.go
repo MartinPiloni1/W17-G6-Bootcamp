@@ -117,6 +117,41 @@ func (h ProductHandler) GetById() http.HandlerFunc {
 	}
 }
 
+// GetRecordsPerProduct returns an http.HandlerFunc that handles GET requests
+// for fetching the number of product_records grouped by product.
+//
+// Query Parameters:
+//   - id (optional): when provided and valid, the handler fetches the record count
+//     for that single product. If omitted or empty, the handler returns counts for
+//     all products.
+func (h *ProductHandler) GetRecordsPerProduct() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		var id *int
+		idAsString := r.URL.Query().Get("id")
+		if idAsString != "" {
+			val, err := strconv.Atoi(idAsString)
+			if err != nil {
+				response.Error(w, http.StatusBadRequest, "invalid id")
+				return
+			}
+			id = &val
+		}
+
+		data, err := h.svc.GetRecordsPerProduct(ctx, id)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+
+		response.JSON(w, http.StatusOK, map[string]any{
+			"data": data,
+		})
+	}
+}
+
 // Update returns an http.HandlerFunc that parses the id URL parameter,
 // decodes a partial-product JSON payload, validates it, delegates the update
 // to the service layer, and responds with the updated product.

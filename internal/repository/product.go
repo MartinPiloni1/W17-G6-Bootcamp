@@ -205,6 +205,48 @@ func (r *ProductRepositoryDB) GetByID(ctx context.Context, id int) (models.Produ
 	return product, nil
 }
 
+// GetRecordsPerProduct returns the count of product_records for each product.
+// If id != nil, it filters by that product ID; otherwise it returns all products.
+// It uses a LEFT JOIN so products with zero records appear with count = 0.
+func (r *ProductRepositoryDB) GetRecordsPerProduct(ctx context.Context, id *int) ([]models.ProductRecordCount, error) {
+	query := `
+			SELECT 
+				p.id, 
+				p.description,
+				COUNT(pr.id) AS records_count
+			FROM products p
+			LEFT JOIN product_records pr ON pr.product_id = p.id
+		`
+
+	var args []interface{}
+	if id != nil {
+		query += " WHERE p.id = ?"
+		args = append(args, *id)
+	}
+	query += " GROUP BY p.id"
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ProductsRecordsCount []models.ProductRecordCount
+	for rows.Next() {
+		var productRecordCount models.ProductRecordCount
+		err := rows.Scan(
+			&productRecordCount.ProductID,
+			&productRecordCount.Description,
+			&productRecordCount.RecordsCount,
+		)
+		if err != nil {
+			return nil, err
+		}
+		ProductsRecordsCount = append(ProductsRecordsCount, productRecordCount)
+	}
+	return ProductsRecordsCount, nil
+}
+
 // Update modifies an existing product record in the database. It applies all
 // fields from updatedProduct to the row identified by id.
 //
