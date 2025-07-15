@@ -71,9 +71,8 @@ func (r *ProductRepositoryDB) Create(ctx context.Context, productAttributes mode
 				return models.Product{},
 					httperrors.ConflictError{Message: "A product with the given product code already exists"}
 			case 1452:
-				return models.Product{}, httperrors.NotFoundError{Message: "The given seller id does not exists"}
-			default:
-				return models.Product{}, httperrors.InternalServerError{Message: "Error creating product"}
+				return models.Product{},
+					httperrors.ConflictError{Message: "The given seller id does not exists"}
 			}
 		}
 		return models.Product{}, httperrors.InternalServerError{Message: "Error creating product"}
@@ -251,9 +250,8 @@ func (r *ProductRepositoryDB) Update(ctx context.Context, id int, updatedProduct
 				return models.Product{},
 					httperrors.ConflictError{Message: "A product with the given product code already exists"}
 			case 1452:
-				return models.Product{}, httperrors.NotFoundError{Message: "The given seller id does not exists"}
-			default:
-				return models.Product{}, httperrors.InternalServerError{Message: "Error creating product"}
+				return models.Product{},
+					httperrors.NotFoundError{Message: "The given seller id does not exists"}
 			}
 		}
 		return models.Product{}, httperrors.InternalServerError{Message: "Error creating product"}

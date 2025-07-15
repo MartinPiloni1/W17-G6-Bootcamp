@@ -90,7 +90,7 @@ func (s *ProductServiceDefault) Update(ctx context.Context, id int, productAttri
 		product.ProductTypeID = *productAttributes.ProductTypeID
 	}
 	if productAttributes.SellerID != nil {
-		product.SellerID = *productAttributes.SellerID
+		product.SellerID = productAttributes.SellerID
 	}
 
 	return s.repo.Update(ctx, id, product)

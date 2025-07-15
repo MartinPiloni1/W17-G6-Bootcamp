@@ -13,7 +13,7 @@ type ProductAttributes struct {
 	ProductCode                    string  `json:"product_code" validate:"required,alphanum,min=1,max=50"`
 	RecommendedFreezingTemperature float64 `json:"recommended_freezing_temperature" validate:"required,gte=-80,lte=25"`
 	ProductTypeID                  int     `json:"product_type_id" validate:"required,gt=0"`
-	SellerID                       int     `json:"seller_id,omitempty" validate:"omitempty,gt=0"`
+	SellerID                       *int    `json:"seller_id,omitempty" validate:"omitempty,gt=0"`
 }
 
 // ProductPatchRequest holds optional fields for partial updates.
