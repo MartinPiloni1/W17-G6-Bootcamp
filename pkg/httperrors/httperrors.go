@@ -20,10 +20,6 @@ type UnprocessableEntityError struct {
 	Message string
 }
 
-type InternalServerError struct {
-	Message string
-}
-
 func (e NotFoundError) Error() string {
 	return e.Message
 }
@@ -40,10 +36,6 @@ func (e UnprocessableEntityError) Error() string {
 	return e.Message
 }
 
-func (e InternalServerError) Error() string {
-	return e.Message
-}
-
 func GetErrorData(err error) (int, string) {
 	switch {
 	case errors.As(err, &BadRequestError{}):
@@ -54,8 +46,6 @@ func GetErrorData(err error) (int, string) {
 		return 409, err.Error()
 	case errors.As(err, &UnprocessableEntityError{}):
 		return 422, err.Error()
-	case errors.As(err, &InternalServerError{}):
-		return 500, err.Error()
 	default:
 		return 500, "Internal Server Error"
 	}

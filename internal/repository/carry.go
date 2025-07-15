@@ -39,12 +39,12 @@ func (p *CarryRepositoryDB) Create(carryAttributes models.CarryAttributes) (mode
 	)
 
 	if err != nil {
-		var me *mysql.MySQLError
-		if errors.As(err, &me) {
-			if me.Number == 1452 {
+		var sqlErrors *mysql.MySQLError
+		if errors.As(err, &sqlErrors) {
+			if sqlErrors.Number == 1452 {
 				return models.Carry{}, httperrors.NotFoundError{Message: "the LocalityId does not exist"}
 			}
-			if me.Number == 1062 {
+			if sqlErrors.Number == 1062 {
 				return models.Carry{}, httperrors.ConflictError{Message: "the Cid already exists"}
 			}
 			return models.Carry{}, httperrors.InternalServerError{Message: "error creating carry"}
@@ -88,7 +88,7 @@ func (p *CarryRepositoryDB) GetReportByLocalityId(localityId string) ([]models.C
 				l.locality_name,
 				COUNT(c.id) AS carries_count
 			FROM carries c
-			INNER JOIN localities l ON c.locality_id = l.id
+			LEFT JOIN localities l ON c.locality_id = l.id
 			WHERE c.locality_id = ?
 			GROUP BY c.locality_id, l.locality_name
 		`
