@@ -1,13 +1,17 @@
 package repository
 
-import "github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
+import (
+	"context"
+
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
+)
 
 type ProductRepository interface {
-	Create(product models.ProductAttributes) (models.Product, error)
-	GetAll() (map[int]models.Product, error)
-	GetByID(id int) (models.Product, error)
-	Update(id int, product models.Product) (models.Product, error)
-	Delete(id int) error
+	Create(ctx context.Context, product models.ProductAttributes) (models.Product, error)
+	GetAll(ctx context.Context) ([]models.Product, error)
+	GetByID(ctx context.Context, id int) (models.Product, error)
+	Update(ctx context.Context, id int, product models.Product) (models.Product, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type SellerRepository interface {
@@ -24,26 +28,31 @@ type LocalityRepository interface {
 	GetSellerReport(id *string) ([]models.SellerReport, error)
 }
 
+// WarehouseRepository provides methods for warehouse data access.
 type WarehouseRepository interface {
-	GetAll() (map[int]models.Warehouse, error)
+	// GetAll returns all warehouses.
+	GetAll() ([]models.Warehouse, error)
+	// Create adds a new warehouse.
 	Create(warehouseAtribbutes models.WarehouseAttributes) (models.Warehouse, error)
+	// GetByID returns a warehouse by its ID.
 	GetByID(id int) (models.Warehouse, error)
+	// Update modifies a warehouse by its ID.
 	Update(id int, warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error)
+	// Delete removes a warehouse by its ID.
 	Delete(id int) error
 }
 
 type BuyerRepository interface {
-	Create(newBuyer models.BuyerAttributes) (models.Buyer, error)
-	GetAll() (map[int]models.Buyer, error)
-	GetByID(id int) (models.Buyer, error)
-	Update(id int, updatedBuyer models.Buyer) (models.Buyer, error)
-	Delete(id int) error
-	CardNumberIdAlreadyExist(newCardNumberId int) (bool, error)
+	Create(ctx context.Context, newBuyer models.BuyerAttributes) (models.Buyer, error)
+	GetAll(ctx context.Context) ([]models.Buyer, error)
+	GetByID(ctx context.Context, id int) (models.Buyer, error)
+	Update(ctx context.Context, id int, updatedBuyer models.Buyer) (models.Buyer, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type EmployeeRepository interface {
 	Create(Employee models.Employee) (models.Employee, error)
-	GetAll() (map[int]models.Employee, error)
+	GetAll() ([]models.Employee, error)
 	GetByID(id int) (models.Employee, error)
 	Update(id int, data models.Employee) (models.Employee, error)
 	Delete(id int) error

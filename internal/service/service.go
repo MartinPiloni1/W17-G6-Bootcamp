@@ -1,13 +1,17 @@
 package service
 
-import "github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
+import (
+	"context"
+
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
+)
 
 type ProductService interface {
-	Create(product models.ProductAttributes) (models.Product, error)
-	GetAll() ([]models.Product, error)
-	GetByID(id int) (models.Product, error)
-	Update(id int, productAttributes models.ProductPatchRequest) (models.Product, error)
-	Delete(id int) error
+	Create(ctx context.Context, product models.ProductAttributes) (models.Product, error)
+	GetAll(ctx context.Context) ([]models.Product, error)
+	GetByID(ctx context.Context, id int) (models.Product, error)
+	Update(ctx context.Context, id int, productAttributes models.ProductPatchRequest) (models.Product, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type SellerService interface {
@@ -24,20 +28,26 @@ type LocalityService interface {
 	GetSellerReport(id *string) ([]models.SellerReport, error)
 }
 
+// WarehouseService defines warehouse operations.
 type WarehouseService interface {
+	// GetAll returns all warehouses.
 	GetAll() ([]models.Warehouse, error)
+	// Create adds a new warehouse.
 	Create(warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error)
+	// GetByID returns a warehouse by ID.
 	GetByID(id int) (models.Warehouse, error)
+	// Update modifies a warehouse by ID.
 	Update(id int, warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error)
+	// Delete removes a warehouse by ID.
 	Delete(id int) error
 }
 
 type BuyerService interface {
-	Create(newBuyer models.BuyerAttributes) (models.Buyer, error)
-	GetAll() ([]models.Buyer, error)
-	GetByID(id int) (models.Buyer, error)
-	Update(id int, BuyerData models.BuyerPatchRequest) (models.Buyer, error)
-	Delete(id int) error
+	Create(ctx context.Context, newBuyer models.BuyerAttributes) (models.Buyer, error)
+	GetAll(ctx context.Context) ([]models.Buyer, error)
+	GetByID(ctx context.Context, id int) (models.Buyer, error)
+	Update(ctx context.Context, id int, BuyerData models.BuyerPatchRequest) (models.Buyer, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type EmployeeService interface {
