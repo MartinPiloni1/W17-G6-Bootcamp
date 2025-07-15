@@ -7,6 +7,7 @@ import (
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/go-sql-driver/mysql"
 )
 
 type BuyerRepositoryDB struct {
@@ -36,6 +37,12 @@ func (r *BuyerRepositoryDB) Create(ctx context.Context, newBuyer models.BuyerAtt
 		newBuyer.LastName,
 	)
 	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			if mysqlErr.Number == 1062 {
+				// cardNumberId is unique
+				return models.Buyer{}, httperrors.ConflictError{Message: "CardNumberId already in use"}
+			}
+		}
 		return models.Buyer{}, err
 	}
 
@@ -194,23 +201,14 @@ func (r *BuyerRepositoryDB) Delete(ctx context.Context, id int) error {
 //   - false and a non-nil error if an unexpected error occurs during the query.
 func (r *BuyerRepositoryDB) CardNumberIdAlreadyExist(ctx context.Context, newCardNumberId int) (bool, error) {
 	const query = `
-		SELECT
-			b.id
-		FROM
-			buyers b
-		WHERE
-			b.card_number_id = ?
+		SELECT EXISTS(
+			SELECT 1 FROM buyers WHERE card_number_id = ?
+		)
 	`
-	row := r.db.QueryRowContext(ctx, query, newCardNumberId)
-
-	var BuyerId int
-	err := row.Scan(&BuyerId)
+	var exists bool
+	err := r.db.QueryRowContext(ctx, query, newCardNumberId).Scan(&exists)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return false, nil
-		}
 		return false, err
 	}
-
-	return true, nil
+	return exists, nil
 }
