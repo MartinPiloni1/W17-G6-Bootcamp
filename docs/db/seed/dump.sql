@@ -13,7 +13,7 @@ INSERT INTO employees (card_number_id, first_name, last_name, warehouse_id) VALU
     ('10101011', 'Carlos', 'Lopez', 1),
     ('10101012', 'Marta', 'Perez', 2),
     ('10101013', 'Lucia', 'Romero', 2),
-                                                                                ('10101014', 'Sergio', 'Castro', 3);
+    ('10101014', 'Sergio', 'Castro', 3);
 
 INSERT INTO product_batch (id) VALUES
    (1),

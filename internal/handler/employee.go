@@ -165,6 +165,10 @@ func (h *EmployeeHandler) Delete() http.HandlerFunc {
 	}
 }
 
+// GetInboundOrderReport handles the HTTP endpoint to obtain an inbound orders report per employee.
+// - If the query parameter "id" is provided, it returns the report for the specified employee only.
+// - If no "id" parameter is specified, it returns the report for all employees.
+// Responds with appropriate HTTP errors if the "id" parameter is invalid or if a business logic error occurs.
 func (h *EmployeeHandler) GetInboundOrderReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		employeeID := 0

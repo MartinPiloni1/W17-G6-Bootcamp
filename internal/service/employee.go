@@ -93,6 +93,10 @@ func (e EmployeeServiceDefault) Delete(id int) error {
 	return e.repo.Delete(id)
 }
 
+// ReportInboundOrders returns a report of inbound order counts per employee.
+// - If an employeeID is provided (non-zero), it returns the inbound order count for the specified employee.
+// - If employeeID is zero, it returns inbound order counts for all employees.
+// Returns an error if the employee does not exist or if a data access error occurs.
 func (s *EmployeeServiceDefault) ReportInboundOrders(employeeID int) ([]models.EmployeeWithInboundCount, error) {
 	// Check for one employee
 	if employeeID != 0 {

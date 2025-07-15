@@ -71,6 +71,9 @@ func (r *InboundOrderRepositoryDB) GetByOrderNumber(orderNumber string) (models.
 	return order, nil
 }
 
+// CountInboundOrdersForEmployee returns the total number of inbound orders
+// associated with a specific employee by their employeeID.
+// Returns the count and any error encountered during the query.
 func (r *InboundOrderRepositoryDB) CountInboundOrdersForEmployee(employeeID int) (int, error) {
 	const query = `SELECT COUNT(*) FROM inbound_orders WHERE employee_id = ?`
 	var count int
@@ -78,6 +81,9 @@ func (r *InboundOrderRepositoryDB) CountInboundOrdersForEmployee(employeeID int)
 	return count, err
 }
 
+// CountInboundOrdersForEmployees retrieves the count of inbound orders for all employees.
+// Returns a map where the key is the employee ID and the value is the inbound order count for that employee.
+// Returns an error if the database query fails.
 func (r *InboundOrderRepositoryDB) CountInboundOrdersForEmployees() (map[int]int, error) {
 	result := make(map[int]int)
 
