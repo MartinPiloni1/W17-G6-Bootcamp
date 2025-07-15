@@ -23,18 +23,6 @@ func NewProductServiceDefault(repo repository.ProductRepository) ProductService 
 // Create validates that no existing product shares the same ProductCode,
 // then delegates to the repository to persist a new product.
 func (s *ProductServiceDefault) Create(ctx context.Context, product models.ProductAttributes) (models.Product, error) {
-	products, err := s.repo.GetAll(ctx)
-	if err != nil {
-		return models.Product{}, err
-	}
-
-	for _, p := range products {
-		if p.ProductCode == product.ProductCode {
-			return models.Product{},
-				httperrors.ConflictError{Message: "A product with this product code already exists"}
-		}
-	}
-
 	return s.repo.Create(ctx, product)
 }
 
