@@ -26,17 +26,18 @@ func (r *LocalityRepositoryDB) Create(locality models.Locality) (models.Locality
         VALUES (?, ?, ?, ?)
     `
 	_, err := r.db.Exec(queryInsertLocality, locality.ID, locality.LocalityName, locality.ProvinceName, locality.CountryName)
+
 	if err != nil {
 		var sqlErr *mysql.MySQLError
 		if errors.As(err, &sqlErr) {
-			if sqlErr.Number == 1062 {
+			switch sqlErr.Number {
+			case 1062:
 				return models.Locality{}, httperrors.ConflictError{Message: "The locality ID already exists"}
-			}
-			if sqlErr.Number == 1452 {
+			case 1452:
 				return models.Locality{}, httperrors.NotFoundError{Message: "The locality ID does not exist"}
 			}
+			return models.Locality{}, err
 		}
-		return models.Locality{}, err
 	}
 	return locality, nil
 }
@@ -56,7 +57,7 @@ func (r *LocalityRepositoryDB) GetByID(id string) (models.Locality, error) {
 		return models.Locality{}, httperrors.NotFoundError{Message: "Locality not found"}
 	}
 	if err != nil {
-		return models.Locality{}, httperrors.InternalServerError{Message: "DB error: " + err.Error()}
+		return models.Locality{}, err
 	}
 	return locality, nil
 }

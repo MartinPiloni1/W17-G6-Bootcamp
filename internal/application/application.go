@@ -38,16 +38,13 @@ func SellerRouter(db *sql.DB) chi.Router {
 func LocalityRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
-	repository := repository.NewLocalityRepository(db)
-	server := service.NewLocalityService(repository)
-	handler := handler.NewLocalityHandler(server)
+	localityRepository := repository.NewLocalityRepository(db)
+	localityServer := service.NewLocalityService(localityRepository)
+	localityHandler := handler.NewLocalityHandler(localityServer)
 
-	//Crear una Locality
-	router.Post("/", handler.Create())
-	//Traer una Locality por id
-	router.Get("/{id}", handler.GetByID())
-	//Reporte sellers por localidad
-	router.Get("/reportSellers", handler.GetSellerReport())
+	router.Post("/", localityHandler.Create())
+	router.Get("/{id}", localityHandler.GetByID())
+	router.Get("/reportSellers", localityHandler.GetSellerReport())
 	return router
 }
 
