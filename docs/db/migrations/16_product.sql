@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS products (
     product_code                     VARCHAR(50)  NOT NULL UNIQUE,
     recommended_freezing_temperature DECIMAL(5,2) NOT NULL,
     product_type_id                  INT NOT NULL,
-    seller_id                        INT NULL,
+    seller_id                        INT DEFAULT NULL,
     CONSTRAINT fk_products_seller
         FOREIGN KEY (seller_id)
         REFERENCES sellers(id)
