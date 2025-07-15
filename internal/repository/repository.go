@@ -22,6 +22,12 @@ type SellerRepository interface {
 	Delete(id int) error
 }
 
+type LocalityRepository interface {
+	Create(locality models.Locality) (models.Locality, error)
+	GetByID(id string) (models.Locality, error)
+	GetSellerReport(id *string) ([]models.SellerReport, error)
+}
+
 // WarehouseRepository provides methods for warehouse data access.
 type WarehouseRepository interface {
 	// GetAll returns all warehouses.

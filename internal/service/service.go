@@ -22,6 +22,12 @@ type SellerService interface {
 	Delete(id int) error
 }
 
+type LocalityService interface {
+	Create(l models.Locality) (models.Locality, error)
+	GetByID(id string) (models.Locality, error)
+	GetSellerReport(id *string) ([]models.SellerReport, error)
+}
+
 // WarehouseService defines warehouse operations.
 type WarehouseService interface {
 	// GetAll returns all warehouses.

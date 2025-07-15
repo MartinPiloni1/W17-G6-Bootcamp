@@ -30,3 +30,23 @@ VALUES
         (12345678, 'Juan', 'Pérez'),
         (23456789, 'Ana', 'Gómez'),
         (34567890, 'Luis', 'Martínez');
+
+
+INSERT INTO localities (id, locality_name, province_name, country_name) VALUES
+('6700', 'Lujan', 'Buenos Aires', 'Argentina'),
+('1001', 'CABA', 'CABA', 'Argentina'),
+('2000', 'Rosario', 'Santa Fe', 'Argentina'),
+('5000', 'Córdoba', 'Córdoba', 'Argentina'),
+('10115', 'Berlin', 'Berlin', 'Alemania'),
+('28001', 'Madrid', 'Madrid', 'España'),
+('11000', 'Montevideo', 'Montevideo', 'Uruguay');
+
+INSERT INTO sellers (cid, company_name, address, telephone, locality_id) VALUES
+(1, 'Alkemy', 'Monroe 860', '47470000', '6700'),
+(2, 'Globant', 'Av. Córdoba 1200', '40334000', '1001'),
+(3, 'Mercado Libre', 'Alem 876', '45450000', '1001'),
+(4, 'Tech Solutions', 'Av. Pellegrini 900', '3411234567', '2000'),
+(5, 'Panaderia El Sol', 'Av. Colon 1000', '3511112222', '5000'),
+(6, 'Bäckerei Berlin', 'Unter den Linden 77', '+4930123456', '10115'),
+(7, 'Supermercado Español', 'Calle Gran Vía 1', '34911223344', '28001'),
+(8, 'Chivitería El Prado', 'Av. 18 de Julio 1010', '59829123456', '11000');
