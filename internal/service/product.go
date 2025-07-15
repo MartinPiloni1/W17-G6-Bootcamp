@@ -57,6 +57,9 @@ func (s *ProductServiceDefault) Update(ctx context.Context, id int, productAttri
 	if productAttributes.Description != nil {
 		product.Description = *productAttributes.Description
 	}
+	if productAttributes.ProductCode != nil {
+		product.ProductCode = *productAttributes.ProductCode
+	}
 	if productAttributes.ExpirationRate != nil {
 		product.ExpirationRate = *productAttributes.ExpirationRate
 	}

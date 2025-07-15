@@ -197,7 +197,7 @@ func (r *ProductRepositoryDB) GetByID(ctx context.Context, id int) (models.Produ
 		&product.SellerID,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
-		return models.Product{}, err
+		return models.Product{}, httperrors.NotFoundError{Message: "Product not found"}
 	} else if err != nil {
 		return models.Product{}, err
 	}
