@@ -326,17 +326,16 @@ func (r *ProductRepositoryDB) Delete(ctx context.Context, id int) error {
 
 	res, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
+		var sqlError *mysql.MySQLError
+		if errors.As(err, &sqlError) && sqlError.Number == 1451 {
+			return httperrors.ConflictError{Message: "The product to delete is still referenced by some product records"}
+		}
 		return err
 	}
 
 	count, err := res.RowsAffected()
 	if err != nil {
-		var sqlError *mysql.MySQLError
-		if errors.As(err, &sqlError) && sqlError.Number == 1451 {
-			return httperrors.ConflictError{Message: "The product to delete is still referenced by some product records"}
-		} else {
-			return err
-		}
+		return err
 	} else if count == 0 {
 		return httperrors.NotFoundError{Message: "Product not found"}
 	}
