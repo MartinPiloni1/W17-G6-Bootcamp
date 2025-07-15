@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
@@ -34,6 +35,13 @@ func (h ProductRecordHandler) Create() http.HandlerFunc {
 		err := decoder.Decode(&newProductRecord)
 		if err != nil {
 			response.Error(w, http.StatusBadRequest, "Invalid JSON body")
+			return
+		}
+
+		// Validates that LastUpdateDate is in a valid date format
+		_, err = time.Parse("2006-01-02", newProductRecord.LastUpdateDate)
+		if err != nil {
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 

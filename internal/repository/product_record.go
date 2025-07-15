@@ -3,9 +3,11 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/go-sql-driver/mysql"
 )
 
 // ProductRecordRepositoryDB is a SQL implementation of ProductRecordRepository.
@@ -47,14 +49,19 @@ func (r *ProductRecordRepositoryDB) Create(ctx context.Context, attributes model
 		attributes.ProductID,
 	)
 	if err != nil {
+		var me *mysql.MySQLError
+		if errors.As(err, &me) && me.Number == 1452 {
+			return models.ProductRecord{},
+				httperrors.ConflictError{Message: "a product with the given id does not exist"}
+		}
 		return models.ProductRecord{},
-			httperrors.InternalServerError{Message: "Database error"}
+			httperrors.InternalServerError{Message: "error creating product record"}
 	}
 
 	lastId, err := result.LastInsertId()
 	if err != nil {
 		return models.ProductRecord{},
-			httperrors.InternalServerError{Message: "Database error"}
+			httperrors.InternalServerError{Message: "error creating product record"}
 	}
 
 	newProductRecord := models.ProductRecord{
