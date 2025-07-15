@@ -1,12 +1,9 @@
 package service
 
 import (
-	"slices"
-
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
 type SellerServiceDefault struct {
@@ -18,7 +15,7 @@ func NewSellerService(repo repository.SellerRepository) SellerService {
 }
 
 func (s SellerServiceDefault) Create(seller models.SellerAttributes) (models.Seller, error) {
-	if seller.CID <= 0 || seller.CompanyName == "" || seller.Address == "" || seller.Telephone == "" {
+	if seller.CID <= 0 || seller.CompanyName == "" || seller.Address == "" || seller.Telephone == "" || seller.LocalityID == "" {
 		return models.Seller{}, httperrors.BadRequestError{
 			Message: "Invalid seller data",
 		}
@@ -32,16 +29,7 @@ func (s SellerServiceDefault) Delete(id int) error {
 }
 
 func (s SellerServiceDefault) GetAll() ([]models.Seller, error) {
-	data, err := s.rp.GetAll()
-	if err != nil {
-		return []models.Seller{}, err
-	}
-
-	slicedData := utils.MapToSlice(data)
-	slices.SortFunc(slicedData, func(a, b models.Seller) int {
-		return a.ID - b.ID
-	})
-	return slicedData, nil
+	return s.rp.GetAll()
 }
 
 func (s SellerServiceDefault) GetByID(id int) (models.Seller, error) {

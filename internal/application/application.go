@@ -21,31 +21,32 @@ func HealthRouter() chi.Router {
 	return router
 }
 
-func SellerRouter() chi.Router {
+// SellerRouter creates a new router for seller-related endpoints
+func SellerRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
-	rp := repository.NewSellerRepository()
-	sv := service.NewSellerService(rp)
-	hd := handler.NewSellerHandler(sv)
-	router.Get("/", hd.GetAll())        // GET /seller         (lista todos)
-	router.Get("/{id}", hd.GetByID())   // GET /seller/{id}    (uno por id)
-	router.Post("/", hd.Create())       // POST /seller        (crear uno)
-	router.Patch("/{id}", hd.Update())  // PATCH /seller/{id}  (actualizar)
-	router.Delete("/{id}", hd.Delete()) // DELETE
+	repository := repository.NewSellerRepository(db)
+	service := service.NewSellerService(repository)
+	handler := handler.NewSellerHandler(service)
+	router.Get("/", handler.GetAll())
+	router.Get("/{id}", handler.GetByID())
+	router.Post("/", handler.Create())
+	router.Patch("/{id}", handler.Update())
+	router.Delete("/{id}", handler.Delete())
 	return router
 }
 
-func WarehouseRouter() chi.Router {
-	rp := repository.NewWarehouseRepository()
-	sv := service.NewWarehouseService(rp)
-	hd := handler.NewWarehouseHandler(sv)
+func WarehouseRouter(db *sql.DB) chi.Router {
+	repoW := repository.NewWarehouseRepositoryDb(db)
+	serviceW := service.NewWarehouseService(repoW)
+	handlerW := handler.NewWarehouseHandler(serviceW)
 
 	router := chi.NewRouter()
 
-	router.Get("/", hd.GetAll())
-	router.Post("/", hd.Create())
-	router.Get("/{id}", hd.GetById())
-	router.Patch("/{id}", hd.Update())
-	router.Delete("/{id}", hd.Delete())
+	router.Get("/", handlerW.GetAll())
+	router.Post("/", handlerW.Create())
+	router.Get("/{id}", handlerW.GetById())
+	router.Patch("/{id}", handlerW.Update())
+	router.Delete("/{id}", handlerW.Delete())
 
 	return router
 }
