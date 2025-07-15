@@ -70,7 +70,7 @@ func (r *SellerRepositoryDB) Create(att models.SellerAttributes) (models.Seller,
 	var locExists int
 	err := r.db.QueryRow(queryCheckLocality, att.LocalityID).Scan(&locExists)
 	if err != nil {
-		return models.Seller{}, err
+		return models.Seller{}, httperrors.InternalServerError{Message: "Locality not found"}
 	}
 	if locExists == 0 {
 		return models.Seller{}, httperrors.ConflictError{Message: "Locality ID does not exist"}
