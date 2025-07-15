@@ -71,9 +71,9 @@ func (r *ProductRepositoryDB) Create(ctx context.Context, productAttributes mode
 		productAttributes.SellerID,
 	)
 	if err != nil {
-		var me *mysql.MySQLError
-		if errors.As(err, &me) {
-			switch me.Number {
+		var sqlError *mysql.MySQLError
+		if errors.As(err, &sqlError) {
+			switch sqlError.Number {
 			case 1062:
 				return models.Product{},
 					httperrors.ConflictError{Message: "A product with the given product code already exists"}
@@ -250,15 +250,15 @@ func (r *ProductRepositoryDB) Update(ctx context.Context, id int, updatedProduct
 		id,
 	)
 	if err != nil {
-		var me *mysql.MySQLError
-		if errors.As(err, &me) {
-			switch me.Number {
+		var sqlError *mysql.MySQLError
+		if errors.As(err, &sqlError) {
+			switch sqlError.Number {
 			case 1062:
 				return models.Product{},
 					httperrors.ConflictError{Message: "A product with the given product code already exists"}
 			case 1452:
 				return models.Product{},
-					httperrors.NotFoundError{Message: "The given seller id does not exists"}
+					httperrors.ConflictError{Message: "The given seller id does not exists"}
 			}
 		}
 		return models.Product{}, err
