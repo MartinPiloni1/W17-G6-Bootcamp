@@ -244,6 +244,12 @@ func (r *ProductRepositoryDB) GetRecordsPerProduct(ctx context.Context, id *int)
 		}
 		ProductsRecordsCount = append(ProductsRecordsCount, productRecordCount)
 	}
+
+	if id != nil && len(ProductsRecordsCount) == 0 {
+		return nil,
+			httperrors.NotFoundError{Message: "Product not found"}
+	}
+
 	return ProductsRecordsCount, nil
 }
 
