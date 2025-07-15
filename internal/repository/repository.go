@@ -37,12 +37,11 @@ type WarehouseRepository interface {
 }
 
 type BuyerRepository interface {
-	Create(newBuyer models.BuyerAttributes) (models.Buyer, error)
-	GetAll() (map[int]models.Buyer, error)
-	GetByID(id int) (models.Buyer, error)
-	Update(id int, updatedBuyer models.Buyer) (models.Buyer, error)
-	Delete(id int) error
-	CardNumberIdAlreadyExist(newCardNumberId int) (bool, error)
+	Create(ctx context.Context, newBuyer models.BuyerAttributes) (models.Buyer, error)
+	GetAll(ctx context.Context) ([]models.Buyer, error)
+	GetByID(ctx context.Context, id int) (models.Buyer, error)
+	Update(ctx context.Context, id int, updatedBuyer models.Buyer) (models.Buyer, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type EmployeeRepository interface {

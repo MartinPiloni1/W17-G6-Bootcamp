@@ -37,11 +37,11 @@ type WarehouseService interface {
 }
 
 type BuyerService interface {
-	Create(newBuyer models.BuyerAttributes) (models.Buyer, error)
-	GetAll() ([]models.Buyer, error)
-	GetByID(id int) (models.Buyer, error)
-	Update(id int, BuyerData models.BuyerPatchRequest) (models.Buyer, error)
-	Delete(id int) error
+	Create(ctx context.Context, newBuyer models.BuyerAttributes) (models.Buyer, error)
+	GetAll(ctx context.Context) ([]models.Buyer, error)
+	GetByID(ctx context.Context, id int) (models.Buyer, error)
+	Update(ctx context.Context, id int, BuyerData models.BuyerPatchRequest) (models.Buyer, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type EmployeeService interface {
