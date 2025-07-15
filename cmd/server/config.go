@@ -61,13 +61,14 @@ func (a *ServerChi) Run() (err error) {
 	}
 
 	healthRouter := application.HealthRouter()
-	productRouter := application.ProductRouter()
+	productRouter := application.ProductRouter(freshDB)
 	buyersRouter := application.BuyersRouter(freshDB)
 	warehouseRouter := application.WarehouseRouter(freshDB)
 	sellerRouter := application.SellerRouter(freshDB)
 	employeeRouter := application.EmployeeRouter(freshDB)
 	sectionRouter := application.SectionRouter()
 	purchaseOrderRouter := application.PurchaseOrderRouter(freshDB)
+	localitiesRouter := application.LocalityRouter(freshDB)
 
 	router.Mount("/healthcheck", healthRouter)
 	router.Route("/api/v1", func(r chi.Router) {
@@ -78,6 +79,7 @@ func (a *ServerChi) Run() (err error) {
 		r.Mount("/employees", employeeRouter)
 		r.Mount("/sections", sectionRouter)
 		r.Mount("/purchaseOrders", purchaseOrderRouter)
+		r.Mount("/localities", localitiesRouter)
 	})
 
 	err = http.ListenAndServe(a.ServerAddr, router)
