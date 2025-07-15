@@ -62,8 +62,8 @@ func (a *ServerChi) Run() (err error) {
 
 	healthRouter := application.HealthRouter()
 	productRouter := application.ProductRouter()
+	buyersRouter := application.BuyersRouter(freshDB)
 	warehouseRouter := application.WarehouseRouter(freshDB)
-	buyersRouter := application.BuyersRouter()
 	sellerRouter := application.SellerRouter(freshDB)
 	employeeRouter := application.EmployeeRouter(freshDB)
 	sectionRouter := application.SectionRouter()

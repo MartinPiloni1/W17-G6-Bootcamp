@@ -66,10 +66,10 @@ func ProductRouter() chi.Router {
 	return router
 }
 
-func BuyersRouter() chi.Router {
+func BuyersRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
-	buyersRepository := repository.NewBuyerRepositoryFile() // fileRepository
+	buyersRepository := repository.NewBuyerRepositoryDB(db)
 	buyersService := service.NewBuyerServiceDefault(buyersRepository)
 	buyersHandler := handler.NewBuyerHandler(buyersService)
 
