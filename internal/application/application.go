@@ -111,9 +111,9 @@ func EmployeeRouter(db *sql.DB) chi.Router {
 	return router
 }
 
-func SectionRouter() chi.Router {
-	sectionRepository := repository.NewSectionRepository()
-	sectionService := service.NewSectionService(sectionRepository)
+func SectionRouter(db *sql.DB) chi.Router {
+	sectionRepository := repository.NewSectionRepositoryDB(db)
+	sectionService := service.NewSectionServiceDefault(sectionRepository)
 	sectionHandler := handler.NewSectionHandler(sectionService)
 
 	router := chi.NewRouter()
