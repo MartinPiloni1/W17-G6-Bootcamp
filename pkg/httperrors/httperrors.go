@@ -44,18 +44,16 @@ func (e InternalServerError) Error() string {
 	return e.Message
 }
 
-/*
-GetErrorData inspects the given error and maps it to an HTTP status code
-and a client‐safe error message. It recognizes the following error types:
-
-• BadRequestError           → 400 Bad Request
-• NotFoundError             → 404 Not Found
-• ConflictError             → 409 Conflict
-• UnprocessableEntityError  → 422 Unprocessable Entity
-• InternalServerError       → 500 Internal Server Error
-
-If the error is none of the above, it returns 500 with a generic message.
-*/
+// GetErrorData inspects the given error and maps it to an HTTP status code
+// and a client‐safe error message. It recognizes the following error types:
+//
+// • BadRequestError           → 400 Bad Request
+// • NotFoundError             → 404 Not Found
+// • ConflictError             → 409 Conflict
+// • UnprocessableEntityError  → 422 Unprocessable Entity
+// • InternalServerError       → 500 Internal Server Error
+//
+// If the error is none of the above, it returns 500 with a generic message.
 func GetErrorData(err error) (int, string) {
 	switch {
 	case errors.As(err, &BadRequestError{}):
