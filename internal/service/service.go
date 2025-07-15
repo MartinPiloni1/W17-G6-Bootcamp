@@ -18,11 +18,17 @@ type SellerService interface {
 	Delete(id int) error
 }
 
+// WarehouseService defines warehouse operations.
 type WarehouseService interface {
+	// GetAll returns all warehouses.
 	GetAll() ([]models.Warehouse, error)
+	// Create adds a new warehouse.
 	Create(warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error)
+	// GetByID returns a warehouse by ID.
 	GetByID(id int) (models.Warehouse, error)
+	// Update modifies a warehouse by ID.
 	Update(id int, warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error)
+	// Delete removes a warehouse by ID.
 	Delete(id int) error
 }
 

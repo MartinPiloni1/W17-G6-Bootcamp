@@ -35,18 +35,18 @@ func SellerRouter(db *sql.DB) chi.Router {
 	return router
 }
 
-func WarehouseRouter() chi.Router {
-	rp := repository.NewWarehouseRepository()
-	sv := service.NewWarehouseService(rp)
-	hd := handler.NewWarehouseHandler(sv)
+func WarehouseRouter(db *sql.DB) chi.Router {
+	repoW := repository.NewWarehouseRepositoryDb(db)
+	serviceW := service.NewWarehouseService(repoW)
+	handlerW := handler.NewWarehouseHandler(serviceW)
 
 	router := chi.NewRouter()
 
-	router.Get("/", hd.GetAll())
-	router.Post("/", hd.Create())
-	router.Get("/{id}", hd.GetById())
-	router.Patch("/{id}", hd.Update())
-	router.Delete("/{id}", hd.Delete())
+	router.Get("/", handlerW.GetAll())
+	router.Post("/", handlerW.Create())
+	router.Get("/{id}", handlerW.GetById())
+	router.Patch("/{id}", handlerW.Update())
+	router.Delete("/{id}", handlerW.Delete())
 
 	return router
 }
