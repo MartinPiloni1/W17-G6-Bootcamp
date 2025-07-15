@@ -24,9 +24,16 @@ func NewSectionRepositoryDB(db *sql.DB) SectionRepository {
 	}
 }
 
-
 // Create creates a new section in the repository
 func (repository *SectionRepositoryDB) Create(ctx context.Context, section models.Section) (models.Section, error) {
+	exists, err := repository.validateWarehouseExists(ctx, section.WarehouseID)
+	if err != nil {
+		return models.Section{}, err
+	}
+
+	if !exists {
+		return models.Section{}, httperrors.ConflictError{Message: "Warehouse does not exist"}
+	}
 	const query = `
 		INSERT INTO sections (
 			section_number,
@@ -185,6 +192,15 @@ func (repository *SectionRepositoryDB) GetByID(ctx context.Context, id int) (mod
 
 // Update updates a section in the repository
 func (repository *SectionRepositoryDB) Update(ctx context.Context, id int, data models.Section) (models.Section, error) {
+	exists, errWarehouse := repository.validateWarehouseExists(ctx, data.WarehouseID)
+	if errWarehouse != nil {
+		return models.Section{}, errWarehouse
+	}
+
+	if !exists {
+		return models.Section{}, httperrors.ConflictError{Message: "Warehouse does not exist"}
+	}
+
 	const query = `
 		UPDATE sections
 		SET
@@ -217,4 +233,14 @@ func (repository *SectionRepositoryDB) Update(ctx context.Context, id int, data 
 	}
 
 	return data, nil
+}
+
+func (repository *SectionRepositoryDB) validateWarehouseExists(ctx context.Context, warehouseID int) (bool, error) {
+	const warehouseExistsQuery = `SELECT EXISTS(SELECT 1 FROM warehouse WHERE id = ?)`
+	var exists bool
+	err := repository.db.QueryRowContext(ctx, warehouseExistsQuery, warehouseID).Scan(&exists)
+	if err != nil {
+		return false, httperrors.InternalServerError{Message: "Failed to validate warehouse existence"}
+	}
+	return exists, nil
 }
