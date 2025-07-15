@@ -23,7 +23,7 @@ func NewSectionHandler(sectionService service.SectionService) *SectionHandler {
 	return &SectionHandler{sectionService: sectionService}
 }
 
-// GetAll returns all sections
+// GetAll, returns all sections
 // @Summary Get all sections
 // @Description Get all sections
 // @Tags sections
@@ -50,7 +50,7 @@ func (handler *SectionHandler) GetAll() http.HandlerFunc {
 	}
 }
 
-// GetByID returns a section by its ID
+// GetByID, returns a section by its ID
 // @Summary Get a section by ID
 // @Description Get a section by ID
 // @Tags sections
@@ -86,7 +86,7 @@ func (handler *SectionHandler) GetByID() http.HandlerFunc {
 	}
 }
 
-// Delete deletes a section from the repository
+// Delete, deletes a section from the repository
 // @Summary Delete a section
 // @Description Delete a section
 // @Tags sections
@@ -119,7 +119,7 @@ func (handler *SectionHandler) Delete() http.HandlerFunc {
 	}
 }
 
-// Create creates a new section in the repository
+// Create, creates a new section in the repository
 // @Summary Create a new section
 // @Description Create a new section
 // @Tags sections
@@ -179,7 +179,7 @@ func (handler *SectionHandler) Create() http.HandlerFunc {
 	}
 }
 
-// Update updates a section in the repository
+// Update, updates a section in the repository
 // @Summary Update a section
 // @Description Update a section
 // @Tags sections

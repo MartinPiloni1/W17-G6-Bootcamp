@@ -1,4 +1,4 @@
-CREATE TABLE sections (
+CREATE TABLE IF NOT EXISTS sections (
     id INT NOT NULL AUTO_INCREMENT,
     section_number VARCHAR(255) NOT NULL UNIQUE,
     current_temperature DECIMAL(5,2) NOT NULL,

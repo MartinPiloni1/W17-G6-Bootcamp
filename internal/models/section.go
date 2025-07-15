@@ -18,7 +18,7 @@ type Section struct {
 // CreateSectionRequest defines the structure for creating a new Section.
 // It includes validation tags for go-playground/validator.
 type CreateSectionRequest struct {
-    SectionNumber      string  `json:"section_number" validate:"required,min=1"`
+    SectionNumber      string  `json:"section_number" validate:"required,min=1,max=255"`
     CurrentTemperature float64 `json:"current_temperature" validate:"required"`
     MinimumTemperature float64 `json:"minimum_temperature" validate:"required"`
     CurrentCapacity    int     `json:"current_capacity" validate:"required,gte=0"`

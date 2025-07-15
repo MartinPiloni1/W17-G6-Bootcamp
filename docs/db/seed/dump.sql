@@ -50,7 +50,7 @@ INSERT INTO sellers (cid, company_name, address, telephone, locality_id) VALUES
 (7, 'Supermercado Español', 'Calle Gran Vía 1', '34911223344', '28001'),
 (8, 'Chivitería El Prado', 'Av. 18 de Julio 1010', '59829123456', '11000');
 
-INSERT INTO sections (section_number, current_temperature, minimum_temperature, current_capacity, minimum_capacity, maximum_capacity, warehouse_id, product_type_id) VALUES
+INSERT IGNORE INTO sections (section_number, current_temperature, minimum_temperature, current_capacity, minimum_capacity, maximum_capacity, warehouse_id, product_type_id) VALUES
         ('SEC-001', 5.00, 0.00, 50, 0, 100, 1, 1),
         ('SEC-002', -18.00, -20.00, 20, 0, 50, 1, 2),
         ('SEC-003', 20.00, 18.00, 80, 50, 150, 2, 3),

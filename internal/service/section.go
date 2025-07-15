@@ -22,12 +22,12 @@ func NewSectionServiceDefault(repo repository.SectionRepository) SectionService 
 	return &SectionServiceDefault{repository: repo}
 }
 
-// Create creates a new section in the repository
+// Create, creates a new section in the repository
 func (service SectionServiceDefault) Create(ctx context.Context, section models.Section) (models.Section, error) {
 	return service.repository.Create(ctx, section)
 }
 
-// Delete deletes a section from the repository
+// Delete, deletes a section from the repository
 func (service SectionServiceDefault) Delete(ctx context.Context, id int) error {
 	return service.repository.Delete(ctx, id)
 }
@@ -50,7 +50,7 @@ func (service SectionServiceDefault) GetByID(ctx context.Context, id int) (model
 	return service.repository.GetByID(ctx, id)
 }
 
-// Update updates a section in the repository
+// Update, updates a section in the repository
 func (service *SectionServiceDefault) Update(ctx context.Context, id int, patchData models.UpdateSectionRequest) (models.Section, error) {
 	section, err := service.repository.GetByID(ctx, id)
 	if err != nil {
@@ -79,22 +79,12 @@ func (service *SectionServiceDefault) Update(ctx context.Context, id int, patchD
 	return service.repository.Update(ctx, id, section)
 }
 
-// applyChanges applies the changes to the section
+// applyChanges, applies the changes to the section
 func (service *SectionServiceDefault) applyChanges(sectionToUpdate *models.Section, patchData models.UpdateSectionRequest) error {
-	// Check if section number is already in use
+	// Update section number
 	if patchData.SectionNumber != nil {
-		allSections, err := service.repository.GetAll(context.Background())
-		if err != nil {
-			return err
-		}
-		for _, section := range allSections {
-			if section.ID != sectionToUpdate.ID && section.SectionNumber == *patchData.SectionNumber {
-				return httperrors.ConflictError{Message: "Section number already exists in another section"}
-			}
-		}
 		sectionToUpdate.SectionNumber = *patchData.SectionNumber
 	}
-
 	// Update temperature
 	if patchData.CurrentTemperature != nil {
 		sectionToUpdate.CurrentTemperature = *patchData.CurrentTemperature

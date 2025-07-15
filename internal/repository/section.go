@@ -26,7 +26,7 @@ func NewSectionRepositoryDB(db *sql.DB) SectionRepository {
 }
 
 
-// Create creates a new section in the repository
+// Create, creates a new section in the repository
 func (repository *SectionRepositoryDB) Create(ctx context.Context, section models.Section) (models.Section, error) {
 	const query = `
         INSERT INTO sections (
@@ -51,22 +51,22 @@ func (repository *SectionRepositoryDB) Create(ctx context.Context, section model
 			case 1452:
 				return models.Section{}, httperrors.ConflictError{Message: "Warehouse does not exist."}
 			default:
-				return models.Section{}, httperrors.InternalServerError{Message: "Unhandled database error"}
+				return models.Section{}, httperrors.InternalServerError{}
 			}
 		}
-		return models.Section{}, httperrors.InternalServerError{Message: "Database error"}
+		return models.Section{}, httperrors.InternalServerError{}
 	}
 
 	// Get the last inserted ID
 	lastId, err := result.LastInsertId()
 	if err != nil {
-		return models.Section{}, httperrors.InternalServerError{Message: "Database error"}
+		return models.Section{}, httperrors.InternalServerError{}
 	}
 	section.ID = int(lastId)
 	return section, nil
 }
 
-// Update updates a section in the repository
+// Update, updates a section in the repository
 func (repository *SectionRepositoryDB) Update(ctx context.Context, id int, data models.Section) (models.Section, error) {
 	const query = `
         UPDATE sections SET
@@ -90,17 +90,17 @@ func (repository *SectionRepositoryDB) Update(ctx context.Context, id int, data 
 			case 1452:
 				return models.Section{}, httperrors.ConflictError{Message: "Warehouse does not exist."}
 			default:
-				return models.Section{}, httperrors.InternalServerError{Message: "Database error"}
+				return models.Section{}, httperrors.InternalServerError{}
 			}
 		}
-		return models.Section{}, httperrors.InternalServerError{Message: "Database error"}
+		return models.Section{}, httperrors.InternalServerError{}
 	}
 
 	return data, nil
 }
 
 
-// Delete deletes a section from the repository
+// Delete, deletes a section from the repository
 func (repository *SectionRepositoryDB) Delete(ctx context.Context, id int) error {
     const query = `
         DELETE FROM sections
@@ -110,13 +110,13 @@ func (repository *SectionRepositoryDB) Delete(ctx context.Context, id int) error
     // Execute the query
     result, err := repository.db.ExecContext(ctx, query, id)
     if err != nil {
-        return httperrors.InternalServerError{Message: "Database error"}
+        return httperrors.InternalServerError{}
     }
 
     // Get the number of rows affected
     count, err := result.RowsAffected()
     if err != nil {
-        return httperrors.InternalServerError{Message: "Database error"}
+        return httperrors.InternalServerError{}
     } else if count == 0 {
         return httperrors.NotFoundError{Message: "Section not found"}
     }
@@ -142,7 +142,7 @@ func (repository *SectionRepositoryDB) GetAll(ctx context.Context) ([]models.Sec
     // Execute the query
     rows, err := repository.db.QueryContext(ctx, query)
     if err != nil {
-        return nil, httperrors.InternalServerError{Message: "Database error"}
+        return nil, httperrors.InternalServerError{}
     }
     defer rows.Close()
 
@@ -161,14 +161,14 @@ func (repository *SectionRepositoryDB) GetAll(ctx context.Context) ([]models.Sec
             &section.ProductTypeID,
         )
         if err != nil {
-            return nil, httperrors.InternalServerError{Message: "Database error"}
+            return nil, httperrors.InternalServerError{}
         }
 
         sections = append(sections, section)
     }
 
     if err := rows.Err(); err != nil {
-        return nil, httperrors.InternalServerError{Message: "Database error"}
+        return nil, httperrors.InternalServerError{}
     }
     return sections, nil
 }
@@ -192,7 +192,7 @@ func (repository *SectionRepositoryDB) GetByID(ctx context.Context, id int) (mod
 
     row := repository.db.QueryRowContext(ctx, query, id)
     if err := row.Err(); err != nil {
-        return models.Section{}, httperrors.InternalServerError{Message: "Database error"}
+        return models.Section{}, httperrors.InternalServerError{}
     }
 
     var section models.Section
