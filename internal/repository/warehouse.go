@@ -37,9 +37,9 @@ func (p *WarehouseRepositoryDB) Create(warehouseAttributes models.WarehouseAttri
 		warehouseAttributes.MinimunTemperature,
 	)
 	if err != nil {
-		var me *mysql.MySQLError
-		if errors.As(err, &me) {
-			if me.Number == 1062 {
+		var sqlErrors *mysql.MySQLError
+		if errors.As(err, &sqlErrors) {
+			if sqlErrors.Number == 1062 {
 				return models.Warehouse{}, httperrors.ConflictError{Message: "the WarehouseCode already exists"}
 			}
 			return models.Warehouse{}, httperrors.InternalServerError{Message: "error creating warehouse"}
