@@ -25,27 +25,9 @@ func NewSectionRepositoryDB(db *sql.DB) SectionRepository {
 	}
 }
 
-func (repository *SectionRepositoryDB) validateWarehouseExists(ctx context.Context, warehouseID int) (bool, error) {
-	const query = `SELECT EXISTS(SELECT 1 FROM warehouse WHERE id = ?)`
-	var exists bool
-	err := repository.db.QueryRowContext(ctx, query, warehouseID).Scan(&exists)
-	if err != nil {
-		return false, httperrors.InternalServerError{Message: "Failed to validate warehouse existence"}
-	}
-	return exists, nil
-}
 
 // Create creates a new section in the repository
 func (repository *SectionRepositoryDB) Create(ctx context.Context, section models.Section) (models.Section, error) {
-	exists, err := repository.validateWarehouseExists(ctx, section.WarehouseID)
-	if err != nil {
-		return models.Section{}, err
-	}
-	if !exists {
-		return models.Section{}, httperrors.ConflictError{
-			Message: "Warehouse does not exist",
-		}
-	}
 	const query = `
         INSERT INTO sections (
             section_number, current_temperature, minimum_temperature,
@@ -66,6 +48,8 @@ func (repository *SectionRepositoryDB) Create(ctx context.Context, section model
 			switch mysqlErr.Number {
 			case 1062:
 				return models.Section{}, httperrors.ConflictError{Message: "Section number already exists."}
+			case 1452:
+				return models.Section{}, httperrors.ConflictError{Message: "Warehouse does not exist."}
 			default:
 				return models.Section{}, httperrors.InternalServerError{Message: "Unhandled database error"}
 			}
@@ -84,14 +68,6 @@ func (repository *SectionRepositoryDB) Create(ctx context.Context, section model
 
 // Update updates a section in the repository
 func (repository *SectionRepositoryDB) Update(ctx context.Context, id int, data models.Section) (models.Section, error) {
-	exists, err := repository.validateWarehouseExists(ctx, data.WarehouseID)
-	if err != nil {
-		return models.Section{}, err
-	}
-	if !exists {
-		return models.Section{}, httperrors.ConflictError{Message: "Warehouse does not exist"}
-	}
-
 	const query = `
         UPDATE sections SET
             section_number = ?, current_temperature = ?, minimum_temperature = ?,
@@ -99,7 +75,7 @@ func (repository *SectionRepositoryDB) Update(ctx context.Context, id int, data 
             warehouse_id = ?, product_type_id = ?
         WHERE id = ?
     `
-	_, err = repository.db.ExecContext(ctx, query,
+	_, err := repository.db.ExecContext(ctx, query,
 		data.SectionNumber, data.CurrentTemperature, data.MinimumTemperature,
 		data.CurrentCapacity, data.MinimumCapacity, data.MaximumCapacity,
 		data.WarehouseID, data.ProductTypeID, id,
@@ -111,6 +87,8 @@ func (repository *SectionRepositoryDB) Update(ctx context.Context, id int, data 
 			switch mysqlErr.Number {
 			case 1062:
 				return models.Section{}, httperrors.ConflictError{Message: "Section number already exists."}
+			case 1452:
+				return models.Section{}, httperrors.ConflictError{Message: "Warehouse does not exist."}
 			default:
 				return models.Section{}, httperrors.InternalServerError{Message: "Database error"}
 			}
