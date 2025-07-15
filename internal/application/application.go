@@ -52,7 +52,7 @@ func WarehouseRouter(db *sql.DB) chi.Router {
 }
 
 // ProductRouter creates and returns a chi.Router configured
-// with all CRUD endpoints for products.
+// with CRUD endpoints for products.
 func ProductRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 

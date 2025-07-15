@@ -26,9 +26,16 @@ func NewProductRepositoryDB(db *sql.DB) ProductRepository {
 }
 
 // Create inserts a new product into the database using the given
-// ProductAttributes, then returns the complete Product
-// (including its auto-generated ID). If any database operation fails,
-// it returns an InternalServerError.
+// ProductAttributes, then returns the complete Product (including its auto-generated ID).
+//
+// Behavior & Error Handling:
+//   - On success, returns a models.Product populated with the generated ID
+//     and the same attributes you passed in.
+//   - If a product with the same product_code already exists (MySQL error #1062),
+//     returns httperrors.ConflictError with a message about duplicate product code.
+//   - If the provided seller_id does not exist (MySQL error #1452),
+//     returns httperrors.ConflictError about the missing seller.
+//   - Any other database error is wrapped in httperrors.InternalServerError.
 func (r *ProductRepositoryDB) Create(ctx context.Context, productAttributes models.ProductAttributes) (models.Product, error) {
 	const query = `
 		INSERT INTO products (
@@ -91,9 +98,9 @@ func (r *ProductRepositoryDB) Create(ctx context.Context, productAttributes mode
 	return newProduct, nil
 }
 
-// GetAll retrieves all product records from the database.
-// It scans each row into a models.Product and returns the slice.
-// On any database error, it returns an InternalServerError.
+// GetAll fetches every product record from the database and returns them
+// as a slice of models.Product. If any database error occurs it returns
+// a 500 InternalServerError.
 func (r *ProductRepositoryDB) GetAll(ctx context.Context) ([]models.Product, error) {
 	const query = `
 		SELECT
@@ -151,8 +158,8 @@ func (r *ProductRepositoryDB) GetAll(ctx context.Context) ([]models.Product, err
 	return products, nil
 }
 
-// GetByID retrieves a single Product by its integer ID.
-// If no matching row exists, returns a NotFoundError.
+// GetByID retrieves a single product from the database by its unique ID.
+// It returns the populated models.Product or if no matching row exists, returns a NotFoundError.
 // On other database errors, returns an InternalServerError.
 func (r *ProductRepositoryDB) GetByID(ctx context.Context, id int) (models.Product, error) {
 	const query = `
@@ -204,10 +211,16 @@ func (r *ProductRepositoryDB) GetByID(ctx context.Context, id int) (models.Produ
 	return product, nil
 }
 
-// Update modifies the product record with the given ID in the database,
-// setting each column to the corresponding field in the provided models.Product.
-// After the UPDATE statement, it returns the updated Product.
-// On any database failure, it returns an InternalServerError.
+// Update modifies an existing product record in the database. It applies all
+// fields from updatedProduct to the row identified by id.
+//
+// Behavior & Error Handling:
+//   - On success, returns the updated product.
+//   - If a product with the same product_code already exists (MySQL error #1062),
+//     returns httperrors.ConflictError with a message about duplicate product code.
+//   - If the provided seller_id does not exist (MySQL error #1452),
+//     returns httperrors.ConflictError about the missing seller.
+//   - Any other database error is wrapped in httperrors.InternalServerError.
 func (r *ProductRepositoryDB) Update(ctx context.Context, id int, updatedProduct models.Product) (models.Product, error) {
 	const query = `
 		UPDATE products
