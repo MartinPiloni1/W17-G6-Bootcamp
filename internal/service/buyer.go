@@ -69,3 +69,16 @@ func (s *BuyerServiceDefault) Delete(ctx context.Context, id int) error {
 	err := s.repository.Delete(ctx, id)
 	return err
 }
+
+// if id is given validate if the buyer exist by id, if exist, obtains the BuyerWithPurchaseOrdersCount
+// no id, GetAll with BuyerWithPurchaseOrdersCount
+func (s *BuyerServiceDefault) GetWithPurchaseOrdersCount(
+	ctx context.Context, id *int) ([]models.BuyerWithPurchaseOrdersCount, error) {
+	if id != nil {
+		_, err := s.repository.GetByID(ctx, *id)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return s.repository.GetWithPurchaseOrdersCount(ctx, id)
+}

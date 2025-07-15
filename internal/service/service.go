@@ -42,6 +42,7 @@ type BuyerService interface {
 	GetByID(ctx context.Context, id int) (models.Buyer, error)
 	Update(ctx context.Context, id int, BuyerData models.BuyerPatchRequest) (models.Buyer, error)
 	Delete(ctx context.Context, id int) error
+	GetWithPurchaseOrdersCount(ctx context.Context, id *int) ([]models.BuyerWithPurchaseOrdersCount, error)
 }
 
 type EmployeeService interface {

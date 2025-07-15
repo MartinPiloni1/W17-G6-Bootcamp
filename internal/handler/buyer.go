@@ -162,3 +162,35 @@ func (h *BuyerHandler) Delete() http.HandlerFunc {
 		response.JSON(w, http.StatusNoContent, nil)
 	}
 }
+
+// If a valid id is provided, obtains the purchase_orders_count associated to the buyer
+// If the id isnt provided, fetch it, but for all the buyers
+func (h *BuyerHandler) GetWithPurchaseOrdersCount() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		idParam := r.URL.Query().Get("id")
+		var id *int
+
+		// if id is provided, check if its an uint
+		if idParam != "" {
+			val, err := strconv.Atoi(idParam)
+			if err != nil || val <= 0 {
+				response.Error(w, http.StatusBadRequest, "Invalid Id")
+				return
+			}
+			id = &val // assign to the pointer
+		}
+
+		BuyerWithPurchaseOrdersCount, err := h.service.GetWithPurchaseOrdersCount(ctx, id)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+
+		response.JSON(w, http.StatusOK, map[string]any{
+			"data": BuyerWithPurchaseOrdersCount,
+		})
+	}
+}

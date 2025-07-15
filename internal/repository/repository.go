@@ -42,6 +42,7 @@ type BuyerRepository interface {
 	GetByID(ctx context.Context, id int) (models.Buyer, error)
 	Update(ctx context.Context, id int, updatedBuyer models.Buyer) (models.Buyer, error)
 	Delete(ctx context.Context, id int) error
+	GetWithPurchaseOrdersCount(ctx context.Context, id *int) ([]models.BuyerWithPurchaseOrdersCount, error)
 }
 
 type EmployeeRepository interface {
