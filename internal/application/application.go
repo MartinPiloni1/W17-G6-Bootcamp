@@ -71,6 +71,18 @@ func ProductRouter(db *sql.DB) chi.Router {
 	return router
 }
 
+// ProductRecordRouter creates and returns a chi.Router configured for product_records.
+func ProductRecordRouter(db *sql.DB) chi.Router {
+	router := chi.NewRouter()
+
+	repository := repository.NewProductRecordRepositoryDB(db)
+	service := service.NewProductRecordServiceDefault(repository)
+	handler := handler.NewProductRecordHandler(service)
+
+	router.Post("/", handler.Create())
+	return router
+}
+
 func BuyersRouter() chi.Router {
 	router := chi.NewRouter()
 

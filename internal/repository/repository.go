@@ -16,7 +16,6 @@ type ProductRepository interface {
 
 type ProductRecordRepository interface {
 	Create(ctx context.Context, productRecord models.ProductRecordAttributes) (models.ProductRecord, error)
-	GetRecordsPerProduct(ctx context.Context, id int) (models.ProductRecordReport, error)
 }
 
 type SellerRepository interface {
