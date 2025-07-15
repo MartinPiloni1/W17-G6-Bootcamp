@@ -125,7 +125,7 @@ func (r *BuyerRepositoryDB) GetByID(ctx context.Context, id int) (models.Buyer, 
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return models.Buyer{}, err
+			return models.Buyer{}, httperrors.NotFoundError{Message: "Buyer not found"}
 		}
 
 		return models.Buyer{}, err
