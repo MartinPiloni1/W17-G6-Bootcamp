@@ -1,91 +1,133 @@
 package repository
 
 import (
-	"os"
+	"database/sql"
+	"errors"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
-type EmployeeRepositoryFile struct {
-	filePath string
+type EmployeeRepositoryDB struct {
+	db *sql.DB
 }
 
-func NewEmployeeRepository() EmployeeRepository {
-	return &EmployeeRepositoryFile{filePath: os.Getenv("FILE_PATH_EMPLOYEE")}
+func NewEmployeeRepository(db *sql.DB) EmployeeRepository {
+	return &EmployeeRepositoryDB{db: db}
 }
 
-func (e *EmployeeRepositoryFile) Create(employee models.Employee) (models.Employee, error) {
-	dataList, err := utils.Read[models.Employee](e.filePath)
+func (e *EmployeeRepositoryDB) Create(employee models.Employee) (models.Employee, error) {
+	const query = `
+		INSERT INTO employees (
+			card_number_id,
+			first_name,
+			last_name,
+			warehouse_id
+		) VALUES (?, ?, ?, ?)
+	`
+	res, err := e.db.Exec(query, employee.CardNumberID, employee.FirstName, employee.LastName, employee.WarehouseID)
 	if err != nil {
 		return models.Employee{}, err
 	}
-
-	employee.Id, err = utils.GetNextID[models.Employee](e.filePath)
+	id, err := res.LastInsertId()
 	if err != nil {
-		return models.Employee{}, httperrors.ConflictError{Message: "error generating sequential id"}
-	}
-	dataList[employee.Id] = employee
-
-	if err := utils.Write[models.Employee](e.filePath, dataList); err != nil {
 		return models.Employee{}, err
 	}
-
+	employee.Id = int(id)
 	return employee, nil
 }
 
-func (e *EmployeeRepositoryFile) GetAll() (map[int]models.Employee, error) {
-	data, err := utils.Read[models.Employee](e.filePath)
+func (e *EmployeeRepositoryDB) GetAll() ([]models.Employee, error) {
+	const query = `
+		SELECT
+			id,
+			card_number_id,
+			first_name,
+			last_name,
+			warehouse_id
+		FROM employees
+	`
+	rows, err := e.db.Query(query)
 	if err != nil {
 		return nil, err
 	}
-	return data, nil
+	defer rows.Close()
+
+	var employees []models.Employee
+	for rows.Next() {
+		var emp models.Employee
+		if err := rows.Scan(&emp.Id, &emp.CardNumberID, &emp.FirstName, &emp.LastName, &emp.WarehouseID); err != nil {
+			return nil, err
+		}
+		employees = append(employees, emp)
+	}
+	return employees, nil
 }
 
-func (e *EmployeeRepositoryFile) GetByID(id int) (models.Employee, error) {
-	data, err := utils.Read[models.Employee](e.filePath)
+func (e *EmployeeRepositoryDB) GetByID(id int) (models.Employee, error) {
+	const query = `
+		SELECT
+			id,
+			card_number_id,
+			first_name,
+			last_name,
+			warehouse_id
+		FROM employees
+		WHERE id = ?
+	`
+	var emp models.Employee
+	err := e.db.QueryRow(query, id).Scan(
+		&emp.Id, &emp.CardNumberID, &emp.FirstName, &emp.LastName, &emp.WarehouseID,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return models.Employee{}, httperrors.NotFoundError{Message: "employee not found"}
+	}
 	if err != nil {
 		return models.Employee{}, err
-	}
-	emp, exist := data[id]
-	if !exist {
-		return models.Employee{}, httperrors.NotFoundError{Message: "employee not found"}
 	}
 	return emp, nil
 }
 
-func (e *EmployeeRepositoryFile) Update(id int, employee models.Employee) (models.Employee, error) {
-	dataList, err := utils.Read[models.Employee](e.filePath)
+func (e *EmployeeRepositoryDB) Update(id int, employee models.Employee) (models.Employee, error) {
+	const query = `
+		UPDATE employees
+		SET
+			card_number_id = ?,
+			first_name = ?,
+			last_name = ?,
+			warehouse_id = ?
+		WHERE id = ?
+	`
+	res, err := e.db.Exec(query, employee.CardNumberID, employee.FirstName, employee.LastName, employee.WarehouseID, id)
 	if err != nil {
 		return models.Employee{}, err
 	}
-
-	if _, exist := dataList[id]; !exist {
-		return models.Employee{}, httperrors.NotFoundError{Message: "employee not found"}
-	}
-
-	employee.Id = id
-	dataList[id] = employee
-	if err := utils.Write[models.Employee](e.filePath, dataList); err != nil {
+	rows, err := res.RowsAffected()
+	if err != nil {
 		return models.Employee{}, err
 	}
+	if rows == 0 {
+		return models.Employee{}, httperrors.NotFoundError{Message: "employee not found"}
+	}
+	employee.Id = id
 	return employee, nil
 }
 
-func (e *EmployeeRepositoryFile) Delete(id int) error {
-	dataList, err := utils.Read[models.Employee](e.filePath)
+func (e *EmployeeRepositoryDB) Delete(id int) error {
+	const query = `
+		DELETE FROM employees
+		WHERE id = ?
+	`
+	res, err := e.db.Exec(query, id)
 	if err != nil {
 		return err
 	}
-
-	if _, exist := dataList[id]; !exist {
-		return httperrors.NotFoundError{Message: "employee not found"}
-	}
-
-	delete(dataList, id)
-	if err := utils.Write[models.Employee](e.filePath, dataList); err != nil {
+	rows, err := res.RowsAffected()
+	if err != nil {
 		return err
+	}
+	if rows == 0 {
+		return httperrors.NotFoundError{Message: "employee not found"}
 	}
 	return nil
 }
