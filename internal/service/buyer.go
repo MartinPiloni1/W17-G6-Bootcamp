@@ -5,7 +5,6 @@ import (
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 )
 
 type BuyerServiceDefault struct {
@@ -18,15 +17,6 @@ func NewBuyerServiceDefault(repositoryInstance repository.BuyerRepository) Buyer
 
 // creates a buyers if it has an unique CardNumberId that dosent already exist in the db
 func (s *BuyerServiceDefault) Create(ctx context.Context, newBuyer models.BuyerAttributes) (models.Buyer, error) {
-	// check if the cardNumber already exist
-	exist, err := s.repository.CardNumberIdAlreadyExist(ctx, newBuyer.CardNumberId)
-	if err != nil {
-		return models.Buyer{}, err
-	}
-
-	if exist {
-		return models.Buyer{}, httperrors.ConflictError{Message: "CardNumberId already in use"}
-	}
 	buyer, err := s.repository.Create(ctx, newBuyer)
 	return buyer, err
 }
@@ -60,14 +50,6 @@ func (s *BuyerServiceDefault) Update(ctx context.Context, id int, BuyerData mode
 		return models.Buyer{}, err
 	}
 	if BuyerData.CardNumberId != nil {
-		exist, err := s.repository.CardNumberIdAlreadyExist(ctx, *BuyerData.CardNumberId)
-		if err != nil {
-			return models.Buyer{}, err
-		}
-
-		if exist {
-			return models.Buyer{}, httperrors.ConflictError{Message: "CardNumberId already in use"}
-		}
 		buyer.CardNumberId = *BuyerData.CardNumberId
 	}
 

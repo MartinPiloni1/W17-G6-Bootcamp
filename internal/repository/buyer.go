@@ -156,6 +156,12 @@ func (r *BuyerRepositoryDB) Update(ctx context.Context, id int, updatedBuyer mod
 		id,
 	)
 	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			if mysqlErr.Number == 1062 {
+				// cardNumberId is unique
+				return models.Buyer{}, httperrors.ConflictError{Message: "CardNumberId already in use"}
+			}
+		}
 		return models.Buyer{}, err
 	}
 
@@ -191,24 +197,4 @@ func (r *BuyerRepositoryDB) Delete(ctx context.Context, id int) error {
 	}
 
 	return nil
-}
-
-// checks whether a buyer with the given card_number_id already exists in the database.
-//
-// Returns:
-//   - true and nil error if a buyer with the provided card_number_id exists.
-//   - false and nil error if no buyer with that card_number_id exists.
-//   - false and a non-nil error if an unexpected error occurs during the query.
-func (r *BuyerRepositoryDB) CardNumberIdAlreadyExist(ctx context.Context, newCardNumberId int) (bool, error) {
-	const query = `
-		SELECT EXISTS(
-			SELECT 1 FROM buyers WHERE card_number_id = ?
-		)
-	`
-	var exists bool
-	err := r.db.QueryRowContext(ctx, query, newCardNumberId).Scan(&exists)
-	if err != nil {
-		return false, err
-	}
-	return exists, nil
 }
