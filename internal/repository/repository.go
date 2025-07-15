@@ -16,7 +16,7 @@ type ProductRepository interface {
 
 type SellerRepository interface {
 	Create(seller models.SellerAttributes) (models.Seller, error)
-	GetAll() (map[int]models.Seller, error)
+	GetAll() ([]models.Seller, error)
 	GetByID(id int) (models.Seller, error)
 	Update(id int, data *models.SellerAttributes) (models.Seller, error)
 	Delete(id int) error
