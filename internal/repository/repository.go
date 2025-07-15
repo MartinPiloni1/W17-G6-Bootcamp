@@ -20,31 +20,37 @@ type ProductRecordRepository interface {
 
 type SellerRepository interface {
 	Create(seller models.SellerAttributes) (models.Seller, error)
-	GetAll() (map[int]models.Seller, error)
+	GetAll() ([]models.Seller, error)
 	GetByID(id int) (models.Seller, error)
 	Update(id int, data *models.SellerAttributes) (models.Seller, error)
 	Delete(id int) error
 }
+
+// WarehouseRepository provides methods for warehouse data access.
 type WarehouseRepository interface {
-	GetAll() (map[int]models.Warehouse, error)
+	// GetAll returns all warehouses.
+	GetAll() ([]models.Warehouse, error)
+	// Create adds a new warehouse.
 	Create(warehouseAtribbutes models.WarehouseAttributes) (models.Warehouse, error)
+	// GetByID returns a warehouse by its ID.
 	GetByID(id int) (models.Warehouse, error)
+	// Update modifies a warehouse by its ID.
 	Update(id int, warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error)
+	// Delete removes a warehouse by its ID.
 	Delete(id int) error
 }
 
 type BuyerRepository interface {
-	Create(newBuyer models.BuyerAttributes) (models.Buyer, error)
-	GetAll() (map[int]models.Buyer, error)
-	GetByID(id int) (models.Buyer, error)
-	Update(id int, updatedBuyer models.Buyer) (models.Buyer, error)
-	Delete(id int) error
-	CardNumberIdAlreadyExist(newCardNumberId int) (bool, error)
+	Create(ctx context.Context, newBuyer models.BuyerAttributes) (models.Buyer, error)
+	GetAll(ctx context.Context) ([]models.Buyer, error)
+	GetByID(ctx context.Context, id int) (models.Buyer, error)
+	Update(ctx context.Context, id int, updatedBuyer models.Buyer) (models.Buyer, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type EmployeeRepository interface {
 	Create(Employee models.Employee) (models.Employee, error)
-	GetAll() (map[int]models.Employee, error)
+	GetAll() ([]models.Employee, error)
 	GetByID(id int) (models.Employee, error)
 	Update(id int, data models.Employee) (models.Employee, error)
 	Delete(id int) error

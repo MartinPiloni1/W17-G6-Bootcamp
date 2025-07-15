@@ -36,3 +36,8 @@ VALUES
   ('2024-02-05',   5.75,   8.99,  3),
   ('2024-03-20', 100.00, 120.00,  4),
   ('2024-04-01',  9.00,  11.5,  1);
+
+INSERT INTO `buyers` (`card_number_id`, `first_name`, `last_name`) VALUES
+        (12345678, 'Juan', 'Pérez'),
+        (23456789, 'Ana', 'Gómez'),
+        (34567890, 'Luis', 'Martínez');
