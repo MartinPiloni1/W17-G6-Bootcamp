@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"strings"
 	_ "time"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
@@ -72,22 +71,24 @@ func (r *InboundOrderRepositoryDB) GetByOrderNumber(orderNumber string) (models.
 	return order, nil
 }
 
-func (r *InboundOrderRepositoryDB) CountInboundOrdersForEmployees(employeeIDs []int) (map[int]int, error) {
+func (r *InboundOrderRepositoryDB) CountInboundOrdersForEmployee(employeeID int) (int, error) {
+	const query = `SELECT COUNT(*) FROM inbound_orders WHERE employee_id = ?`
+	var count int
+	err := r.db.QueryRow(query, employeeID).Scan(&count)
+	return count, err
+}
+
+func (r *InboundOrderRepositoryDB) CountInboundOrdersForEmployees() (map[int]int, error) {
 	result := make(map[int]int)
-	if len(employeeIDs) == 0 {
-		return result, nil
-	}
-	// Utiliza IN (?,?,?)...
-	query := "SELECT employee_id, COUNT(*) FROM inbound_orders WHERE employee_id IN (?" + strings.Repeat(",?", len(employeeIDs)-1) + ") GROUP BY employee_id"
-	args := make([]interface{}, len(employeeIDs))
-	for i, id := range employeeIDs {
-		args[i] = id
-	}
-	rows, err := r.db.Query(query, args...)
+
+	query := "SELECT employee_id, COUNT(*) FROM inbound_orders GROUP BY employee_id"
+
+	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+
 	for rows.Next() {
 		var eid, cnt int
 		if err := rows.Scan(&eid, &cnt); err != nil {
@@ -96,11 +97,4 @@ func (r *InboundOrderRepositoryDB) CountInboundOrdersForEmployees(employeeIDs []
 		result[eid] = cnt
 	}
 	return result, nil
-}
-
-func (r *InboundOrderRepositoryDB) CountInboundOrdersForEmployee(employeeID int) (int, error) {
-	const query = `SELECT COUNT(*) FROM inbound_orders WHERE employee_id = ?`
-	var count int
-	err := r.db.QueryRow(query, employeeID).Scan(&count)
-	return count, err
 }

@@ -8,15 +8,17 @@ import (
 
 // InboundOrderServiceDefault implements the InboundOrderService interface.
 type InboundOrderServiceDefault struct {
-	repo         repository.InboundOrderRepository
-	employeeRepo repository.EmployeeRepository
+	repo          repository.InboundOrderRepository
+	employeeRepo  repository.EmployeeRepository
+	warehouseRepo repository.WarehouseRepository
 }
 
 // NewInboundOrderService returns a new InboundOrderService.
-func NewInboundOrderService(repo repository.InboundOrderRepository, employeeRepo repository.EmployeeRepository) InboundOrderService {
+func NewInboundOrderService(repo repository.InboundOrderRepository, employeeRepo repository.EmployeeRepository, warehouseRepo repository.WarehouseRepository) InboundOrderService {
 	return &InboundOrderServiceDefault{
-		repo:         repo,
-		employeeRepo: employeeRepo,
+		repo:          repo,
+		employeeRepo:  employeeRepo,
+		warehouseRepo: warehouseRepo,
 	}
 }
 
@@ -38,6 +40,12 @@ func (s InboundOrderServiceDefault) Create(attrs models.InboundOrderAttributes) 
 	employee, err := s.employeeRepo.GetByID(attrs.EmployeeID)
 	if err != nil || employee.Id == 0 {
 		return models.InboundOrder{}, httperrors.ConflictError{Message: "employee does not exist"}
+	}
+
+	// Check if warehouse exists
+	warehouse, err := s.warehouseRepo.GetByID(attrs.WarehouseID)
+	if err != nil || warehouse.Id == 0 {
+		return models.InboundOrder{}, httperrors.ConflictError{Message: "warehouse does not exist"}
 	}
 
 	newInboundOrder := models.InboundOrder{InboundOrderAttributes: attrs}

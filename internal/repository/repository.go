@@ -60,6 +60,6 @@ type SectionRepository interface {
 type InboundOrderRepository interface {
 	Create(order models.InboundOrder) (models.InboundOrder, error)
 	GetByOrderNumber(orderNumber string) (models.InboundOrder, error)
-	CountInboundOrdersForEmployees(employeeIDs []int) (map[int]int, error)
+	CountInboundOrdersForEmployees() (map[int]int, error)
 	CountInboundOrdersForEmployee(employeeID int) (int, error)
 }

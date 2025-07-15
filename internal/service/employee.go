@@ -115,11 +115,8 @@ func (s *EmployeeServiceDefault) ReportInboundOrders(employeeID int) ([]models.E
 	if err != nil {
 		return nil, err
 	}
-	ids := make([]int, len(employees))
-	for i, emp := range employees {
-		ids[i] = emp.Id
-	}
-	counts, err := s.inboundOrderRepo.CountInboundOrdersForEmployees(ids)
+
+	counts, err := s.inboundOrderRepo.CountInboundOrdersForEmployees()
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +124,7 @@ func (s *EmployeeServiceDefault) ReportInboundOrders(employeeID int) ([]models.E
 	for i, emp := range employees {
 		response[i] = models.EmployeeWithInboundCount{
 			Id: emp.Id, CardNumberID: emp.CardNumberID, FirstName: emp.FirstName, LastName: emp.LastName, WarehouseID: emp.WarehouseID,
-			InboundOrdersCount: counts[emp.Id], // if count is 0, map is 0 (by default)
+			InboundOrdersCount: counts[emp.Id], // 0 by default
 		}
 	}
 	return response, nil

@@ -66,7 +66,7 @@ func (p *WarehouseRepositoryDB) GetAll() ([]models.Warehouse, error) {
 			telephone,
 			minimun_capacity,
 			minimun_temperature
-		FROM warehouse
+		FROM warehouses
 	`
 	rows, err := p.db.Query(query)
 	if err != nil {
@@ -105,7 +105,7 @@ func (p *WarehouseRepositoryDB) GetByID(id int) (models.Warehouse, error) {
 			telephone,
 			minimun_capacity,
 			minimun_temperature
-		FROM warehouse
+		FROM warehouses
 		WHERE id = ?
 	`
 	row := p.db.QueryRow(query, id)
@@ -129,7 +129,7 @@ func (p *WarehouseRepositoryDB) GetByID(id int) (models.Warehouse, error) {
 // Update modifies an existing warehouse and returns the updated warehouse.
 func (p *WarehouseRepositoryDB) Update(id int, warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error) {
 	query := `
-		UPDATE warehouse SET
+		UPDATE warehouses SET
 			warehouse_code = ?,
 			address = ?,
 			telephone = ?,
@@ -164,7 +164,7 @@ func (p *WarehouseRepositoryDB) Update(id int, warehouseAttributes models.Wareho
 
 // Delete removes a warehouse by its ID.
 func (p *WarehouseRepositoryDB) Delete(id int) error {
-	query := `DELETE FROM warehouse WHERE id = ?`
+	query := `DELETE FROM warehouses WHERE id = ?`
 	result, err := p.db.Exec(query, id)
 	if err != nil {
 		return httperrors.InternalServerError{Message: "error deleting warehouse"}

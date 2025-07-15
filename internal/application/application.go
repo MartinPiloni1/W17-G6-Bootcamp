@@ -118,7 +118,8 @@ func InboundOrderRouter(db *sql.DB) chi.Router {
 
 	inboundOrderRepository := repository.NewInboundOrderRepository(db)
 	employeeRepository := repository.NewEmployeeRepository(db)
-	service := service.NewInboundOrderService(inboundOrderRepository, employeeRepository)
+	warehouseRepository := repository.NewWarehouseRepositoryDb(db)
+	service := service.NewInboundOrderService(inboundOrderRepository, employeeRepository, warehouseRepository)
 	handler := handler.NewInboundOrderHandler(service)
 
 	router.Post("/", handler.Create())
