@@ -59,3 +59,7 @@ type SectionRepository interface {
 	Update(id int, data models.Section) (models.Section, error)
 	Delete(id int) error
 }
+
+type PurchaseOrderRepository interface {
+	Create(ctx context.Context, newPurchaseOrder models.PurchaseOrderAttributes) (models.PurchaseOrder, error)
+}

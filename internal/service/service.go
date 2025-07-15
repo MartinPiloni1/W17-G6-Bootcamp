@@ -59,3 +59,7 @@ type SectionService interface {
 	Update(id int, data models.UpdateSectionRequest) (models.Section, error)
 	Delete(id int) error
 }
+
+type PurchaseOrderService interface {
+	Create(ctx context.Context, newPurchaseOrder models.PurchaseOrderAttributes) (models.PurchaseOrder, error)
+}
