@@ -24,11 +24,9 @@ func NewProductHandler(svc service.ProductService) *ProductHandler {
 	return &ProductHandler{svc: svc}
 }
 
-/*
-Create returns an http.HandlerFunc that decodes a JSON payload,
-validates it, delegates creation to the service layer, and writes
-the appropriate JSON response.
-*/
+// Create returns an http.HandlerFunc that decodes a JSON payload,
+// validates it, delegates creation of a Product to the service layer, and writes
+// the appropriate JSON response.
 func (h ProductHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -64,10 +62,8 @@ func (h ProductHandler) Create() http.HandlerFunc {
 	}
 }
 
-/*
-GetAll returns an http.HandlerFunc that fetches all products
-from the service layer and writes them as JSON.
-*/
+// GetAll returns an http.HandlerFunc that fetches all products
+// from the service layer and writes them as JSON.
 func (h ProductHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -84,10 +80,8 @@ func (h ProductHandler) GetAll() http.HandlerFunc {
 	}
 }
 
-/*
-GetById returns an http.HandlerFunc that parses the product ID
-from the URL, retrieves the product, and writes it as JSON.
-*/
+// GetById returns an http.HandlerFunc that parses the product ID
+// from the URL, retrieves the product, and writes it as JSON.
 func (h ProductHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -110,11 +104,9 @@ func (h ProductHandler) GetById() http.HandlerFunc {
 	}
 }
 
-/*
-Update returns an http.HandlerFunc that parses the id URL parameter,
-decodes a partial-product JSON payload, validates it, delegates the update
-to the service layer, and responds with the updated product.
-*/
+// Update returns an http.HandlerFunc that parses the id URL parameter,
+// decodes a partial-product JSON payload, validates it, delegates the update
+// to the service layer, and responds with the updated product.
 func (h ProductHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -159,10 +151,8 @@ func (h ProductHandler) Update() http.HandlerFunc {
 	}
 }
 
-/*
-Delete returns an http.HandlerFunc that parses the id URL parameter,
-delegates deletion to the service layer, and responds with no content.
-*/
+// Delete returns an http.HandlerFunc that parses the id URL parameter,
+// delegates deletion to the service layer, and responds with no content.
 func (h ProductHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
