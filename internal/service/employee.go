@@ -7,11 +7,12 @@ import (
 )
 
 type EmployeeServiceDefault struct {
-	repo repository.EmployeeRepository
+	repo             repository.EmployeeRepository
+	inboundOrderRepo repository.InboundOrderRepository
 }
 
-func NewEmployeeService(repo repository.EmployeeRepository) EmployeeService {
-	return &EmployeeServiceDefault{repo: repo}
+func NewEmployeeService(repo repository.EmployeeRepository, inboundOrderRepo repository.InboundOrderRepository) EmployeeService {
+	return &EmployeeServiceDefault{repo: repo, inboundOrderRepo: inboundOrderRepo}
 }
 
 // Create creates a new employee with the provided attributes.
@@ -90,4 +91,44 @@ func (e EmployeeServiceDefault) Update(id int, attrs models.EmployeeAttributes) 
 // Returns an error if the employee does not exist or the operation fails.
 func (e EmployeeServiceDefault) Delete(id int) error {
 	return e.repo.Delete(id)
+}
+
+func (s *EmployeeServiceDefault) ReportInboundOrders(employeeID int) ([]models.EmployeeWithInboundCount, error) {
+	// Check for one employee
+	if employeeID != 0 {
+		emp, err := s.repo.GetByID(employeeID)
+		if err != nil || emp.Id == 0 {
+			return nil, httperrors.NotFoundError{Message: "employee not found"}
+		}
+		count, err := s.inboundOrderRepo.CountInboundOrdersForEmployee(employeeID)
+		if err != nil {
+			return nil, err
+		}
+		result := models.EmployeeWithInboundCount{
+			Id: emp.Id, CardNumberID: emp.CardNumberID, FirstName: emp.FirstName, LastName: emp.LastName, WarehouseID: emp.WarehouseID, InboundOrdersCount: count,
+		}
+		return []models.EmployeeWithInboundCount{result}, nil
+	}
+
+	// Check for all employees
+	employees, err := s.repo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]int, len(employees))
+	for i, emp := range employees {
+		ids[i] = emp.Id
+	}
+	counts, err := s.inboundOrderRepo.CountInboundOrdersForEmployees(ids)
+	if err != nil {
+		return nil, err
+	}
+	response := make([]models.EmployeeWithInboundCount, len(employees))
+	for i, emp := range employees {
+		response[i] = models.EmployeeWithInboundCount{
+			Id: emp.Id, CardNumberID: emp.CardNumberID, FirstName: emp.FirstName, LastName: emp.LastName, WarehouseID: emp.WarehouseID,
+			InboundOrdersCount: counts[emp.Id], // if count is 0, map is 0 (by default)
+		}
+	}
+	return response, nil
 }

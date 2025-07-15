@@ -49,3 +49,10 @@ type SectionRepository interface {
 	Update(id int, data models.Section) (models.Section, error)
 	Delete(id int) error
 }
+
+type InboundOrderRepository interface {
+	Create(order models.InboundOrder) (models.InboundOrder, error)
+	GetByOrderNumber(orderNumber string) (models.InboundOrder, error)
+	CountInboundOrdersForEmployees(employeeIDs []int) (map[int]int, error)
+	CountInboundOrdersForEmployee(employeeID int) (int, error)
+}

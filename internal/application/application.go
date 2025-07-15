@@ -83,8 +83,9 @@ func BuyersRouter() chi.Router {
 func EmployeeRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
-	repository := repository.NewEmployeeRepository(db)
-	service := service.NewEmployeeService(repository)
+	employeeRepository := repository.NewEmployeeRepository(db)
+	inboundOrderRepository := repository.NewInboundOrderRepository(db)
+	service := service.NewEmployeeService(employeeRepository, inboundOrderRepository)
 	handler := handler.NewEmployeeHandler(service)
 
 	router.Get("/", handler.GetAll())
@@ -92,6 +93,7 @@ func EmployeeRouter(db *sql.DB) chi.Router {
 	router.Post("/", handler.Create())
 	router.Patch("/{id}", handler.Update())
 	router.Delete("/{id}", handler.Delete())
+	router.Get("/reportInboundOrders", handler.GetInboundOrderReport())
 	return router
 }
 
@@ -107,5 +109,17 @@ func SectionRouter() chi.Router {
 	router.Delete("/{id}", handler.Delete())
 	router.Post("/", handler.Create())
 	router.Patch("/{id}", handler.Update())
+	return router
+}
+
+func InboundOrderRouter(db *sql.DB) chi.Router {
+	router := chi.NewRouter()
+
+	inboundOrderRepository := repository.NewInboundOrderRepository(db)
+	employeeRepository := repository.NewEmployeeRepository(db)
+	service := service.NewInboundOrderService(inboundOrderRepository, employeeRepository)
+	handler := handler.NewInboundOrderHandler(service)
+
+	router.Post("/", handler.Create())
 	return router
 }

@@ -40,8 +40,7 @@ func LoadServerConf() (*ServerChi, error) {
 	if Host == "" ||
 		Port == "" ||
 		Name == "" ||
-		User == "" ||
-		Pass == "" {
+		User == "" {
 		return nil, fmt.Errorf("DB conn settings not established")
 	}
 	dbConfig := storage.NewMySQLConfig(Host, Port, User, Pass, Name)
@@ -68,6 +67,7 @@ func (a *ServerChi) Run() (err error) {
 	sellerRouter := application.SellerRouter()
 	employeeRouter := application.EmployeeRouter(freshDB)
 	sectionRouter := application.SectionRouter()
+	inboundOrderRouter := application.InboundOrderRouter(freshDB)
 
 	router.Mount("/healthcheck", healthRouter)
 	router.Route("/api/v1", func(r chi.Router) {
@@ -77,6 +77,7 @@ func (a *ServerChi) Run() (err error) {
 		r.Mount("/sellers", sellerRouter)
 		r.Mount("/employees", employeeRouter)
 		r.Mount("/sections", sectionRouter)
+		r.Mount("/inboundOrders", inboundOrderRouter)
 	})
 
 	err = http.ListenAndServe(a.ServerAddr, router)

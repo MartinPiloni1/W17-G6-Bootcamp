@@ -39,6 +39,7 @@ type EmployeeService interface {
 	GetByID(id int) (models.Employee, error)
 	Update(id int, employee models.EmployeeAttributes) (models.Employee, error)
 	Delete(id int) error
+	ReportInboundOrders(employeeID int) ([]models.EmployeeWithInboundCount, error)
 }
 
 type SectionService interface {
@@ -47,4 +48,8 @@ type SectionService interface {
 	GetByID(id int) (models.Section, error)
 	Update(id int, data models.UpdateSectionRequest) (models.Section, error)
 	Delete(id int) error
+}
+
+type InboundOrderService interface {
+	Create(attrs models.InboundOrderAttributes) (models.InboundOrder, error)
 }

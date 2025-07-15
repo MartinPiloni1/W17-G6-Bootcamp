@@ -164,3 +164,28 @@ func (h *EmployeeHandler) Delete() http.HandlerFunc {
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
+
+func (h *EmployeeHandler) GetInboundOrderReport() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		employeeID := 0
+		param := r.URL.Query().Get("id")
+		if param != "" {
+			id, err := strconv.Atoi(param)
+			if err != nil {
+				response.Error(w, http.StatusBadRequest, "Invalid employee_id")
+				return
+			}
+			employeeID = id
+		}
+
+		data, err := h.sv.ReportInboundOrders(employeeID)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+		response.JSON(w, http.StatusOK, map[string]interface{}{
+			"data": data,
+		})
+	}
+}
