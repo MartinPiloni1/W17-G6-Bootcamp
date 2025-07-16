@@ -30,6 +30,7 @@ func (h ProductRecordHandler) Create() http.HandlerFunc {
 		ctx := r.Context()
 		var newProductRecord models.ProductRecordAttributes
 
+		// Decode JSON Body to a ProductRecordAttributes struct
 		decoder := json.NewDecoder(r.Body)
 		decoder.DisallowUnknownFields()
 		err := decoder.Decode(&newProductRecord)
@@ -41,10 +42,11 @@ func (h ProductRecordHandler) Create() http.HandlerFunc {
 		// Validates that LastUpdateDate is in a valid date format
 		_, err = time.Parse("2006-01-02", newProductRecord.LastUpdateDate)
 		if err != nil {
-			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
+			response.Error(w, http.StatusUnprocessableEntity, "Invalid date format")
 			return
 		}
 
+		// Validate the ProductRecordAttributes struct
 		validator := validator.New()
 		err = validator.Struct(newProductRecord)
 		if err != nil {
@@ -52,6 +54,7 @@ func (h ProductRecordHandler) Create() http.HandlerFunc {
 			return
 		}
 
+		// Delegate creation to the service layer
 		productRecordData, err := h.svc.Create(ctx, newProductRecord)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
@@ -59,6 +62,7 @@ func (h ProductRecordHandler) Create() http.HandlerFunc {
 			return
 		}
 
+		// Write the appropiate JSON Response
 		response.JSON(w, http.StatusCreated, map[string]any{
 			"data": productRecordData,
 		})
