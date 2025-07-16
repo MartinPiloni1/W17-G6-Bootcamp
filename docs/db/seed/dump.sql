@@ -7,31 +7,6 @@ INSERT IGNORE INTO warehouses (warehouse_code, address, telephone, minimun_capac
     ("DHK2", 'Monroe 1234', '47470001', '15', '10'),
     ("CBA3", 'Cordoba 91011', '3516000789', '25', '4');
 
-INSERT IGNORE INTO employees (card_number_id, first_name, last_name, warehouse_id) VALUES
-    ('ABC001', 'Ramon', 'Diaz', 1),
-    ('DEF002', 'Carlos', 'Lopez', 1),
-    ('GHI003', 'Marta', 'Perez', 2),
-    ('JKL004', 'Lucia', 'Romero', 2),
-    ('MNO005', 'Sergio', 'Castro', 3);
-
-INSERT IGNORE INTO products (description, expiration_rate, freezing_rate, height, length, width, netweight, product_code, recommended_freezing_temperature, product_type_id, seller_id) VALUES
-     ('Pechuga de pollo', 4.50, 0.75, 3.0, 12.0, 8.0, 1.20, 'POL-0001', -18.0, 1, 1),
-     ('Salmón', 6.00, 0.60, 2.5, 18.0, 14.0, 0.35, 'SAL-0001', -20.0, 2,  2),
-     ('Leche entera', 7.00, 0.90, 25.0, 7.0, 7.0, 1.00, 'LCH-100L',  4.0, 3,   3),
-     ('Yogurt helado', 5, 3, 6.4, 4.5, 1.2, 0.5, 'YOG01', -18, 4, 4);
-
-INSERT IGNORE INTO product_records (last_update_date, purchase_price, sale_price, product_id) VALUES
-    ('2024-01-10',  10.00,  12.50,  1),
-    ('2024-01-12',  20.00,  20.00,  2),
-    ('2024-02-05',   5.75,   8.99,  3),
-    ('2024-03-20', 100.00, 120.00,  4),
-    ('2024-04-01',  9.00,  11.5,  1);
-
-INSERT IGNORE INTO buyers (card_number_id, first_name, last_name) VALUES
-    (12345678, 'Juan', 'Pérez'),
-    (23456789, 'Ana', 'Gómez'),
-    (34567890, 'Luis', 'Martínez');
-
 INSERT IGNORE INTO localities (id, locality_name, province_name, country_name) VALUES
     ('6700', 'Lujan', 'Buenos Aires', 'Argentina'),
     ('1001', 'CABA', 'CABA', 'Argentina'),
@@ -40,6 +15,18 @@ INSERT IGNORE INTO localities (id, locality_name, province_name, country_name) V
     ('10115', 'Berlin', 'Berlin', 'Alemania'),
     ('28001', 'Madrid', 'Madrid', 'España'),
     ('11000', 'Montevideo', 'Montevideo', 'Uruguay');
+
+INSERT IGNORE INTO buyers (card_number_id, first_name, last_name) VALUES
+    (12345678, 'Juan', 'Pérez'),
+    (23456789, 'Ana', 'Gómez'),
+    (34567890, 'Luis', 'Martínez');
+
+INSERT IGNORE INTO employees (card_number_id, first_name, last_name, warehouse_id) VALUES
+    ('ABC001', 'Ramon', 'Diaz', 1),
+    ('DEF002', 'Carlos', 'Lopez', 1),
+    ('GHI003', 'Marta', 'Perez', 2),
+    ('JKL004', 'Lucia', 'Romero', 2),
+    ('MNO005', 'Sergio', 'Castro', 3);
 
 INSERT IGNORE INTO sellers (cid, company_name, address, telephone, locality_id) VALUES
      (1, 'Alkemy', 'Monroe 860', '47470000', '6700'),
@@ -59,6 +46,11 @@ INSERT IGNORE INTO carries (cid, company_name, address, telephone, locality_id) 
      ("CID2445", 'Panaderia El Sol', 'Av. Colon 1000', '3511112222', '5000'),
      ("CID3326", 'Bäckerei Berlin', 'Unter den Linden 77', '+4930123456', '10115');
 
+INSERT IGNORE INTO products (description, expiration_rate, freezing_rate, height, length, width, netweight, product_code, recommended_freezing_temperature, product_type_id, seller_id) VALUES
+     ('Pechuga de pollo', 4.50, 0.75, 3.0, 12.0, 8.0, 1.20, 'POL-0001', -18.0, 1, 1),
+     ('Salmón', 6.00, 0.60, 2.5, 18.0, 14.0, 0.35, 'SAL-0001', -20.0, 2,  2),
+     ('Leche entera', 7.00, 0.90, 25.0, 7.0, 7.0, 1.00, 'LCH-100L',  4.0, 3,   3),
+     ('Yogurt helado', 5, 3, 6.4, 4.5, 1.2, 0.5, 'YOG01', -18, 4, 4);
 
 INSERT IGNORE INTO sections (section_number, current_temperature, minimum_temperature, current_capacity, minimum_capacity, maximum_capacity, warehouse_id, product_type_id) VALUES
     ('SEC-001', 5.00, 0.00, 50, 0, 100, 1, 1),
@@ -72,19 +64,25 @@ INSERT IGNORE INTO sections (section_number, current_temperature, minimum_temper
     ('SEC-009', -1.00, -3.00, 5, 0, 10, 3, 1),
     ('SEC-010', 10.00, 8.00, 90, 70, 110, 1, 1);
 
+INSERT IGNORE INTO product_records (last_update_date, purchase_price, sale_price, product_id) VALUES
+    ('2024-01-10',  10.00,  12.50,  1),
+    ('2024-01-12',  20.00,  20.00,  2),
+    ('2024-02-05',   5.75,   8.99,  3),
+    ('2024-03-20', 100.00, 120.00,  4),
+    ('2024-04-01',  9.00,  11.5,  1);
+
 INSERT IGNORE INTO product_batches (batch_number, current_quantity, current_temperature, due_date, initial_quantity, manufacturing_date, manufacturing_hour, minimum_temperature, product_id, section_id) VALUES
-    (111, 500, 4.5, '2025-08-15', 500, '2025-07-15', 8, 2.0, 101, 1),
-    (112, 1000, -18.0, '2026-01-20', 1000, '2025-07-15', 10, -22.0, 102, 2),
-    (113, 300, 5.0, '2025-11-10', 400, '2025-07-14', 14, 3.0, 103, 1),
-    (114, 450, 4.2, '2025-08-22', 500, '2025-07-22', 9, 2.0, 101, 3),
-    (115, 800, -19.5, '2026-02-01', 800, '2025-07-20', 11, -22.0, 102, 2);
+    (111, 500, 4.5, '2025-08-15', 500, '2025-07-15', 8, 2.0, 1, 1),
+    (112, 1000, -18.0, '2026-01-20', 1000, '2025-07-15', 10, -22.0, 2, 2),
+    (113, 300, 5.0, '2025-11-10', 400, '2025-07-14', 14, 3.0, 3, 1),
+    (114, 450, 4.2, '2025-08-22', 500, '2025-07-22', 9, 2.0, 1, 3),
+    (115, 800, -19.5, '2026-02-01', 800, '2025-07-20', 11, -22.0, 2, 2);
+
+INSERT IGNORE INTO purchase_orders (order_number, order_date, tracking_code, buyer_id, product_record_id) VALUES
+        ('ORD-001', '2024-06-15 12:34:56', 'TRACK-111AAA', 1, 1),
+        ('ORD-002', '2024-06-16 15:10:35', 'TRACK-222BBB', 2, 2);
 
 INSERT IGNORE INTO inbound_orders (order_number, order_date, employee_id, warehouse_id, product_batch_id) VALUES
    ('INB-1001', '2024-06-01 09:00:00', 1, 1, 1),
    ('INB-1002', '2024-06-02 10:30:00', 2, 2, 2),
    ('INB-1003', '2024-06-03 11:00:00', 3, 3, 3);
-
-INSERT IGNORE INTO purchase_orders
-(order_number, order_date, tracking_code, buyer_id, product_record_id) VALUES
-        ('ORD-001', '2024-06-15 12:34:56', 'TRACK-111AAA', 1, 1),
-        ('ORD-002', '2024-06-16 15:10:35', 'TRACK-222BBB', 2, 2);
