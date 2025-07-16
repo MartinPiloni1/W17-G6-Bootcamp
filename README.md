@@ -36,4 +36,7 @@ DB_PORT=3306
 DB_USER=freshuser # can be changed
 DB_PASS=freshpass # can be changed
 ```
-docker-compose up --build
+
+run the project with
+
+`docker-compose up --build`
