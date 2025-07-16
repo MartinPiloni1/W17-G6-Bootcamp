@@ -3,11 +3,11 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 	"github.com/bootcamp-go/web/response"
 	"github.com/go-playground/validator"
 )
@@ -21,15 +21,6 @@ type ProductBatchHandler struct {
 func NewProductBatchHandler(productBatchService service.ProductBatchService) *ProductBatchHandler {
 	return &ProductBatchHandler{productBatchService: productBatchService}
 }
-
-// ValidateDateFormat validates the date format YYYY-MM-DD
-func validateDateFormat(fl validator.FieldLevel) bool {
-	const layout = "2006-01-02"
-	dateStr := fl.Field().String()
-	_, err := time.Parse(layout, dateStr)
-	return err == nil
-}
-
 
 // Create creates a new product batch in the repository
 // @Summary Create a new product batch
@@ -59,7 +50,7 @@ func (handler *ProductBatchHandler) Create() http.HandlerFunc {
 
 		// Validate date format
 		validator := validator.New()
-		validator.RegisterValidation("date_format", validateDateFormat)
+		validator.RegisterValidation("date_format", utils.ValidateDateFormat)
 
 		// Validate product batch
 		if err := validator.Struct(productBatch.Data); err != nil {

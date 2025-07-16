@@ -228,14 +228,13 @@ func (repository *SectionRepositoryDB) GetProductsReport(ctx context.Context, id
 
 	err := row.Scan(&report.SectionID, &report.SectionNumber, &report.ProductsCount)
 	if err != nil {
+		// If Scan returns sql.ErrNoRows, it means the section ID was not found.
+		// The LEFT JOIN ensures a row is returned even for sections with 0 products.
+		// Therefore, this error reliably indicates that the section does not exist.
 		if errors.Is(err, sql.ErrNoRows) {
-			// We check if the section exists at all. If not, return a standard not found error.
-			_, errCheck := repository.GetByID(ctx, id)
-			if errCheck != nil {
-				return models.SectionProductsReport{}, httperrors.NotFoundError{Message: "Section not found"}
-			}
+			return models.SectionProductsReport{}, httperrors.NotFoundError{Message: "Section not found"}
 		}
-		// Any other error
+		// Any other error is treated as an internal server error.
 		return models.SectionProductsReport{}, httperrors.InternalServerError{}
 	}
 
