@@ -83,3 +83,8 @@ INSERT IGNORE INTO inbound_orders (order_number, order_date, employee_id, wareho
    ('INB-1001', '2024-06-01 09:00:00', 1, 1, 1),
    ('INB-1002', '2024-06-02 10:30:00', 2, 2, 2),
    ('INB-1003', '2024-06-03 11:00:00', 3, 3, 3);
+
+INSERT IGNORE INTO purchase_orders
+(order_number, order_date, tracking_code, buyer_id, product_record_id) VALUES
+        ('ORD-001', '2024-06-15 12:34:56', 'TRACK-111AAA', 1, 1),
+        ('ORD-002', '2024-06-16 15:10:35', 'TRACK-222BBB', 2, 2);
