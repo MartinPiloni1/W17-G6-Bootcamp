@@ -69,6 +69,7 @@ func (a *ServerChi) Run() (err error) {
 	employeeRouter := application.EmployeeRouter(freshDB)
 	sectionRouter := application.SectionRouter(freshDB)
 	carryRouter := application.CarryRouter(freshDB)
+	purchaseOrderRouter := application.PurchaseOrderRouter(freshDB)
 	localitiesRouter := application.LocalityRouter(freshDB)
 	inboundOrderRouter := application.InboundOrderRouter(freshDB)
 
@@ -81,6 +82,7 @@ func (a *ServerChi) Run() (err error) {
 		r.Mount("/sellers", sellerRouter)
 		r.Mount("/employees", employeeRouter)
 		r.Mount("/sections", sectionRouter)
+		r.Mount("/purchaseOrders", purchaseOrderRouter)
 		r.Mount("/localities", localitiesRouter)
 		r.Mount("/carries", carryRouter)
 		r.Mount("/inboundOrders", inboundOrderRouter)

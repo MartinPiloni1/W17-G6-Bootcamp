@@ -198,3 +198,71 @@ func (r *BuyerRepositoryDB) Delete(ctx context.Context, id int) error {
 
 	return nil
 }
+
+// get one or all buyer/s BuyerWithPurchaseOrdersCount if id is setted
+// return not found if the Buyer does not exist or db error
+func (r *BuyerRepositoryDB) GetWithPurchaseOrdersCount(
+	ctx context.Context, id *int) ([]models.BuyerWithPurchaseOrdersCount, error) {
+	query := `
+	SELECT
+		b.id,
+		b.card_number_id,
+		b.first_name,
+		b.last_name,
+		COUNT(po.id) as purchase_orders_count
+	FROM
+		buyers b
+	LEFT JOIN
+		purchase_orders po 
+		ON po.buyer_id = b.id`
+
+	// put the id value into an array if setted, if not, pass the array empty regardless
+	params := []any{}
+	if id != nil {
+		query += " WHERE b.id = ?"
+		params = append(params, *id)
+	}
+
+	query += `
+	GROUP BY
+		b.id,
+		b.card_number_id,
+		b.first_name,
+		b.last_name
+	ORDER BY b.id`
+
+	rows, err := r.db.QueryContext(ctx, query, params...)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var buyers []models.BuyerWithPurchaseOrdersCount
+	for rows.Next() {
+		var buyer models.BuyerWithPurchaseOrdersCount
+		err := rows.Scan(
+			&buyer.Id,
+			&buyer.CardNumberId,
+			&buyer.FirstName,
+			&buyer.LastName,
+			&buyer.PurchaseOrdersCount,
+		)
+
+		// if one has an invalid field from the db, will fail the Scan
+		if err != nil {
+			return nil, err
+		}
+		buyers = append(buyers, buyer)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// if an id was given and it didnt fetch any BuyerWithPurchaseOrdersCount
+	// the buyer does not exist
+	if id != nil && len(buyers) == 0 {
+		return nil, httperrors.NotFoundError{Message: "Buyer not found"}
+	}
+	return buyers, nil
+}

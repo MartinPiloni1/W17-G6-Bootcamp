@@ -16,3 +16,8 @@ type BuyerPatchRequest struct {
 	FirstName    *string `json:"first_name" validate:"omitempty,min=1,max=100,alpha"`           // only letters
 	LastName     *string `json:"last_name" validate:"omitempty,min=1,max=100,alpha"`            // only letters
 }
+
+type BuyerWithPurchaseOrdersCount struct {
+	Buyer
+	PurchaseOrdersCount int `json:"purchase_orders_count"`
+}

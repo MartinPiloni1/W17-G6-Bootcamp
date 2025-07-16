@@ -107,6 +107,7 @@ func BuyersRouter(db *sql.DB) chi.Router {
 	router.Get("/{id}", buyersHandler.GetByID())
 	router.Patch("/{id}", buyersHandler.Update())
 	router.Delete("/{id}", buyersHandler.Delete())
+	router.Get("/reportPurchaseOrders", buyersHandler.GetWithPurchaseOrdersCount())
 	return router
 }
 
@@ -139,6 +140,17 @@ func SectionRouter(db *sql.DB) chi.Router {
 	router.Delete("/{id}", sectionHandler.Delete())
 	router.Post("/", sectionHandler.Create())
 	router.Patch("/{id}", sectionHandler.Update())
+	return router
+}
+
+func PurchaseOrderRouter(db *sql.DB) chi.Router {
+	purchaseOrderRepository := repository.NewPurchaseOrderRepositoryDB(db)
+	purchaseOrderService := service.NewPurchaseOrderDefault(purchaseOrderRepository)
+	purchaseOrderHandler := handler.NewPurchaseOrderHandler(purchaseOrderService)
+
+	router := chi.NewRouter()
+
+	router.Post("/", purchaseOrderHandler.Create())
 	return router
 }
 

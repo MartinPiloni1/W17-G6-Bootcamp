@@ -55,6 +55,7 @@ type BuyerService interface {
 	GetByID(ctx context.Context, id int) (models.Buyer, error)
 	Update(ctx context.Context, id int, BuyerData models.BuyerPatchRequest) (models.Buyer, error)
 	Delete(ctx context.Context, id int) error
+	GetWithPurchaseOrdersCount(ctx context.Context, id *int) ([]models.BuyerWithPurchaseOrdersCount, error)
 }
 
 type EmployeeService interface {
@@ -72,6 +73,10 @@ type SectionService interface {
 	GetByID(ctx context.Context, id int) (models.Section, error)
 	Update(ctx context.Context, id int, data models.UpdateSectionRequest) (models.Section, error)
 	Delete(ctx context.Context, id int) error
+}
+
+type PurchaseOrderService interface {
+	Create(ctx context.Context, newPurchaseOrder models.PurchaseOrderAttributes) (models.PurchaseOrder, error)
 }
 
 // CarryService defines operations for managing carries.
