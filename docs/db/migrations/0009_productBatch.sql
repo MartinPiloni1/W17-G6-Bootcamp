@@ -11,5 +11,6 @@ CREATE TABLE IF NOT EXISTS product_batches (
     product_id INT NOT NULL,
     section_id INT NOT NULL,
     FOREIGN KEY (section_id) REFERENCES sections(id),
+    FOREIGN KEY (product_id) REFERENCES products(id),
     PRIMARY KEY (id)
     );
