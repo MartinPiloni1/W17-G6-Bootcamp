@@ -1,13 +1,17 @@
 package repository
 
-import "github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
+import (
+	"context"
+
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
+)
 
 type ProductRepository interface {
-	Create(product models.ProductAttributes) (models.Product, error)
-	GetAll() (map[int]models.Product, error)
-	GetByID(id int) (models.Product, error)
-	Update(id int, product models.Product) (models.Product, error)
-	Delete(id int) error
+	Create(ctx context.Context, product models.ProductAttributes) (models.Product, error)
+	GetAll(ctx context.Context) ([]models.Product, error)
+	GetByID(ctx context.Context, id int) (models.Product, error)
+	Update(ctx context.Context, id int, product models.Product) (models.Product, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type SellerRepository interface {
@@ -16,6 +20,12 @@ type SellerRepository interface {
 	GetByID(id int) (models.Seller, error)
 	Update(id int, data *models.SellerAttributes) (models.Seller, error)
 	Delete(id int) error
+}
+
+type LocalityRepository interface {
+	Create(locality models.Locality) (models.Locality, error)
+	GetByID(id string) (models.Locality, error)
+	GetSellerReport(id *string) ([]models.SellerReport, error)
 }
 
 // WarehouseRepository provides methods for warehouse data access.
@@ -33,12 +43,11 @@ type WarehouseRepository interface {
 }
 
 type BuyerRepository interface {
-	Create(newBuyer models.BuyerAttributes) (models.Buyer, error)
-	GetAll() (map[int]models.Buyer, error)
-	GetByID(id int) (models.Buyer, error)
-	Update(id int, updatedBuyer models.Buyer) (models.Buyer, error)
-	Delete(id int) error
-	CardNumberIdAlreadyExist(newCardNumberId int) (bool, error)
+	Create(ctx context.Context, newBuyer models.BuyerAttributes) (models.Buyer, error)
+	GetAll(ctx context.Context) ([]models.Buyer, error)
+	GetByID(ctx context.Context, id int) (models.Buyer, error)
+	Update(ctx context.Context, id int, updatedBuyer models.Buyer) (models.Buyer, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type EmployeeRepository interface {
@@ -50,11 +59,11 @@ type EmployeeRepository interface {
 }
 
 type SectionRepository interface {
-	Create(section models.Section) (models.Section, error)
-	GetAll() (map[int]models.Section, error)
-	GetByID(id int) (models.Section, error)
-	Update(id int, data models.Section) (models.Section, error)
-	Delete(id int) error
+	Create(ctx context.Context, section models.Section) (models.Section, error)
+	GetAll(ctx context.Context) ([]models.Section, error)
+	GetByID(ctx context.Context, id int) (models.Section, error)
+	Update(ctx context.Context, id int, data models.Section) (models.Section, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type InboundOrderRepository interface {

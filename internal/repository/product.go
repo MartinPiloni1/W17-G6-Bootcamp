@@ -1,101 +1,291 @@
 package repository
 
 import (
-	"os"
+	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
+	"github.com/go-sql-driver/mysql"
 )
 
-type ProductRepositoryFile struct {
-	filePath string
+// ProductRepositoryDB is a SQL implementation of ProductRepository.
+// It uses the provided *sql.DB connection to perform CRUD operations
+// against the products table in the database.
+type ProductRepositoryDB struct {
+	db *sql.DB
 }
 
-func NewProductRepositoryFile() ProductRepository {
-	filePath := os.Getenv("FILE_PATH_PRODUCTS")
-	return &ProductRepositoryFile{
-		filePath: filePath,
+// NewProductRepositoryDB constructs a ProductRepositoryDB that uses
+// the given *sql.DB for all data operations.
+func NewProductRepositoryDB(db *sql.DB) ProductRepository {
+	return &ProductRepositoryDB{
+		db: db,
 	}
 }
 
-func (p *ProductRepositoryFile) Create(productAttribbutes models.ProductAttributes) (models.Product, error) {
-	productData, err := utils.Read[models.Product](p.filePath)
+// Create inserts a new product into the database using the given
+// ProductAttributes, then returns the complete Product (including its auto-generated ID).
+//
+// Behavior & Error Handling:
+//   - On success, returns a models.Product populated with the generated ID
+//     and the same attributes you passed in.
+//   - If a product with the same product_code already exists (MySQL error #1062),
+//     returns httperrors.ConflictError with a message about duplicate product code.
+//   - If the provided seller_id does not exist (MySQL error #1452),
+//     returns httperrors.ConflictError about the missing seller.
+//   - Any other database error is returned.
+func (r *ProductRepositoryDB) Create(ctx context.Context, productAttributes models.ProductAttributes) (models.Product, error) {
+	const query = `
+		INSERT INTO products (
+			description,
+			expiration_rate,
+			freezing_rate,
+			height,
+			length,
+			width,
+			netweight,
+			product_code,
+			recommended_freezing_temperature,
+			product_type_id,
+			seller_id
+		) VALUES (
+			?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+		)
+	`
+
+	result, err := r.db.ExecContext(
+		ctx,
+		query,
+		productAttributes.Description,
+		productAttributes.ExpirationRate,
+		productAttributes.FreezingRate,
+		productAttributes.Height,
+		productAttributes.Length,
+		productAttributes.Width,
+		productAttributes.NetWeight,
+		productAttributes.ProductCode,
+		productAttributes.RecommendedFreezingTemperature,
+		productAttributes.ProductTypeID,
+		productAttributes.SellerID,
+	)
 	if err != nil {
+		var sqlError *mysql.MySQLError
+		if errors.As(err, &sqlError) {
+			switch sqlError.Number {
+			case 1062:
+				return models.Product{},
+					httperrors.ConflictError{Message: "A product with the given product code already exists"}
+			case 1452:
+				return models.Product{},
+					httperrors.ConflictError{Message: "The given seller id does not exists"}
+			}
+		}
 		return models.Product{}, err
 	}
 
-	newId, err := utils.GetNextID[models.Product](p.filePath)
+	lastId, err := result.LastInsertId()
 	if err != nil {
 		return models.Product{}, err
 	}
 
 	newProduct := models.Product{
-		ID:                newId,
-		ProductAttributes: productAttribbutes,
+		ID:                int(lastId),
+		ProductAttributes: productAttributes,
 	}
-
-	productData[newId] = newProduct
-
-	err = utils.Write(p.filePath, productData)
-	if err != nil {
-		return models.Product{}, err
-	}
-
 	return newProduct, nil
 }
 
-func (p *ProductRepositoryFile) GetAll() (map[int]models.Product, error) {
-	productData, err := utils.Read[models.Product](p.filePath)
+// GetAll fetches every product record from the database and returns them
+// as a slice of models.Product. If any database error occurs it returns
+// the error.
+func (r *ProductRepositoryDB) GetAll(ctx context.Context) ([]models.Product, error) {
+	const query = `
+		SELECT
+			id,
+			description,
+			expiration_rate,
+			freezing_rate,
+			height,
+			length,
+			width,
+			netweight,
+			product_code,
+			recommended_freezing_temperature,
+			product_type_id,
+			seller_id
+		FROM products 
+	`
+
+	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-	return productData, nil
+	defer rows.Close()
+
+	var products []models.Product
+	for rows.Next() {
+		var product models.Product
+		err = rows.Scan(
+			&product.ID,
+			&product.Description,
+			&product.ExpirationRate,
+			&product.FreezingRate,
+			&product.Height,
+			&product.Length,
+			&product.Width,
+			&product.NetWeight,
+			&product.ProductCode,
+			&product.RecommendedFreezingTemperature,
+			&product.ProductTypeID,
+			&product.SellerID,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		products = append(products, product)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return products, nil
 }
 
-func (p *ProductRepositoryFile) GetByID(id int) (models.Product, error) {
-	productData, err := utils.Read[models.Product](p.filePath)
-	if err != nil {
+// GetByID retrieves a single product from the database by its unique ID.
+// It returns the populated models.Product or if no matching row exists, returns a NotFoundError.
+// On other database errors, returns the error.
+func (r *ProductRepositoryDB) GetByID(ctx context.Context, id int) (models.Product, error) {
+	const query = `
+		SELECT
+			id,
+			description,
+			expiration_rate,
+			freezing_rate,
+			height,
+			length,
+			width,
+			netweight,
+			product_code,
+			recommended_freezing_temperature,
+			product_type_id,
+			seller_id
+		FROM products 
+		WHERE id = ?
+	`
+
+	row := r.db.QueryRowContext(ctx, query, id)
+	if err := row.Err(); err != nil {
 		return models.Product{}, err
 	}
 
-	product, exists := productData[id]
-	if !exists {
-		return models.Product{},
-			httperrors.NotFoundError{Message: "Product not found"}
+	var product models.Product
+	err := row.Scan(
+		&product.ID,
+		&product.Description,
+		&product.ExpirationRate,
+		&product.FreezingRate,
+		&product.Height,
+		&product.Length,
+		&product.Width,
+		&product.NetWeight,
+		&product.ProductCode,
+		&product.RecommendedFreezingTemperature,
+		&product.ProductTypeID,
+		&product.SellerID,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return models.Product{}, err
+	} else if err != nil {
+		return models.Product{}, err
 	}
+
 	return product, nil
 }
 
-func (p *ProductRepositoryFile) Update(id int, product models.Product) (models.Product, error) {
-	productData, err := utils.Read[models.Product](p.filePath)
+// Update modifies an existing product record in the database. It applies all
+// fields from updatedProduct to the row identified by id.
+//
+// Behavior & Error Handling:
+//   - On success, returns the updated product.
+//   - If a product with the same product_code already exists (MySQL error #1062),
+//     returns httperrors.ConflictError with a message about duplicate product code.
+//   - If the provided seller_id does not exist (MySQL error #1452),
+//     returns httperrors.ConflictError about the missing seller.
+//   - Any other database error is returned.
+func (r *ProductRepositoryDB) Update(ctx context.Context, id int, updatedProduct models.Product) (models.Product, error) {
+	const query = `
+		UPDATE products
+		SET
+			description                         = ?,
+			expiration_rate                     = ?,
+			freezing_rate                       = ?,
+			height                              = ?,
+			length                              = ?,
+			width                               = ?,
+			netweight                           = ?,
+			product_code                        = ?,
+			recommended_freezing_temperature    = ?,
+			product_type_id                     = ?,
+			seller_id                           = ?
+		WHERE id = ?
+    `
+
+	_, err := r.db.ExecContext(
+		ctx,
+		query,
+		updatedProduct.Description,
+		updatedProduct.ExpirationRate,
+		updatedProduct.FreezingRate,
+		updatedProduct.Height,
+		updatedProduct.Length,
+		updatedProduct.Width,
+		updatedProduct.NetWeight,
+		updatedProduct.ProductCode,
+		updatedProduct.RecommendedFreezingTemperature,
+		updatedProduct.ProductTypeID,
+		updatedProduct.SellerID,
+		id,
+	)
 	if err != nil {
+		var sqlError *mysql.MySQLError
+		if errors.As(err, &sqlError) {
+			switch sqlError.Number {
+			case 1062:
+				return models.Product{},
+					httperrors.ConflictError{Message: "A product with the given product code already exists"}
+			case 1452:
+				return models.Product{},
+					httperrors.ConflictError{Message: "The given seller id does not exists"}
+			}
+		}
 		return models.Product{}, err
 	}
-	productData[id] = product
-	err = utils.Write(p.filePath, productData)
-	if err != nil {
-		return models.Product{}, err
-	}
-	return product, nil
+
+	return updatedProduct, nil
 }
 
-func (p *ProductRepositoryFile) Delete(id int) error {
-	productData, err := utils.Read[models.Product](p.filePath)
+// Delete removes the product record with the specified ID from the database.
+// If the deletion fails due to a DB error, it returns the error.
+// If the product does not exist it returns a NotFoundError.
+func (r *ProductRepositoryDB) Delete(ctx context.Context, id int) error {
+	const query = `
+		DELETE FROM products
+		WHERE id=?	
+    `
+
+	res, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
 	}
 
-	if _, exists := productData[id]; !exists {
+	count, err := res.RowsAffected()
+	if err != nil {
+		return err
+	} else if count == 0 {
 		return httperrors.NotFoundError{Message: "Product not found"}
 	}
-
-	delete(productData, id)
-
-	err = utils.Write(p.filePath, productData)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }

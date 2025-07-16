@@ -1,74 +1,52 @@
 package service
 
 import (
-	"slices"
+	"context"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
+// ProductServiceDefault is the implementation of ProductService interface,
+// delegating persistence to a ProductRepository.
 type ProductServiceDefault struct {
-	rp repository.ProductRepository
+	repo repository.ProductRepository
 }
 
+// NewProductServiceDefault constructs a ProductServiceDefault
+// with the given repository.
 func NewProductServiceDefault(repo repository.ProductRepository) ProductService {
-	return &ProductServiceDefault{rp: repo}
+	return &ProductServiceDefault{repo: repo}
 }
 
-func (p *ProductServiceDefault) Create(product models.ProductAttributes) (models.Product, error) {
-	products, err := p.rp.GetAll()
+// Create creates a new product entry in the repository using the supplied
+// attributes. It returns the fully populated Product model or an error
+func (s *ProductServiceDefault) Create(ctx context.Context, product models.ProductAttributes) (models.Product, error) {
+	return s.repo.Create(ctx, product)
+}
+
+// GetAll retrieves all products from the repository, returning a slice
+// containing every product or an error.
+func (s *ProductServiceDefault) GetAll(ctx context.Context) ([]models.Product, error) {
+	return s.repo.GetAll(ctx)
+}
+
+// GetByID fetches a single product by its ID.
+// Returns the product or ErrNotFound if no such product exists.
+func (s *ProductServiceDefault) GetByID(ctx context.Context, id int) (models.Product, error) {
+	return s.repo.GetByID(ctx, id)
+}
+
+// Update retrieves an existing Product by its ID, applies any non-nil fields
+// from the provided ProductPatchRequest, and then persists the updated Product
+// via the repository. Returns the updated Product or an error
+func (s *ProductServiceDefault) Update(ctx context.Context, id int, productAttributes models.ProductPatchRequest) (models.Product, error) {
+	product, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return models.Product{}, err
 	}
 
-	for _, p := range products {
-		if p.ProductCode == product.ProductCode {
-			return models.Product{}, httperrors.ConflictError{Message: "A product with this product code already exists"}
-		}
-	}
-
-	return p.rp.Create(product)
-}
-
-func (p *ProductServiceDefault) GetAll() ([]models.Product, error) {
-	data, err := p.rp.GetAll()
-	if err != nil {
-		return []models.Product{}, err
-	}
-
-	slicedData := utils.MapToSlice(data)
-	slices.SortFunc(slicedData, func(a, b models.Product) int {
-		return a.ID - b.ID
-	})
-	return slicedData, nil
-}
-
-func (p *ProductServiceDefault) GetByID(id int) (models.Product, error) {
-	return p.rp.GetByID(id)
-}
-
-func (p *ProductServiceDefault) Update(id int, productAttributes models.ProductPatchRequest) (models.Product, error) {
-	product, err := p.rp.GetByID(id)
-	if err != nil {
-		return models.Product{}, err
-	}
-
-	if productAttributes.ProductCode != nil {
-		products, err := p.rp.GetAll()
-		if err != nil {
-			return models.Product{}, err
-		}
-
-		product.ProductCode = *productAttributes.ProductCode
-		for _, p := range products {
-			if p.ProductCode == product.ProductCode && p.ID != product.ID {
-				return models.Product{}, httperrors.ConflictError{Message: "A product with this product code already exists"}
-			}
-		}
-	}
-
+	// Apply non-nil fields to the product
 	if productAttributes.Description != nil {
 		product.Description = *productAttributes.Description
 	}
@@ -97,12 +75,14 @@ func (p *ProductServiceDefault) Update(id int, productAttributes models.ProductP
 		product.ProductTypeID = *productAttributes.ProductTypeID
 	}
 	if productAttributes.SellerID != nil {
-		product.SellerID = *productAttributes.SellerID
+		product.SellerID = productAttributes.SellerID
 	}
 
-	return p.rp.Update(id, product)
+	return s.repo.Update(ctx, id, product)
 }
 
-func (p *ProductServiceDefault) Delete(id int) error {
-	return p.rp.Delete(id)
+// Delete removes the Product with the given ID from the database.
+// Returns nil on success or an error if the repository fails.
+func (s *ProductServiceDefault) Delete(ctx context.Context, id int) error {
+	return s.repo.Delete(ctx, id)
 }

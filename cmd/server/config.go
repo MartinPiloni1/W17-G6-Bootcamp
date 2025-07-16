@@ -22,7 +22,7 @@ func LoadServerConf() (*ServerChi, error) {
 
 	err := godotenv.Load()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to load env file: %w", err)
+		return nil, fmt.Errorf("failed to load env file: %w", err)
 	}
 
 	// default values
@@ -61,12 +61,13 @@ func (a *ServerChi) Run() (err error) {
 	}
 
 	healthRouter := application.HealthRouter()
-	productRouter := application.ProductRouter()
+	productRouter := application.ProductRouter(freshDB)
+	buyersRouter := application.BuyersRouter(freshDB)
 	warehouseRouter := application.WarehouseRouter(freshDB)
-	buyersRouter := application.BuyersRouter()
 	sellerRouter := application.SellerRouter(freshDB)
 	employeeRouter := application.EmployeeRouter(freshDB)
-	sectionRouter := application.SectionRouter()
+	sectionRouter := application.SectionRouter(freshDB)
+	localitiesRouter := application.LocalityRouter(freshDB)
 	inboundOrderRouter := application.InboundOrderRouter(freshDB)
 
 	router.Mount("/healthcheck", healthRouter)
@@ -77,6 +78,7 @@ func (a *ServerChi) Run() (err error) {
 		r.Mount("/sellers", sellerRouter)
 		r.Mount("/employees", employeeRouter)
 		r.Mount("/sections", sectionRouter)
+		r.Mount("/localities", localitiesRouter)
 		r.Mount("/inboundOrders", inboundOrderRouter)
 	})
 

@@ -1,13 +1,17 @@
 package service
 
-import "github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
+import (
+	"context"
+
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
+)
 
 type ProductService interface {
-	Create(product models.ProductAttributes) (models.Product, error)
-	GetAll() ([]models.Product, error)
-	GetByID(id int) (models.Product, error)
-	Update(id int, productAttributes models.ProductPatchRequest) (models.Product, error)
-	Delete(id int) error
+	Create(ctx context.Context, product models.ProductAttributes) (models.Product, error)
+	GetAll(ctx context.Context) ([]models.Product, error)
+	GetByID(ctx context.Context, id int) (models.Product, error)
+	Update(ctx context.Context, id int, productAttributes models.ProductPatchRequest) (models.Product, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type SellerService interface {
@@ -16,6 +20,12 @@ type SellerService interface {
 	GetByID(id int) (models.Seller, error)
 	Update(id int, data *models.SellerAttributes) (models.Seller, error)
 	Delete(id int) error
+}
+
+type LocalityService interface {
+	Create(l models.Locality) (models.Locality, error)
+	GetByID(id string) (models.Locality, error)
+	GetSellerReport(id *string) ([]models.SellerReport, error)
 }
 
 // WarehouseService defines warehouse operations.
@@ -33,11 +43,11 @@ type WarehouseService interface {
 }
 
 type BuyerService interface {
-	Create(newBuyer models.BuyerAttributes) (models.Buyer, error)
-	GetAll() ([]models.Buyer, error)
-	GetByID(id int) (models.Buyer, error)
-	Update(id int, BuyerData models.BuyerPatchRequest) (models.Buyer, error)
-	Delete(id int) error
+	Create(ctx context.Context, newBuyer models.BuyerAttributes) (models.Buyer, error)
+	GetAll(ctx context.Context) ([]models.Buyer, error)
+	GetByID(ctx context.Context, id int) (models.Buyer, error)
+	Update(ctx context.Context, id int, BuyerData models.BuyerPatchRequest) (models.Buyer, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type EmployeeService interface {
@@ -50,11 +60,11 @@ type EmployeeService interface {
 }
 
 type SectionService interface {
-	Create(section models.Section) (models.Section, error)
-	GetAll() ([]models.Section, error)
-	GetByID(id int) (models.Section, error)
-	Update(id int, data models.UpdateSectionRequest) (models.Section, error)
-	Delete(id int) error
+	Create(ctx context.Context, section models.Section) (models.Section, error)
+	GetAll(ctx context.Context) ([]models.Section, error)
+	GetByID(ctx context.Context, id int) (models.Section, error)
+	Update(ctx context.Context, id int, data models.UpdateSectionRequest) (models.Section, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type InboundOrderService interface {

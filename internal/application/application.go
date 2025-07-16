@@ -35,6 +35,19 @@ func SellerRouter(db *sql.DB) chi.Router {
 	return router
 }
 
+func LocalityRouter(db *sql.DB) chi.Router {
+	router := chi.NewRouter()
+
+	localityRepository := repository.NewLocalityRepository(db)
+	localityServer := service.NewLocalityService(localityRepository)
+	localityHandler := handler.NewLocalityHandler(localityServer)
+
+	router.Post("/", localityHandler.Create())
+	router.Get("/{id}", localityHandler.GetByID())
+	router.Get("/reportSellers", localityHandler.GetSellerReport())
+	return router
+}
+
 func WarehouseRouter(db *sql.DB) chi.Router {
 	warehouseRepository := repository.NewWarehouseRepositoryDb(db)
 	warehouseService := service.NewWarehouseService(warehouseRepository)
@@ -51,10 +64,12 @@ func WarehouseRouter(db *sql.DB) chi.Router {
 	return router
 }
 
-func ProductRouter() chi.Router {
+// ProductRouter creates and returns a chi.Router configured
+// with CRUD endpoints for products.
+func ProductRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
-	productRepository := repository.NewProductRepositoryFile()
+	productRepository := repository.NewProductRepositoryDB(db)
 	productService := service.NewProductServiceDefault(productRepository)
 	productHandler := handler.NewProductHandler(productService)
 
@@ -66,10 +81,10 @@ func ProductRouter() chi.Router {
 	return router
 }
 
-func BuyersRouter() chi.Router {
+func BuyersRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
-	buyersRepository := repository.NewBuyerRepositoryFile() // fileRepository
+	buyersRepository := repository.NewBuyerRepositoryDB(db)
 	buyersService := service.NewBuyerServiceDefault(buyersRepository)
 	buyersHandler := handler.NewBuyerHandler(buyersService)
 
@@ -98,9 +113,9 @@ func EmployeeRouter(db *sql.DB) chi.Router {
 	return router
 }
 
-func SectionRouter() chi.Router {
-	sectionRepository := repository.NewSectionRepository()
-	sectionService := service.NewSectionService(sectionRepository)
+func SectionRouter(db *sql.DB) chi.Router {
+	sectionRepository := repository.NewSectionRepositoryDB(db)
+	sectionService := service.NewSectionServiceDefault(sectionRepository)
 	sectionHandler := handler.NewSectionHandler(sectionService)
 
 	router := chi.NewRouter()
