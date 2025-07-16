@@ -73,11 +73,11 @@ func ProductRouter(db *sql.DB) chi.Router {
 func ProductRecordRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
-	repository := repository.NewProductRecordRepositoryDB(db)
-	service := service.NewProductRecordServiceDefault(repository)
-	handler := handler.NewProductRecordHandler(service)
+	productRecordRepository := repository.NewProductRecordRepositoryDB(db)
+	productRecordService := service.NewProductRecordServiceDefault(productRecordRepository)
+	productRecordHandler := handler.NewProductRecordHandler(productRecordService)
 
-	router.Post("/", handler.Create())
+	router.Post("/", productRecordHandler.Create())
 	return router
 }
 
