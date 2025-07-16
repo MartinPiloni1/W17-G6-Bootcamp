@@ -32,7 +32,7 @@ func LoadServerConf(withEnvFile bool) (*ServerChi, error) {
 	serverAddr := os.Getenv("ADDRESS")
 
 	if serverAddr == "" {
-		serverAddr = ":8080"
+		serverAddr = "8080"
 	}
 
 	Host := os.Getenv("DB_HOST")
@@ -47,6 +47,7 @@ func LoadServerConf(withEnvFile bool) (*ServerChi, error) {
 		return nil, fmt.Errorf("DB conn settings not established")
 	}
 	dbConfig := storage.NewMySQLConfig(Host, Port, User, Pass, Name)
+	serverAddr = ":" + serverAddr // add two point to the address
 
 	return &ServerChi{
 		ServerAddr:     serverAddr,
