@@ -21,7 +21,7 @@ func NewWarehouseRepositoryDb(db *sql.DB) *WarehouseRepositoryDB {
 // Create adds a new warehouse and returns the created warehouse.
 func (p *WarehouseRepositoryDB) Create(warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error) {
 	query := `
-		INSERT INTO warehouse (
+		INSERT INTO warehouses (
 			warehouse_code, 
 			address, 
 			telephone,
