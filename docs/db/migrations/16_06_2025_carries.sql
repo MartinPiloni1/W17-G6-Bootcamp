@@ -4,5 +4,7 @@ CREATE TABLE carries (
     `company_name` VARCHAR(100) NOT NULL,
     `address` VARCHAR(100) NOT NULL,
     `telephone` VARCHAR(100) NOT NULL,
-    `locality_id` VARCHAR(20) NOT NULL REFERENCES localities (id)
+    FOREIGN KEY (locality_id) REFERENCES localities(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
 );
