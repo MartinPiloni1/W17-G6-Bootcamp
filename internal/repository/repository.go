@@ -78,3 +78,10 @@ type CarryRepository interface {
 	// Create creates a new carry.
 	Create(carryAttributes models.CarryAttributes) (models.Carry, error)
 }
+
+type InboundOrderRepository interface {
+	Create(order models.InboundOrder) (models.InboundOrder, error)
+	GetByOrderNumber(orderNumber string) (models.InboundOrder, error)
+	CountInboundOrdersForEmployees() (map[int]int, error)
+	CountInboundOrdersForEmployee(employeeID int) (int, error)
+}

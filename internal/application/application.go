@@ -114,7 +114,8 @@ func EmployeeRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
 	employeeRepository := repository.NewEmployeeRepository(db)
-	employeeService := service.NewEmployeeService(employeeRepository)
+	inboundOrderRepository := repository.NewInboundOrderRepository(db)
+	employeeService := service.NewEmployeeService(employeeRepository, inboundOrderRepository)
 	employeeHandler := handler.NewEmployeeHandler(employeeService)
 
 	router.Get("/", employeeHandler.GetAll())
@@ -122,6 +123,7 @@ func EmployeeRouter(db *sql.DB) chi.Router {
 	router.Post("/", employeeHandler.Create())
 	router.Patch("/{id}", employeeHandler.Update())
 	router.Delete("/{id}", employeeHandler.Delete())
+	router.Get("/reportInboundOrders", employeeHandler.GetInboundOrderReport())
 	return router
 }
 
@@ -148,5 +150,18 @@ func CarryRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 	router.Post("/", carryHandler.Create())
 
+	return router
+}
+
+func InboundOrderRouter(db *sql.DB) chi.Router {
+	router := chi.NewRouter()
+
+	inboundOrderRepository := repository.NewInboundOrderRepository(db)
+	employeeRepository := repository.NewEmployeeRepository(db)
+	warehouseRepository := repository.NewWarehouseRepositoryDb(db)
+	service := service.NewInboundOrderService(inboundOrderRepository, employeeRepository, warehouseRepository)
+	handler := handler.NewInboundOrderHandler(service)
+
+	router.Post("/", handler.Create())
 	return router
 }

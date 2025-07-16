@@ -63,6 +63,7 @@ type EmployeeService interface {
 	GetByID(id int) (models.Employee, error)
 	Update(id int, employee models.EmployeeAttributes) (models.Employee, error)
 	Delete(id int) error
+	ReportInboundOrders(employeeID int) ([]models.EmployeeWithInboundCount, error)
 }
 
 type SectionService interface {
@@ -77,4 +78,8 @@ type SectionService interface {
 type CarryService interface {
 	// Create validates and creates a new carry.
 	Create(carryAttributes models.CarryAttributes) (models.Carry, error)
+}
+
+type InboundOrderService interface {
+	Create(attrs models.InboundOrderAttributes) (models.InboundOrder, error)
 }

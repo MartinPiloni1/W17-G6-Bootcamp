@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS sections (
     maximum_capacity INT NOT NULL,
     warehouse_id INT NOT NULL,
     product_type_id INT NOT NULL,
-    FOREIGN KEY (warehouse_id) REFERENCES warehouse(id),
+    FOREIGN KEY (warehouse_id) REFERENCES warehouses(id),
     PRIMARY KEY (id)
 );
