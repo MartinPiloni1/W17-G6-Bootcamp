@@ -30,7 +30,7 @@ func (r *InboundOrderRepositoryDB) Create(order models.InboundOrder) (models.Inb
 
 	res, err := r.db.Exec(query,
 		order.OrderNumber,
-		order.OrderDate, // Debes asegurarte de, si llega vacía, poner time.Now() antes de llamar a Create
+		order.OrderDate,
 		order.EmployeeID,
 		order.WarehouseID,
 		order.ProductBatchID,
@@ -63,7 +63,7 @@ func (r *InboundOrderRepositoryDB) GetByOrderNumber(orderNumber string) (models.
 	err := r.db.QueryRow(query, orderNumber).
 		Scan(&order.ID, &order.OrderNumber, &order.OrderDate, &order.EmployeeID, &order.WarehouseID, &order.ProductBatchID)
 	if errors.Is(err, sql.ErrNoRows) {
-		return models.InboundOrder{}, nil // Patron tuyo: not found = objeto vacío y err=nil
+		return models.InboundOrder{}, nil
 	}
 	if err != nil {
 		return models.InboundOrder{}, err
