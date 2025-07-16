@@ -21,7 +21,8 @@ func NewProductRecordServiceDefault(repo repository.ProductRecordRepository) Pro
 	}
 }
 
-// Create implements ProductRecordService.
+// Create creates a new product record entry in the repository using the supplied
+// attributes. It returns the fully populated ProductRecord or an error
 func (p *ProductRecordServiceDefault) Create(ctx context.Context, attributes models.ProductRecordAttributes) (models.ProductRecord, error) {
 	return p.repo.Create(ctx, attributes)
 }
