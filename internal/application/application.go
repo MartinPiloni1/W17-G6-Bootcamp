@@ -128,12 +128,12 @@ func SectionRouter() chi.Router {
 }
 
 func PurchaseOrderRouter(db *sql.DB) chi.Router {
-	repository := repository.NewPurchaseOrderRepositoryDB(db)
-	service := service.NewPurchaseOrderDefault(repository)
-	handler := handler.NewPurchaseOrderHandler(service)
+	purchaseOrderRepository := repository.NewPurchaseOrderRepositoryDB(db)
+	purchaseOrderService := service.NewPurchaseOrderDefault(purchaseOrderRepository)
+	purchaseOrderHandler := handler.NewPurchaseOrderHandler(purchaseOrderService)
 
 	router := chi.NewRouter()
 
-	router.Post("/", handler.Create())
+	router.Post("/", purchaseOrderHandler.Create())
 	return router
 }

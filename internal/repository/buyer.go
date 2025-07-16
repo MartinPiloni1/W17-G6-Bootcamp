@@ -249,7 +249,7 @@ func (r *BuyerRepositoryDB) GetWithPurchaseOrdersCount(
 			&buyer.PurchaseOrdersCount,
 		)
 
-		// if one has an invalid field from the db, will fay the Scan
+		// if one has an invalid field from the db, will fail the Scan
 		if err != nil {
 			return nil, err
 		}
