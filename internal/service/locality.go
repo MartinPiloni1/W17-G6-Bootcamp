@@ -34,3 +34,12 @@ func (s *LocalityServiceDefault) GetByID(id string) (models.Locality, error) {
 func (s *LocalityServiceDefault) GetSellerReport(id *string) ([]models.SellerReport, error) {
 	return s.repository.GetSellerReport(id)
 }
+
+// GetReportByLocalityId retrieves a report of carries by locality ID.
+func (s *LocalityServiceDefault) GetReportByLocalityId(localityId string) ([]models.CarryReport, error) {
+	result, err := s.repository.GetReportByLocalityId(localityId)
+	if result == nil && localityId != "" {
+		return nil, httperrors.NotFoundError{Message: "locality not found"}
+	}
+	return result, err
+}
