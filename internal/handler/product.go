@@ -118,7 +118,7 @@ func (h ProductHandler) GetById() http.HandlerFunc {
 }
 
 // GetRecordsPerProduct returns an http.HandlerFunc that handles GET requests
-// for fetching the number of product_records grouped by product.
+// for fetching the number of product_records per product.
 //
 // Query Parameters:
 //   - id (optional): when provided and valid, the handler fetches the record count
