@@ -59,7 +59,6 @@ func (a *ServerChi) Run() (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Println(freshDB) // TODO: remove when in use
 
 	healthRouter := application.HealthRouter()
 	productRouter := application.ProductRouter(freshDB)
