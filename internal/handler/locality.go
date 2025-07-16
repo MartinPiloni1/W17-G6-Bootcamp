@@ -102,6 +102,9 @@ func (h *LocalityHandler) GetReportByLocalityId() http.HandlerFunc {
 			response.Error(w, statusCode, msg)
 			return
 		}
+		if result == nil && localityId == "" {
+			result = make([]models.CarryReport, 0)
+		}
 		response.JSON(w, http.StatusOK, map[string]any{
 			"data": result,
 		})

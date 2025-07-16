@@ -38,7 +38,7 @@ func (s *LocalityServiceDefault) GetSellerReport(id *string) ([]models.SellerRep
 // GetReportByLocalityId retrieves a report of carries by locality ID.
 func (s *LocalityServiceDefault) GetReportByLocalityId(localityId string) ([]models.CarryReport, error) {
 	result, err := s.repository.GetReportByLocalityId(localityId)
-	if result == nil {
+	if result == nil && localityId != "" {
 		return nil, httperrors.NotFoundError{Message: "locality not found"}
 	}
 	return result, err
