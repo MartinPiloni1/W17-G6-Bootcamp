@@ -1,8 +1,6 @@
 package service
 
 import (
-	"slices"
-
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
@@ -10,14 +8,16 @@ import (
 )
 
 type WarehouseServiceDefault struct {
-	rp repository.WarehouseRepository
+	repo repository.WarehouseRepository
 }
 
+// NewWarehouseService creates a new warehouse service.
 func NewWarehouseService(repo repository.WarehouseRepository) *WarehouseServiceDefault {
-	return &WarehouseServiceDefault{rp: repo}
+	return &WarehouseServiceDefault{repo: repo}
 }
 
-func (p *WarehouseServiceDefault) Create(warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error) {
+// Create validates and adds a new warehouse.
+func (w *WarehouseServiceDefault) Create(warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error) {
 	if warehouseAttributes.WarehouseCode == "" {
 		return models.Warehouse{}, httperrors.BadRequestError{Message: "the field WarehouseCode must not be empty"}
 	}
@@ -30,37 +30,27 @@ func (p *WarehouseServiceDefault) Create(warehouseAttributes models.WarehouseAtt
 	if warehouseAttributes.MinimunCapacity <= 0 {
 		return models.Warehouse{}, httperrors.BadRequestError{Message: "the field MinimunCapacity must not be zero or negative"}
 	}
-	warehouses, err := p.rp.GetAll()
-	if err != nil {
-		return models.Warehouse{}, err
-	}
-	for _, w := range warehouses {
-		if w.WarehouseCode == warehouseAttributes.WarehouseCode {
-			return models.Warehouse{}, httperrors.ConflictError{Message: "the WarehouseCode already exists"}
-		}
-	}
-	return p.rp.Create(warehouseAttributes)
+	return w.repo.Create(warehouseAttributes)
 }
 
-func (p *WarehouseServiceDefault) GetAll() ([]models.Warehouse, error) {
-	result, err := p.rp.GetAll()
+// GetAll returns all warehouses.
+func (w *WarehouseServiceDefault) GetAll() ([]models.Warehouse, error) {
+	result, err := w.repo.GetAll()
 	if err != nil {
 		return []models.Warehouse{}, err
 	}
-	slicedData := utils.MapToSlice(result)
-	slices.SortFunc(slicedData, func(a, b models.Warehouse) int {
-		return a.Id - b.Id
-	})
-	return slicedData, nil
+	return result, nil
 
 }
 
-func (p *WarehouseServiceDefault) GetByID(id int) (models.Warehouse, error) {
-	return p.rp.GetByID(id)
+// GetByID returns a warehouse by ID.
+func (w *WarehouseServiceDefault) GetByID(id int) (models.Warehouse, error) {
+	return w.repo.GetByID(id)
 }
 
-func (p *WarehouseServiceDefault) Update(id int, warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error) {
-	warehouse, err := p.rp.GetByID(id)
+// Update modifies a warehouse by ID.
+func (w *WarehouseServiceDefault) Update(id int, warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error) {
+	warehouse, err := w.repo.GetByID(id)
 	if err != nil {
 		return models.Warehouse{}, err
 	}
@@ -68,19 +58,19 @@ func (p *WarehouseServiceDefault) Update(id int, warehouseAttributes models.Ware
 	if errZeroVelue != nil {
 		return models.Warehouse{}, httperrors.BadRequestError{Message: "the input fields are not valid"}
 	}
-	warehouses, err := p.rp.GetAll()
-	delete(warehouses, id)
+	warehouses, err := w.repo.GetAll()
 	if err != nil {
 		return models.Warehouse{}, err
 	}
 	for _, w := range warehouses {
-		if w.WarehouseCode == warehouse.WarehouseAttributes.WarehouseCode {
+		if w.WarehouseCode == warehouse.WarehouseAttributes.WarehouseCode && w.Id != id {
 			return models.Warehouse{}, httperrors.ConflictError{Message: "the WarehouseCode already exists"}
 		}
 	}
-	return p.rp.Update(id, warehouse.WarehouseAttributes)
+	return w.repo.Update(id, warehouse.WarehouseAttributes)
 }
 
-func (p *WarehouseServiceDefault) Delete(id int) error {
-	return p.rp.Delete(id)
+// Delete removes a warehouse by ID.
+func (w *WarehouseServiceDefault) Delete(id int) error {
+	return w.repo.Delete(id)
 }

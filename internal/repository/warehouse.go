@@ -1,103 +1,186 @@
 package repository
 
 import (
-	"os"
-
+	"database/sql"
+	"errors"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
+	"github.com/go-sql-driver/mysql"
+	"log"
 )
 
-type WarehouseRepositoryFile struct {
-	filePath string
+type WarehouseRepositoryDB struct {
+	db *sql.DB
 }
 
-func NewWarehouseRepository() *WarehouseRepositoryFile {
-	return &WarehouseRepositoryFile{filePath: os.Getenv("FILE_PATH_WAREHOUSE")}
+// NewWarehouseRepositoryDb creates a new instance of WarehouseRepositoryDB.
+func NewWarehouseRepositoryDb(db *sql.DB) *WarehouseRepositoryDB {
+	return &WarehouseRepositoryDB{db: db}
 }
 
-func (p *WarehouseRepositoryFile) Create(warehouseAtribbutes models.WarehouseAttributes) (models.Warehouse, error) {
-	warehouseData, err := utils.Read[models.Warehouse](p.filePath)
+// Create adds a new warehouse and returns the created warehouse.
+func (p *WarehouseRepositoryDB) Create(warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error) {
+	query := `
+		INSERT INTO warehouses (
+			warehouse_code, 
+			address, 
+			telephone,
+			minimun_capacity,
+			minimun_temperature
+		) VALUES (?, ?, ?, ?, ?)
+	`
+	result, err := p.db.Exec(query,
+		warehouseAttributes.WarehouseCode,
+		warehouseAttributes.Address,
+		warehouseAttributes.Telephone,
+		warehouseAttributes.MinimunCapacity,
+		warehouseAttributes.MinimunTemperature,
+	)
 	if err != nil {
-		return models.Warehouse{}, err
+		var sqlErrors *mysql.MySQLError
+		if errors.As(err, &sqlErrors) {
+			if sqlErrors.Number == 1062 {
+				return models.Warehouse{}, httperrors.ConflictError{Message: "the WarehouseCode already exists"}
+			}
+			return models.Warehouse{}, httperrors.InternalServerError{Message: "error creating warehouse"}
+		}
 	}
-
-	newId, err := utils.GetNextID[models.Warehouse](p.filePath)
+	lastInsertId, err := result.LastInsertId()
 	if err != nil {
-		return models.Warehouse{}, err
+		return models.Warehouse{}, httperrors.InternalServerError{Message: "error obtaining last insert ID"}
 	}
-
 	newWarehouse := models.Warehouse{
-		Id:                  newId,
-		WarehouseAttributes: warehouseAtribbutes,
+		Id:                  int(lastInsertId),
+		WarehouseAttributes: warehouseAttributes,
 	}
-
-	warehouseData[newId] = newWarehouse
-
-	err = utils.Write(p.filePath, warehouseData)
-	if err != nil {
-		return models.Warehouse{}, err
-	}
-
 	return newWarehouse, nil
 }
 
-func (p *WarehouseRepositoryFile) GetAll() (map[int]models.Warehouse, error) {
-	data, err := utils.Read[models.Warehouse](p.filePath)
+// GetAll returns all warehouses.
+func (p *WarehouseRepositoryDB) GetAll() ([]models.Warehouse, error) {
+	query := `
+		SELECT 
+			id,
+			warehouse_code, 
+			address, 
+			telephone,
+			minimun_capacity,
+			minimun_temperature
+		FROM warehouses
+	`
+	rows, err := p.db.Query(query)
 	if err != nil {
-		return map[int]models.Warehouse{}, err
+		return nil, httperrors.InternalServerError{Message: "error obtaining warehouses"}
 	}
-	if len(data) == 0 {
-		return map[int]models.Warehouse{}, httperrors.NotFoundError{Message: "data not found"}
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("error closing rows: %v", err)
+		}
+	}()
+	var warehouses []models.Warehouse
+	for rows.Next() {
+		var warehouse models.Warehouse
+		if err := rows.Scan(
+			&warehouse.Id,
+			&warehouse.WarehouseCode,
+			&warehouse.Address,
+			&warehouse.Telephone,
+			&warehouse.MinimunCapacity,
+			&warehouse.MinimunTemperature,
+		); err != nil {
+			return nil, httperrors.InternalServerError{Message: "error reading warehouse data"}
+		}
+		warehouses = append(warehouses, warehouse)
 	}
-	return data, nil
+	return warehouses, nil
 }
 
-func (p *WarehouseRepositoryFile) GetByID(id int) (models.Warehouse, error) {
-	warehouseData, err := utils.Read[models.Warehouse](p.filePath)
-	if err != nil {
-		return models.Warehouse{}, err
-	}
-	warehouse, exists := warehouseData[id]
-	if !exists {
-		return models.Warehouse{},
-			httperrors.NotFoundError{Message: "warehouse not found"}
+// GetByID returns a warehouse by its ID.
+func (p *WarehouseRepositoryDB) GetByID(id int) (models.Warehouse, error) {
+	query := `
+		SELECT 
+			id,
+			warehouse_code, 
+			address, 
+			telephone,
+			minimun_capacity,
+			minimun_temperature
+		FROM warehouses
+		WHERE id = ?
+	`
+	row := p.db.QueryRow(query, id)
+	var warehouse models.Warehouse
+	if err := row.Scan(
+		&warehouse.Id,
+		&warehouse.WarehouseCode,
+		&warehouse.Address,
+		&warehouse.Telephone,
+		&warehouse.MinimunCapacity,
+		&warehouse.MinimunTemperature,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return models.Warehouse{}, httperrors.NotFoundError{Message: "warehouse not found"}
+		}
+		return models.Warehouse{}, httperrors.InternalServerError{Message: "error obtaining warehouse by ID"}
 	}
 	return warehouse, nil
 }
 
-func (p *WarehouseRepositoryFile) Update(id int, warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error) {
-	WarehouseData, err := utils.Read[models.Warehouse](p.filePath)
+// Update modifies an existing warehouse and returns the updated warehouse.
+func (p *WarehouseRepositoryDB) Update(id int, warehouseAttributes models.WarehouseAttributes) (models.Warehouse, error) {
+	query := `
+		UPDATE warehouses SET
+			warehouse_code = ?,
+			address = ?,
+			telephone = ?,
+			minimun_capacity = ?,
+			minimun_temperature = ?
+		WHERE id = ?
+	`
+	result, err := p.db.Exec(query,
+		warehouseAttributes.WarehouseCode,
+		warehouseAttributes.Address,
+		warehouseAttributes.Telephone,
+		warehouseAttributes.MinimunCapacity,
+		warehouseAttributes.MinimunTemperature,
+		id,
+	)
 	if err != nil {
-		return models.Warehouse{}, err
+		return models.Warehouse{}, httperrors.InternalServerError{Message: "error updating warehouse"}
 	}
-
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return models.Warehouse{}, httperrors.InternalServerError{Message: "error checking update"}
+	}
+	if rowsAffected == 0 {
+		return models.Warehouse{}, httperrors.NotFoundError{Message: "warehouse not found or no changes made"}
+	}
 	updatedWarehouse := models.Warehouse{
 		Id:                  id,
 		WarehouseAttributes: warehouseAttributes,
 	}
-	WarehouseData[id] = updatedWarehouse
-
-	utils.Write(p.filePath, WarehouseData)
 	return updatedWarehouse, nil
 }
 
-func (p *WarehouseRepositoryFile) Delete(id int) error {
-	warehouseData, err := utils.Read[models.Warehouse](p.filePath)
+// Delete removes a warehouse by its ID.
+func (p *WarehouseRepositoryDB) Delete(id int) error {
+	query := `DELETE FROM warehouses WHERE id = ?`
+	result, err := p.db.Exec(query, id)
 	if err != nil {
-		return err
+		var sqlErrors *mysql.MySQLError
+		if errors.As(err, &sqlErrors) {
+			if sqlErrors.Number == 1451 {
+				return httperrors.InternalServerError{Message: "This warehouse cannot be deleted because it is associated with other entities"}
+			}
+		}
+		return httperrors.InternalServerError{Message: "error deleting warehouse"}
 	}
-
-	if _, exists := warehouseData[id]; !exists {
-		return httperrors.NotFoundError{Message: "Warehouse not found"}
-	}
-
-	delete(warehouseData, id)
-
-	err = utils.Write(p.filePath, warehouseData)
+	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return httperrors.InternalServerError{Message: "error checking delete"}
 	}
-
+	if rowsAffected == 0 {
+		return httperrors.NotFoundError{Message: "warehouse not found"}
+	}
 	return nil
 }

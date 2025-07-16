@@ -1,106 +1,108 @@
 package service
 
 import (
-	"slices"
+	"context"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 )
 
+// SectionServiceDefault implements SectionService
 type SectionServiceDefault struct {
-	repo repository.SectionRepository
+	repository repository.SectionRepository
 }
 
-func NewSectionService(repo repository.SectionRepository) SectionService {
-	return &SectionServiceDefault{
-		repo: repo,
-	}
+/*
+NewSectionServiceDefault constructs a SectionServiceDefault
+with the given repository.
+*/
+func NewSectionServiceDefault(repo repository.SectionRepository) SectionService {
+	return &SectionServiceDefault{repository: repo}
 }
 
-func (s SectionServiceDefault) Create(section models.Section) (models.Section, error) {
-	allSections, err := s.GetAll()
-	if err != nil {
-		return models.Section{}, err
-	}
-
-	for _, sections := range allSections {
-		if sections.SectionNumber == section.SectionNumber {
-			return models.Section{}, httperrors.ConflictError{Message: "Section number already exists"}
-		}
-	}
-
-	return s.repo.Create(section)
+// Create, creates a new section in the repository
+func (service SectionServiceDefault) Create(ctx context.Context, section models.Section) (models.Section, error) {
+	return service.repository.Create(ctx, section)
 }
 
-func (s SectionServiceDefault) Delete(id int) error {
-	return s.repo.Delete(id)
+// Delete, deletes a section from the repository
+func (service SectionServiceDefault) Delete(ctx context.Context, id int) error {
+	return service.repository.Delete(ctx, id)
 }
-func (s SectionServiceDefault) GetAll() ([]models.Section, error) {
-	data, err := s.repo.GetAll()
+
+// GetAll returns all sections in the repository
+func (service SectionServiceDefault) GetAll(ctx context.Context) ([]models.Section, error) {
+	data, err := service.repository.GetAll(ctx)
 	if err != nil {
 		return []models.Section{}, err
 	}
-
-	slicedData := utils.MapToSlice(data)
-	slices.SortFunc(slicedData, func(a, b models.Section) int {
-		return a.ID - b.ID
-	})
-	return slicedData, nil
+	return data, nil
 }
 
-func (s SectionServiceDefault) GetByID(id int) (models.Section, error) {
-	return s.repo.GetByID(id)
+// GetByID returns a section by its ID
+func (service SectionServiceDefault) GetByID(ctx context.Context, id int) (models.Section, error) {
+	return service.repository.GetByID(ctx, id)
 }
 
-func (s *SectionServiceDefault) Update(id int, patchData models.UpdateSectionRequest) (models.Section, error) {
-	sectionToUpdate, err := s.repo.GetByID(id)
+// Update, updates a section in the repository
+func (service *SectionServiceDefault) Update(ctx context.Context, id int, patchData models.UpdateSectionRequest) (models.Section, error) {
+	section, err := service.repository.GetByID(ctx, id)
 	if err != nil {
 		return models.Section{}, err
 	}
-	if err := s.applyChanges(&sectionToUpdate, patchData); err != nil {
+
+	err = service.applyChanges(&section, patchData)
+	if err != nil {
 		return models.Section{}, err
 	}
 
-	return s.repo.Update(id, sectionToUpdate)
+	return service.repository.Update(ctx, id, section)
 }
 
-func (s *SectionServiceDefault) applyChanges(sectionToUpdate *models.Section, patchData models.UpdateSectionRequest) error {
+// applyChanges, applies the changes to the section
+func (service *SectionServiceDefault) applyChanges(sectionToUpdate *models.Section, patchData models.UpdateSectionRequest) error {
+	// Update section number
 	if patchData.SectionNumber != nil {
-		allSections, err := s.repo.GetAll()
-		if err != nil {
-			return err
-		}
-		for _, section := range allSections {
-			if section.ID != sectionToUpdate.ID && section.SectionNumber == *patchData.SectionNumber {
-				return httperrors.ConflictError{Message: "Section number already exists in another section"}
-			}
-		}
 		sectionToUpdate.SectionNumber = *patchData.SectionNumber
 	}
-
+	// Update temperature
 	if patchData.CurrentTemperature != nil {
 		sectionToUpdate.CurrentTemperature = *patchData.CurrentTemperature
 	}
+	// Update minimum temperature
 	if patchData.MinimumTemperature != nil {
 		sectionToUpdate.MinimumTemperature = *patchData.MinimumTemperature
 	}
+	// Update current capacity
 	if patchData.CurrentCapacity != nil {
 		sectionToUpdate.CurrentCapacity = *patchData.CurrentCapacity
 	}
+	// Update minimum capacity
 	if patchData.MinimumCapacity != nil {
 		sectionToUpdate.MinimumCapacity = *patchData.MinimumCapacity
 	}
+	// Update maximum capacity
 	if patchData.MaximumCapacity != nil {
 		sectionToUpdate.MaximumCapacity = *patchData.MaximumCapacity
 	}
+	// Update warehouse ID
 	if patchData.WarehouseID != nil {
 		sectionToUpdate.WarehouseID = *patchData.WarehouseID
 	}
+	// Update product type ID
 	if patchData.ProductTypeID != nil {
 		sectionToUpdate.ProductTypeID = *patchData.ProductTypeID
 	}
 
 	return nil
+}
+
+// GetProductsReport calls the repository to get a single section report.
+func (service SectionServiceDefault) GetProductsReport(ctx context.Context, id int) (models.SectionProductsReport, error) {
+	return service.repository.GetProductsReport(ctx, id)
+}
+
+// GetAllProductsReport calls the repository to get all section reports.
+func (service SectionServiceDefault) GetAllProductsReport(ctx context.Context) ([]models.SectionProductsReport, error) {
+	return service.repository.GetAllProductsReport(ctx)
 }

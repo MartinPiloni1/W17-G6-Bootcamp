@@ -13,14 +13,17 @@ import (
 )
 
 type WarehouseHandler struct {
-	sv service.WarehouseService
+	service service.WarehouseService
 }
 
+// NewWarehouseHandler creates a new instance of WarehouseHandler.
 func NewWarehouseHandler(sv service.WarehouseService) *WarehouseHandler {
 	return &WarehouseHandler{
-		sv: sv,
+		service: sv,
 	}
 }
+
+// Create handles the creation of a new warehouse.
 func (h WarehouseHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var warehouse models.WarehouseAttributes
@@ -29,7 +32,7 @@ func (h WarehouseHandler) Create() http.HandlerFunc {
 			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
-		warehouseData, err := h.sv.Create(warehouse)
+		warehouseData, err := h.service.Create(warehouse)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -41,22 +44,25 @@ func (h WarehouseHandler) Create() http.HandlerFunc {
 	}
 }
 
+// GetAll returns all warehouses.
 func (h WarehouseHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		data, err := h.sv.GetAll()
+		data, err := h.service.GetAll()
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
 			return
 		}
-
+		if data == nil {
+			data = make([]models.Warehouse, 0)
+		}
 		response.JSON(w, http.StatusOK, map[string]any{
 			"data": data,
 		})
 	}
 }
 
+// GetById returns a warehouse by ID.
 func (h WarehouseHandler) GetById() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -65,7 +71,7 @@ func (h WarehouseHandler) GetById() http.HandlerFunc {
 			return
 		}
 
-		warehouseData, err := h.sv.GetByID(id)
+		warehouseData, err := h.service.GetByID(id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -78,6 +84,7 @@ func (h WarehouseHandler) GetById() http.HandlerFunc {
 	}
 }
 
+// Update modifies a warehouse by ID.
 func (h WarehouseHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -93,7 +100,7 @@ func (h WarehouseHandler) Update() http.HandlerFunc {
 			return
 		}
 
-		warehouseData, err := h.sv.Update(id, updatedWarehouse)
+		warehouseData, err := h.service.Update(id, updatedWarehouse)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -106,6 +113,7 @@ func (h WarehouseHandler) Update() http.HandlerFunc {
 	}
 }
 
+// Delete deletes a warehouse by ID.
 func (h WarehouseHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -113,7 +121,7 @@ func (h WarehouseHandler) Delete() http.HandlerFunc {
 			response.Error(w, http.StatusBadRequest, "Invalid ID format")
 			return
 		}
-		err = h.sv.Delete(id)
+		err = h.service.Delete(id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)

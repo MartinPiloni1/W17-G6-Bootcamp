@@ -14,19 +14,20 @@ import (
 )
 
 type BuyerHandler struct {
-	sv service.BuyerService
+	service service.BuyerService
 }
 
-func NewBuyerHandler(sv service.BuyerService) *BuyerHandler {
-	return &BuyerHandler{sv: sv}
+func NewBuyerHandler(serviceInstance service.BuyerService) *BuyerHandler {
+	return &BuyerHandler{service: serviceInstance}
 }
 
 func (h *BuyerHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		var newBuyer models.BuyerAttributes
 
 		dec := json.NewDecoder(r.Body)
-		dec.DisallowUnknownFields()
+		dec.DisallowUnknownFields() // cannot send unexpected fields in request
 
 		err := dec.Decode(&newBuyer)
 		if err != nil {
@@ -34,13 +35,15 @@ func (h *BuyerHandler) Create() http.HandlerFunc {
 			return
 		}
 
+		// validate the json body with validator
 		validator := validator.New()
 		err = validator.Struct(newBuyer)
 		if err != nil {
 			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
-		buyer, err := h.sv.Create(newBuyer)
+
+		buyer, err := h.service.Create(ctx, newBuyer)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -55,7 +58,8 @@ func (h *BuyerHandler) Create() http.HandlerFunc {
 
 func (h *BuyerHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		buyerData, err := h.sv.GetAll()
+		ctx := r.Context()
+		buyerData, err := h.service.GetAll(ctx)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -70,15 +74,17 @@ func (h *BuyerHandler) GetAll() http.HandlerFunc {
 
 func (h *BuyerHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		idReq := chi.URLParam(r, "id")
 
 		id, err := strconv.Atoi(idReq)
+		// id must be uint
 		if err != nil || id <= 0 {
 			response.Error(w, http.StatusBadRequest, "Invalid Id")
 			return
 		}
 
-		data, err := h.sv.GetByID(id)
+		data, err := h.service.GetByID(ctx, id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -93,8 +99,11 @@ func (h *BuyerHandler) GetByID() http.HandlerFunc {
 
 func (h *BuyerHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		idParam := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idParam)
+
+		// id must be uint
 		if err != nil || id <= 0 {
 			response.Error(w, http.StatusBadRequest, "Invalid id")
 			return
@@ -103,13 +112,14 @@ func (h *BuyerHandler) Update() http.HandlerFunc {
 		var patchReq models.BuyerPatchRequest
 
 		dec := json.NewDecoder(r.Body)
-		dec.DisallowUnknownFields()
+		dec.DisallowUnknownFields() // cannot send unexpected fields in request
 		err = dec.Decode(&patchReq)
 		if err != nil {
 			response.Error(w, http.StatusBadRequest, "Invalid JSON body")
 			return
 		}
 
+		// validate the json body with validator
 		validate := validator.New()
 		err = validate.Struct(patchReq)
 		if err != nil {
@@ -117,7 +127,7 @@ func (h *BuyerHandler) Update() http.HandlerFunc {
 			return
 		}
 
-		buyer, err := h.sv.Update(id, patchReq)
+		buyer, err := h.service.Update(ctx, id, patchReq)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -132,15 +142,17 @@ func (h *BuyerHandler) Update() http.HandlerFunc {
 
 func (h *BuyerHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		idReq := chi.URLParam(r, "id")
 
 		id, err := strconv.Atoi(idReq)
+		// id must be uint
 		if err != nil || id <= 0 {
 			response.Error(w, http.StatusBadRequest, "Invalid Id")
 			return
 		}
 
-		err = h.sv.Delete(id)
+		err = h.service.Delete(ctx, id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -148,5 +160,37 @@ func (h *BuyerHandler) Delete() http.HandlerFunc {
 		}
 
 		response.JSON(w, http.StatusNoContent, nil)
+	}
+}
+
+// If a valid id is provided, obtains the purchase_orders_count associated to the buyer
+// If the id isnt provided, fetch it, but for all the buyers
+func (h *BuyerHandler) GetWithPurchaseOrdersCount() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		idParam := r.URL.Query().Get("id")
+		var id *int
+
+		// if id is provided, check if its an uint
+		if idParam != "" {
+			val, err := strconv.Atoi(idParam)
+			if err != nil || val <= 0 {
+				response.Error(w, http.StatusBadRequest, "Invalid Id")
+				return
+			}
+			id = &val // assign to the pointer
+		}
+
+		BuyerWithPurchaseOrdersCount, err := h.service.GetWithPurchaseOrdersCount(ctx, id)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+
+		response.JSON(w, http.StatusOK, map[string]any{
+			"data": BuyerWithPurchaseOrdersCount,
+		})
 	}
 }

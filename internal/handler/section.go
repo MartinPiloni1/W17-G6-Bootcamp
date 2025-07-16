@@ -13,61 +13,102 @@ import (
 	"github.com/go-playground/validator"
 )
 
+// SectionHandler handles section operations
 type SectionHandler struct {
 	sectionService service.SectionService
 }
 
+// NewSectionHandler returns a new SectionHandler
 func NewSectionHandler(sectionService service.SectionService) *SectionHandler {
 	return &SectionHandler{sectionService: sectionService}
 }
 
-func (h SectionHandler) GetAll() http.HandlerFunc {
+// GetAll, returns all sections
+// @Summary Get all sections
+// @Description Get all sections
+// @Tags sections
+// @Accept json
+// @Produce json
+// @Success 200 {array} models.Section
+// @Router /sections [get]
+func (handler *SectionHandler) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		data, err := h.sectionService.GetAll()
+		ctx := r.Context()
+		// Get all sections from the repository
+		data, err := handler.sectionService.GetAll(ctx)
+		// Check for errors
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
 			return
 		}
 
+		// Return all sections
 		response.JSON(w, http.StatusOK, map[string]any{
 			"data": data,
 		})
 	}
 }
 
-func (h *SectionHandler) GetByID() http.HandlerFunc {
+// GetByID, returns a section by its ID
+// @Summary Get a section by ID
+// @Description Get a section by ID
+// @Tags sections
+// @Accept json
+// @Produce json
+// @Param id path int true "Section ID"
+// @Success 200 {object} models.Section
+// @Router /sections/{id} [get]
+func (handler *SectionHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		// Get section ID from URL parameter
 		idParam := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idParam)
+		// Check for invalid ID
 		if err != nil || id <= 0 {
 			response.Error(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
 
-		data, err := h.sectionService.GetByID(id)
+		// Get section by ID from service
+		data, err := handler.sectionService.GetByID(ctx, id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
 			return
 		}
 
+		// Return section
 		response.JSON(w, http.StatusOK, map[string]any{
 			"data": data,
 		})
 	}
 }
 
-func (h *SectionHandler) Delete() http.HandlerFunc {
+// Delete, deletes a section from the repository
+// @Summary Delete a section
+// @Description Delete a section
+// @Tags sections
+// @Accept json
+// @Produce json
+// @Param id path int true "Section ID"
+// @Success 204
+// @Router /sections/{id} [delete]
+func (handler *SectionHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		// Get section ID from URL parameter
 		idParam := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idParam)
+		// Check for invalid ID
 		if err != nil || id <= 0 {
 			response.Error(w, http.StatusBadRequest, "Invalid ID")
 			return
 		}
 
-		err = h.sectionService.Delete(id)
+		// Delete section from service
+		err = handler.sectionService.Delete(ctx, id)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -78,24 +119,40 @@ func (h *SectionHandler) Delete() http.HandlerFunc {
 	}
 }
 
-func (h *SectionHandler) Create() http.HandlerFunc {
+// Create, creates a new section in the repository
+// @Summary Create a new section
+// @Description Create a new section
+// @Tags sections
+// @Accept json
+// @Produce json
+// @Param section body models.CreateSectionRequest true "Section to create"
+// @Success 201 {object} models.Section
+// @Router /sections [post]
+func (handler *SectionHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		// Parse request body
 		var section models.CreateSectionRequest
+		// Initialize decoder
 		dec := json.NewDecoder(r.Body)
+		// Disallow unknown fields
 		dec.DisallowUnknownFields()
 
+		// Decode request body
 		err := dec.Decode(&section)
 		if err != nil {
 			response.Error(w, http.StatusBadRequest, "Invalid body")
 			return
 		}
 
+		// Validate section
 		validator := validator.New()
 		if err := validator.Struct(section); err != nil {
 			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 
+		// Convert request body to section model
 		sectionModel := models.Section{
 			SectionNumber:      section.SectionNumber,
 			CurrentTemperature: section.CurrentTemperature,
@@ -107,21 +164,34 @@ func (h *SectionHandler) Create() http.HandlerFunc {
 			ProductTypeID:      section.ProductTypeID,
 		}
 
-		createdSection, err := h.sectionService.Create(sectionModel)
+		// Create section in service
+		createdSection, err := handler.sectionService.Create(ctx, sectionModel)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
 			return
 		}
 
+		// Return created section
 		response.JSON(w, http.StatusCreated, map[string]any{
 			"data": createdSection,
 		})
 	}
 }
 
-func (h *SectionHandler) Update() http.HandlerFunc {
+// Update, updates a section in the repository
+// @Summary Update a section
+// @Description Update a section
+// @Tags sections
+// @Accept json
+// @Produce json
+// @Param id path int true "Section ID"
+// @Param section body models.UpdateSectionRequest true "Section to update"
+// @Success 200 {object} models.Section
+// @Router /sections/{id} [patch]
+func (handler *SectionHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		idParam := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idParam)
 		if err != nil {
@@ -129,24 +199,81 @@ func (h *SectionHandler) Update() http.HandlerFunc {
 			return
 		}
 
+		// Parse request body
 		var req models.UpdateSectionRequest
-
 		dec := json.NewDecoder(r.Body)
 		dec.DisallowUnknownFields()
 
+		// Decode request body
 		err = dec.Decode(&req)
 		if err != nil {
 			response.Error(w, http.StatusBadRequest, "Invalid body")
 			return
 		}
 
+		// Validate request body
 		validate := validator.New()
 		if err := validate.Struct(req); err != nil {
 			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
 
-		updatedSection, err := h.sectionService.Update(id, req)
+		// Update section in service
+		updatedSection, err := handler.sectionService.Update(ctx, id, req)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+
+		// Return updated section
+		response.JSON(w, http.StatusOK, map[string]any{
+			"data": updatedSection,
+		})
+	}
+}
+
+// GetProductsReport gets a report of products per section.
+// @Summary Get products report for sections
+// @Description Get a report of the total number of products for a specific section or for all sections.
+// @Tags sections
+// @Accept json
+// @Produce json
+// @Param id query int false "Section ID"
+// @Success 200 {object} map[string][]models.SectionProductsReport
+// @Router /sections/reportProducts [get]
+func (handler *SectionHandler) GetProductsReport() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		// Check for the "id" query parameter
+		idParam := r.URL.Query().Get("id")
+
+		// Case 1: An "id" is provided
+		if idParam != "" {
+			id, err := strconv.Atoi(idParam)
+			if err != nil || id <= 0 {
+				response.Error(w, http.StatusBadRequest, "Invalid section ID")
+				return
+			}
+
+			// Get the report for a single section
+			report, err := handler.sectionService.GetProductsReport(ctx, id)
+			if err != nil {
+				statusCode, msg := httperrors.GetErrorData(err)
+				response.Error(w, statusCode, msg)
+				return
+			}
+			// The expected response is an array, so wrap the single result in a slice
+			response.JSON(w, http.StatusOK, map[string]any{
+				"data": []models.SectionProductsReport{report},
+			})
+			return
+		}
+
+		// Case 2: No "id" is provided
+		// Get the report for all sections
+		reports, err := handler.sectionService.GetAllProductsReport(ctx)
 		if err != nil {
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
@@ -154,7 +281,7 @@ func (h *SectionHandler) Update() http.HandlerFunc {
 		}
 
 		response.JSON(w, http.StatusOK, map[string]any{
-			"data": updatedSection,
+			"data": reports,
 		})
 	}
 }
