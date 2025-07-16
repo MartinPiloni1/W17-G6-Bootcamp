@@ -62,6 +62,7 @@ func (a *ServerChi) Run() (err error) {
 
 	healthRouter := application.HealthRouter()
 	productRouter := application.ProductRouter(freshDB)
+	productRecordRouter := application.ProductRecordRouter(freshDB)
 	buyersRouter := application.BuyersRouter(freshDB)
 	warehouseRouter := application.WarehouseRouter(freshDB)
 	sellerRouter := application.SellerRouter(freshDB)
@@ -72,6 +73,7 @@ func (a *ServerChi) Run() (err error) {
 	router.Mount("/healthcheck", healthRouter)
 	router.Route("/api/v1", func(r chi.Router) {
 		r.Mount("/products", productRouter)
+		r.Mount("/productRecords", productRecordRouter)
 		r.Mount("/warehouses", warehouseRouter)
 		r.Mount("/buyers", buyersRouter)
 		r.Mount("/sellers", sellerRouter)

@@ -197,12 +197,60 @@ func (r *ProductRepositoryDB) GetByID(ctx context.Context, id int) (models.Produ
 		&product.SellerID,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
-		return models.Product{}, err
+		return models.Product{}, httperrors.NotFoundError{Message: "Product not found"}
 	} else if err != nil {
 		return models.Product{}, err
 	}
 
 	return product, nil
+}
+
+// GetRecordsPerProduct returns the count of product_records for each product.
+// If id != nil, it filters by that product ID; otherwise it returns all products.
+// It uses a LEFT JOIN so products with zero records appear with count = 0.
+func (r *ProductRepositoryDB) GetRecordsPerProduct(ctx context.Context, id *int) ([]models.ProductRecordCount, error) {
+	query := `
+			SELECT 
+				p.id, 
+				p.description,
+				COUNT(pr.id) AS records_count
+			FROM products p
+			LEFT JOIN product_records pr ON pr.product_id = p.id
+		`
+
+	var args []interface{}
+	if id != nil {
+		query += " WHERE p.id = ?"
+		args = append(args, *id)
+	}
+	query += " GROUP BY p.id"
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ProductsRecordsCount []models.ProductRecordCount
+	for rows.Next() {
+		var productRecordCount models.ProductRecordCount
+		err := rows.Scan(
+			&productRecordCount.ProductID,
+			&productRecordCount.Description,
+			&productRecordCount.RecordsCount,
+		)
+		if err != nil {
+			return nil, err
+		}
+		ProductsRecordsCount = append(ProductsRecordsCount, productRecordCount)
+	}
+
+	if id != nil && len(ProductsRecordsCount) == 0 {
+		return nil,
+			httperrors.NotFoundError{Message: "Product not found"}
+	}
+
+	return ProductsRecordsCount, nil
 }
 
 // Update modifies an existing product record in the database. It applies all
@@ -278,6 +326,10 @@ func (r *ProductRepositoryDB) Delete(ctx context.Context, id int) error {
 
 	res, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
+		var sqlError *mysql.MySQLError
+		if errors.As(err, &sqlError) && sqlError.Number == 1451 {
+			return httperrors.ConflictError{Message: "The product to delete is still referenced by some product records"}
+		}
 		return err
 	}
 

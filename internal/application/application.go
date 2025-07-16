@@ -76,8 +76,21 @@ func ProductRouter(db *sql.DB) chi.Router {
 	router.Post("/", productHandler.Create())
 	router.Get("/", productHandler.GetAll())
 	router.Get("/{id}", productHandler.GetById())
+	router.Get("/reportRecords", productHandler.GetRecordsPerProduct())
 	router.Patch("/{id}", productHandler.Update())
 	router.Delete("/{id}", productHandler.Delete())
+	return router
+}
+
+// ProductRecordRouter creates and returns a chi.Router configured for product_records.
+func ProductRecordRouter(db *sql.DB) chi.Router {
+	router := chi.NewRouter()
+
+	productRecordRepository := repository.NewProductRecordRepositoryDB(db)
+	productRecordService := service.NewProductRecordServiceDefault(productRecordRepository)
+	productRecordHandler := handler.NewProductRecordHandler(productRecordService)
+
+	router.Post("/", productRecordHandler.Create())
 	return router
 }
 
