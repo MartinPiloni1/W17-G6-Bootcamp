@@ -172,8 +172,8 @@ func (p *WarehouseRepositoryDB) Delete(id int) error {
 			if sqlErrors.Number == 1451 {
 				return httperrors.InternalServerError{Message: "This warehouse cannot be deleted because it is associated with other entities"}
 			}
-			return httperrors.InternalServerError{Message: "error deleting warehouse"}
 		}
+		return httperrors.InternalServerError{Message: "error deleting warehouse"}
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
