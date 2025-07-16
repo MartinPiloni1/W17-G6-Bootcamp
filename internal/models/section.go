@@ -41,3 +41,11 @@ type UpdateSectionRequest struct {
     WarehouseID        *int     `json:"warehouse_id,omitempty" validate:"omitempty,gt=0"`
     ProductTypeID      *int     `json:"product_type_id,omitempty" validate:"omitempty,gt=0"`
 }
+
+// SectionProductsReport defines the structure for the products report per section.
+// This new struct is used for the GET /sections/reportProducts endpoint response.
+type SectionProductsReport struct {
+	SectionID     int    `json:"section_id"`
+	SectionNumber string `json:"section_number"`
+	ProductsCount int    `json:"products_count"`
+}

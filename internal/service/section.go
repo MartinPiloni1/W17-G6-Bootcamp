@@ -96,3 +96,13 @@ func (service *SectionServiceDefault) applyChanges(sectionToUpdate *models.Secti
 
 	return nil
 }
+
+// GetProductsReport calls the repository to get a single section report.
+func (service SectionServiceDefault) GetProductsReport(ctx context.Context, id int) (models.SectionProductsReport, error) {
+	return service.repository.GetProductsReport(ctx, id)
+}
+
+// GetAllProductsReport calls the repository to get all section reports.
+func (service SectionServiceDefault) GetAllProductsReport(ctx context.Context) ([]models.SectionProductsReport, error) {
+	return service.repository.GetAllProductsReport(ctx)
+}

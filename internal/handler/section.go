@@ -232,3 +232,56 @@ func (handler *SectionHandler) Update() http.HandlerFunc {
 		})
 	}
 }
+
+// GetProductsReport gets a report of products per section.
+// @Summary Get products report for sections
+// @Description Get a report of the total number of products for a specific section or for all sections.
+// @Tags sections
+// @Accept json
+// @Produce json
+// @Param id query int false "Section ID"
+// @Success 200 {object} map[string][]models.SectionProductsReport
+// @Router /sections/reportProducts [get]
+func (handler *SectionHandler) GetProductsReport() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		// Check for the "id" query parameter
+		idParam := r.URL.Query().Get("id")
+
+		// Case 1: An "id" is provided
+		if idParam != "" {
+			id, err := strconv.Atoi(idParam)
+			if err != nil || id <= 0 {
+				response.Error(w, http.StatusBadRequest, "Invalid section ID")
+				return
+			}
+
+			// Get the report for a single section
+			report, err := handler.sectionService.GetProductsReport(ctx, id)
+			if err != nil {
+				statusCode, msg := httperrors.GetErrorData(err)
+				response.Error(w, statusCode, msg)
+				return
+			}
+			// The expected response is an array, so wrap the single result in a slice
+			response.JSON(w, http.StatusOK, map[string]any{
+				"data": []models.SectionProductsReport{report},
+			})
+			return
+		}
+
+		// Case 2: No "id" is provided
+		// Get the report for all sections
+		reports, err := handler.sectionService.GetAllProductsReport(ctx)
+		if err != nil {
+			statusCode, msg := httperrors.GetErrorData(err)
+			response.Error(w, statusCode, msg)
+			return
+		}
+
+		response.JSON(w, http.StatusOK, map[string]any{
+			"data": reports,
+		})
+	}
+}
