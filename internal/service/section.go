@@ -2,11 +2,9 @@ package service
 
 import (
 	"context"
-	"slices"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 )
 
 // SectionServiceDefault implements SectionService
@@ -38,10 +36,6 @@ func (service SectionServiceDefault) GetAll(ctx context.Context) ([]models.Secti
 	if err != nil {
 		return []models.Section{}, err
 	}
-
-	slices.SortFunc(data, func(a, b models.Section) int {
-		return a.ID - b.ID
-	})
 	return data, nil
 }
 
@@ -55,20 +49,6 @@ func (service *SectionServiceDefault) Update(ctx context.Context, id int, patchD
 	section, err := service.repository.GetByID(ctx, id)
 	if err != nil {
 		return models.Section{}, err
-	}
-
-	if patchData.SectionNumber != nil {
-		sections, err := service.repository.GetAll(ctx)
-		if err != nil {
-			return models.Section{}, err
-		}
-
-		for _, s := range sections {
-			if s.SectionNumber == *patchData.SectionNumber && s.ID != id {
-				return models.Section{},
-					httperrors.ConflictError{Message: "A section with this section number already exists"}
-			}
-		}
 	}
 
 	err = service.applyChanges(&section, patchData)
