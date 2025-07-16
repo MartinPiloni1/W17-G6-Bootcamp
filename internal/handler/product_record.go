@@ -40,9 +40,15 @@ func (h ProductRecordHandler) Create() http.HandlerFunc {
 		}
 
 		// Validates that LastUpdateDate is in a valid date format
-		_, err = time.Parse("2006-01-02", newProductRecord.LastUpdateDate)
+		parsedDate, err := time.Parse("2006-01-02", newProductRecord.LastUpdateDate)
 		if err != nil {
 			response.Error(w, http.StatusUnprocessableEntity, "Invalid date format")
+			return
+		}
+
+		// Validates that LastUpdateDate is not in the future
+		if parsedDate.After(time.Now()) {
+			response.Error(w, http.StatusUnprocessableEntity, "invalid date: cannot be in the future")
 			return
 		}
 
