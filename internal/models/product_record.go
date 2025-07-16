@@ -12,6 +12,6 @@ type ProductRecordAttributes struct {
 // ProductRecord represents a product record, including its
 // auto-generated ID plus its attributes.
 type ProductRecord struct {
-	ID int `json:"id" validate:"required,gt=0"`
+	ID int `json:"id"`
 	ProductRecordAttributes
 }
