@@ -27,7 +27,7 @@ func NewProductRecordRepositoryDB(db *sql.DB) ProductRecordRepository {
 
 // Create inserts a new product record into the database using the given
 // attributes, then returns the complete ProductRecord (including its auto-generated ID).
-// If any database operation fails, it returns an InternalServerError.
+// If any database operation fails, it returns the error.
 func (r *ProductRecordRepositoryDB) Create(ctx context.Context, attributes models.ProductRecordAttributes) (models.ProductRecord, error) {
 	const query = `
 		INSERT INTO product_records (
