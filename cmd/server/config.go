@@ -18,11 +18,14 @@ type ServerChi struct {
 	DatabaseConfig mysql.Config
 }
 
-func LoadServerConf() (*ServerChi, error) {
+func LoadServerConf(withEnvFile bool) (*ServerChi, error) {
 
-	err := godotenv.Load()
-	if err != nil {
-		return nil, fmt.Errorf("failed to load env file: %w", err)
+	if withEnvFile {
+
+		err := godotenv.Load()
+		if err != nil {
+			return nil, fmt.Errorf("failed to load env file: %w", err)
+		}
 	}
 
 	// default values
@@ -40,8 +43,7 @@ func LoadServerConf() (*ServerChi, error) {
 	if Host == "" ||
 		Port == "" ||
 		Name == "" ||
-		User == "" ||
-		Pass == "" {
+		User == "" {
 		return nil, fmt.Errorf("DB conn settings not established")
 	}
 	dbConfig := storage.NewMySQLConfig(Host, Port, User, Pass, Name)
