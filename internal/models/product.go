@@ -39,3 +39,11 @@ type Product struct {
 	ID int `json:"id"`
 	ProductAttributes
 }
+
+// ProductRecordCount represents the number of records associated
+// with a specific product.
+type ProductRecordCount struct {
+	ProductID    int    `json:"product_id"`
+	Description  string `json:"description"`
+	RecordsCount int    `json:"records_count"`
+}
