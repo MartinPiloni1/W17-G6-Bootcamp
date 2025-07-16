@@ -3,7 +3,6 @@ INSERT INTO warehouses (id, warehouse_code, address, telephone, minimun_capacity
     (2, 'WH-002', '456 Secondary Ave', '+34-222-333-444', 2000, 3.5),
     (3, 'WH-003', '789 Warehouse Rd', '+34-333-444-555', 1500, 2.0);
 
-
 INSERT INTO employees (card_number_id, first_name, last_name, warehouse_id) VALUES
     ('ABC001', 'Ramon', 'Diaz', 1),
     ('DEF002', 'Carlos', 'Lopez', 1),
