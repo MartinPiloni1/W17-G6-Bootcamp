@@ -18,7 +18,7 @@ func NewLocalityService(repo repository.LocalityRepository) LocalityService {
 // It checks if all required fields are provided and returns an error if any are missing
 func (s *LocalityServiceDefault) Create(locality models.Locality) (models.Locality, error) {
 	if locality.ID == "" || locality.LocalityName == "" || locality.ProvinceName == "" || locality.CountryName == "" {
-		return models.Locality{}, httperrors.BadRequestError{
+		return models.Locality{}, httperrors.UnprocessableEntityError{
 			Message: "Invalid locality data",
 		}
 	}
