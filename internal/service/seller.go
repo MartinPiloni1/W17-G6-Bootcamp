@@ -16,7 +16,7 @@ func NewSellerService(repo repository.SellerRepository) SellerService {
 
 func (s SellerServiceDefault) Create(seller models.SellerAttributes) (models.Seller, error) {
 	if seller.CID <= 0 || seller.CompanyName == "" || seller.Address == "" || seller.Telephone == "" || seller.LocalityID == "" {
-		return models.Seller{}, httperrors.BadRequestError{
+		return models.Seller{}, httperrors.UnprocessableEntityError{
 			Message: "Invalid seller data",
 		}
 	}
