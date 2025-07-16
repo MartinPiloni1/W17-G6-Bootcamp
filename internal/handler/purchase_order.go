@@ -2,13 +2,13 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 	"github.com/bootcamp-go/web/response"
 	"github.com/go-playground/validator"
 )
@@ -32,7 +32,6 @@ func (h *PurchaseOrderHandler) Create() http.HandlerFunc {
 
 		err := dec.Decode(&newPurchaseOrder)
 		if err != nil {
-			fmt.Println(err)
 			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
 		}
@@ -42,8 +41,10 @@ func (h *PurchaseOrderHandler) Create() http.HandlerFunc {
 		newPurchaseOrder.TrackingCode = strings.TrimSpace(newPurchaseOrder.TrackingCode)
 
 		// validate the json body with validator
-		validator := validator.New()
-		err = validator.Struct(newPurchaseOrder)
+		v := validator.New()
+		// add rute to date not seted into the future
+		_ = v.RegisterValidation("notfuture", utils.NotFutureDatetime)
+		err = v.Struct(newPurchaseOrder)
 		if err != nil {
 			response.Error(w, http.StatusUnprocessableEntity, "Invalid JSON body")
 			return
@@ -51,7 +52,6 @@ func (h *PurchaseOrderHandler) Create() http.HandlerFunc {
 
 		purchaseOrder, err := h.service.Create(ctx, newPurchaseOrder)
 		if err != nil {
-			fmt.Println(err)
 			statusCode, msg := httperrors.GetErrorData(err)
 			response.Error(w, statusCode, msg)
 			return
