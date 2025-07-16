@@ -22,11 +22,11 @@ INSERT IGNORE INTO buyers (card_number_id, first_name, last_name) VALUES
     (34567890, 'Luis', 'Martínez');
 
 INSERT IGNORE INTO employees (card_number_id, first_name, last_name, warehouse_id) VALUES
-    ('ABC001', 'Ramon', 'Diaz', 1),
-    ('DEF002', 'Carlos', 'Lopez', 1),
-    ('GHI003', 'Marta', 'Perez', 2),
-    ('JKL004', 'Lucia', 'Romero', 2),
-    ('MNO005', 'Sergio', 'Castro', 3);
+    ('10101010', 'Ramon', 'Diaz', 1),
+    ('10101011', 'Carlos', 'Lopez', 1),
+    ('10101012', 'Marta', 'Perez', 2),
+    ('10101013', 'Lucia', 'Romero', 2),
+    ('40402461', 'Sergio', 'Castro', 3);
 
 INSERT IGNORE INTO sellers (cid, company_name, address, telephone, locality_id) VALUES
      (1, 'Alkemy', 'Monroe 860', '47470000', '6700'),
