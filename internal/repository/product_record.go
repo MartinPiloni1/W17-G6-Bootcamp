@@ -54,14 +54,12 @@ func (r *ProductRecordRepositoryDB) Create(ctx context.Context, attributes model
 			return models.ProductRecord{},
 				httperrors.ConflictError{Message: "a product with the given id does not exist"}
 		}
-		return models.ProductRecord{},
-			httperrors.InternalServerError{Message: "error creating product record"}
+		return models.ProductRecord{}, err
 	}
 
 	lastId, err := result.LastInsertId()
 	if err != nil {
-		return models.ProductRecord{},
-			httperrors.InternalServerError{Message: "error creating product record"}
+		return models.ProductRecord{}, err
 	}
 
 	newProductRecord := models.ProductRecord{
