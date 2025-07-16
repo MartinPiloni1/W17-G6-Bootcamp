@@ -43,8 +43,7 @@ func LoadServerConf(withEnvFile bool) (*ServerChi, error) {
 	if Host == "" ||
 		Port == "" ||
 		Name == "" ||
-		User == "" ||
-		Pass == "" {
+		User == "" {
 		return nil, fmt.Errorf("DB conn settings not established")
 	}
 	dbConfig := storage.NewMySQLConfig(Host, Port, User, Pass, Name)
