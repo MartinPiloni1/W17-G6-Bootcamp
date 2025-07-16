@@ -73,6 +73,8 @@ type SectionService interface {
 	GetByID(ctx context.Context, id int) (models.Section, error)
 	Update(ctx context.Context, id int, data models.UpdateSectionRequest) (models.Section, error)
 	Delete(ctx context.Context, id int) error
+	GetProductsReport(ctx context.Context, id int) (models.SectionProductsReport, error)
+	GetAllProductsReport(ctx context.Context) ([]models.SectionProductsReport, error)
 }
 
 type PurchaseOrderService interface {
@@ -87,4 +89,10 @@ type CarryService interface {
 
 type InboundOrderService interface {
 	Create(attrs models.InboundOrderAttributes) (models.InboundOrder, error)
+}
+
+// ProductBatchService defines operations for managing product batches.
+type ProductBatchService interface {
+	// Create validates and creates a new product batch.
+	Create(ctx context.Context, productBatch models.ProductBatchAttibutes) (models.ProductBatch, error)
 }

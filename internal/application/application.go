@@ -140,6 +140,7 @@ func SectionRouter(db *sql.DB) chi.Router {
 	router.Delete("/{id}", sectionHandler.Delete())
 	router.Post("/", sectionHandler.Create())
 	router.Patch("/{id}", sectionHandler.Update())
+	router.Get("/reportProducts", sectionHandler.GetProductsReport())
 	return router
 }
 
@@ -175,5 +176,15 @@ func InboundOrderRouter(db *sql.DB) chi.Router {
 	handler := handler.NewInboundOrderHandler(service)
 
 	router.Post("/", handler.Create())
+	return router
+}
+
+func ProductBatchRouter(db *sql.DB) chi.Router {
+	productBatchRepository := repository.NewProductBatchRepositoryDB(db)
+	productBatchService := service.NewProductBatchServiceDefault(productBatchRepository)
+	productBatchHandler := handler.NewProductBatchHandler(productBatchService)
+
+	router := chi.NewRouter()
+	router.Post("/", productBatchHandler.Create())
 	return router
 }

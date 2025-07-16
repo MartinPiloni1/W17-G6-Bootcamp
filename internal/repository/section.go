@@ -213,3 +213,62 @@ func (repository *SectionRepositoryDB) GetByID(ctx context.Context, id int) (mod
 
     return section, nil
 }
+
+// GetProductsReport gets a product count report for a specific section.
+func (repository *SectionRepositoryDB) GetProductsReport(ctx context.Context, id int) (models.SectionProductsReport, error) {
+	const query = `
+		SELECT s.id, s.section_number, COUNT(pb.id) as products_count
+		FROM sections s
+		LEFT JOIN product_batches pb ON s.id = pb.section_id
+		WHERE s.id = ?
+		GROUP BY s.id, s.section_number;
+	`
+	row := repository.db.QueryRowContext(ctx, query, id)
+	var report models.SectionProductsReport
+
+	err := row.Scan(&report.SectionID, &report.SectionNumber, &report.ProductsCount)
+	if err != nil {
+		// If Scan returns sql.ErrNoRows, it means the section ID was not found.
+		// The LEFT JOIN ensures a row is returned even for sections with 0 products.
+		// Therefore, this error reliably indicates that the section does not exist.
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.SectionProductsReport{}, httperrors.NotFoundError{Message: "Section not found"}
+		}
+		// Any other error is treated as an internal server error.
+		return models.SectionProductsReport{}, httperrors.InternalServerError{}
+	}
+
+	return report, nil
+}
+
+
+//GetAllProductsReport gets a product count report for all sections.
+func (repository *SectionRepositoryDB) GetAllProductsReport(ctx context.Context) ([]models.SectionProductsReport, error) {
+	const query = `
+		SELECT s.id, s.section_number, COUNT(pb.id) as products_count
+		FROM sections s
+		LEFT JOIN product_batches pb ON s.id = pb.section_id
+		GROUP BY s.id, s.section_number;
+	`
+	rows, err := repository.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, httperrors.InternalServerError{}
+	}
+	defer rows.Close()
+
+	var reports []models.SectionProductsReport
+	for rows.Next() {
+		var report models.SectionProductsReport
+		err := rows.Scan(&report.SectionID, &report.SectionNumber, &report.ProductsCount)
+		if err != nil {
+			return nil, httperrors.InternalServerError{}
+		}
+		reports = append(reports, report)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, httperrors.InternalServerError{}
+	}
+
+	return reports, nil
+}

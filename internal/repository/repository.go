@@ -72,6 +72,8 @@ type SectionRepository interface {
 	GetByID(ctx context.Context, id int) (models.Section, error)
 	Update(ctx context.Context, id int, data models.Section) (models.Section, error)
 	Delete(ctx context.Context, id int) error
+	GetProductsReport(ctx context.Context, id int) (models.SectionProductsReport, error)
+	GetAllProductsReport(ctx context.Context) ([]models.SectionProductsReport, error)
 }
 
 // CarryRepository provides methods for carry data access.
@@ -89,4 +91,8 @@ type InboundOrderRepository interface {
 
 type PurchaseOrderRepository interface {
 	Create(ctx context.Context, newPurchaseOrder models.PurchaseOrderAttributes) (models.PurchaseOrder, error)
+}
+
+type ProductBatchRepository interface {
+	Create(ctx context.Context, productBatch models.ProductBatchAttibutes) (models.ProductBatch, error)
 }
