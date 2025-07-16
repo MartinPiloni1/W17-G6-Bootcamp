@@ -153,7 +153,7 @@ func (p *WarehouseRepositoryDB) Update(id int, warehouseAttributes models.Wareho
 		return models.Warehouse{}, httperrors.InternalServerError{Message: "error checking update"}
 	}
 	if rowsAffected == 0 {
-		return models.Warehouse{}, httperrors.NotFoundError{Message: "warehouse not found"}
+		return models.Warehouse{}, httperrors.NotFoundError{Message: "warehouse not found or no changes made"}
 	}
 	updatedWarehouse := models.Warehouse{
 		Id:                  id,

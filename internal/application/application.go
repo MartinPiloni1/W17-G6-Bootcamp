@@ -45,6 +45,7 @@ func LocalityRouter(db *sql.DB) chi.Router {
 	router.Post("/", localityHandler.Create())
 	router.Get("/{id}", localityHandler.GetByID())
 	router.Get("/reportSellers", localityHandler.GetSellerReport())
+	router.Get("/reportCarries", localityHandler.GetReportByLocalityId())
 	return router
 }
 
@@ -76,8 +77,21 @@ func ProductRouter(db *sql.DB) chi.Router {
 	router.Post("/", productHandler.Create())
 	router.Get("/", productHandler.GetAll())
 	router.Get("/{id}", productHandler.GetById())
+	router.Get("/reportRecords", productHandler.GetRecordsPerProduct())
 	router.Patch("/{id}", productHandler.Update())
 	router.Delete("/{id}", productHandler.Delete())
+	return router
+}
+
+// ProductRecordRouter creates and returns a chi.Router configured for product_records.
+func ProductRecordRouter(db *sql.DB) chi.Router {
+	router := chi.NewRouter()
+
+	productRecordRepository := repository.NewProductRecordRepositoryDB(db)
+	productRecordService := service.NewProductRecordServiceDefault(productRecordRepository)
+	productRecordHandler := handler.NewProductRecordHandler(productRecordService)
+
+	router.Post("/", productRecordHandler.Create())
 	return router
 }
 
@@ -125,6 +139,17 @@ func SectionRouter(db *sql.DB) chi.Router {
 	router.Delete("/{id}", sectionHandler.Delete())
 	router.Post("/", sectionHandler.Create())
 	router.Patch("/{id}", sectionHandler.Update())
+	return router
+}
+
+func CarryRouter(db *sql.DB) chi.Router {
+	carryRepository := repository.NewCarryRepositoryDb(db)
+	carryService := service.NewCarryService(carryRepository)
+	carryHandler := handler.NewCarryHandler(carryService)
+
+	router := chi.NewRouter()
+	router.Post("/", carryHandler.Create())
+
 	return router
 }
 

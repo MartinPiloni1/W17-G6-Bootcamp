@@ -10,8 +10,13 @@ type ProductRepository interface {
 	Create(ctx context.Context, product models.ProductAttributes) (models.Product, error)
 	GetAll(ctx context.Context) ([]models.Product, error)
 	GetByID(ctx context.Context, id int) (models.Product, error)
+	GetRecordsPerProduct(ctx context.Context, id *int) ([]models.ProductRecordCount, error)
 	Update(ctx context.Context, id int, product models.Product) (models.Product, error)
 	Delete(ctx context.Context, id int) error
+}
+
+type ProductRecordRepository interface {
+	Create(ctx context.Context, productRecord models.ProductRecordAttributes) (models.ProductRecord, error)
 }
 
 type SellerRepository interface {
@@ -26,6 +31,8 @@ type LocalityRepository interface {
 	Create(locality models.Locality) (models.Locality, error)
 	GetByID(id string) (models.Locality, error)
 	GetSellerReport(id *string) ([]models.SellerReport, error)
+	// GetReportByLocalityId retrieves a report of carries by locality ID.
+	GetReportByLocalityId(localityId string) ([]models.CarryReport, error)
 }
 
 // WarehouseRepository provides methods for warehouse data access.
@@ -64,6 +71,12 @@ type SectionRepository interface {
 	GetByID(ctx context.Context, id int) (models.Section, error)
 	Update(ctx context.Context, id int, data models.Section) (models.Section, error)
 	Delete(ctx context.Context, id int) error
+}
+
+// CarryRepository provides methods for carry data access.
+type CarryRepository interface {
+	// Create creates a new carry.
+	Create(carryAttributes models.CarryAttributes) (models.Carry, error)
 }
 
 type InboundOrderRepository interface {
