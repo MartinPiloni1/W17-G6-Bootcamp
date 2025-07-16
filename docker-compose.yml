@@ -16,7 +16,6 @@ services:
       - ./docs/db/init:/docker-entrypoint-initdb.d
       # - ./docs/db/seed/:/docker-entrypoint-initdb.d/seed
     command: --default-authentication-plugin=mysql_native_password
-    # command: --default-authentication-plugin=mysql_native_password --log-error-verbosity=3
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
