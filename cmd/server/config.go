@@ -87,7 +87,7 @@ func (a *ServerChi) Run() (err error) {
 		r.Mount("/localities", localitiesRouter)
 		r.Mount("/carries", carryRouter)
 		r.Mount("/inboundOrders", inboundOrderRouter)
-		r.Mount("/product-batches", productBatchRouter)
+		r.Mount("/productBatches", productBatchRouter)
 	})
 
 	err = http.ListenAndServe(a.ServerAddr, router)
