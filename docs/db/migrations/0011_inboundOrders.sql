@@ -7,5 +7,5 @@ CREATE TABLE inbound_orders (
         product_batch_id INTEGER NOT NULL,
         FOREIGN KEY (employee_id) REFERENCES employees(id),
         FOREIGN KEY (warehouse_id) REFERENCES warehouses(id),
-        FOREIGN KEY (product_batch_id) REFERENCES product_batch(id)
+        FOREIGN KEY (product_batch_id) REFERENCES product_batches(id)
 );

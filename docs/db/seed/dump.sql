@@ -52,10 +52,12 @@ INSERT IGNORE INTO sections (section_number, current_temperature, minimum_temper
     ('SEC-009', -1.00, -3.00, 5, 0, 10, 3, 1),
     ('SEC-010', 10.00, 8.00, 90, 70, 110, 1, 1);
 
-INSERT INTO product_batch (id) VALUES
-   (1),
-   (2),
-   (3);
+INSERT IGNORE INTO product_batches (batch_number, current_quantity, current_temperature, due_date, initial_quantity, manufacturing_date, manufacturing_hour, minimum_temperature, product_id, section_id) VALUES
+    (111, 500, 4.5, '2025-08-15', 500, '2025-07-15', 8, 2.0, 101, 1),
+    (112, 1000, -18.0, '2026-01-20', 1000, '2025-07-15', 10, -22.0, 102, 2),
+    (113, 300, 5.0, '2025-11-10', 400, '2025-07-14', 14, 3.0, 103, 1),
+    (114, 450, 4.2, '2025-08-22', 500, '2025-07-22', 9, 2.0, 101, 3),
+    (115, 800, -19.5, '2026-02-01', 800, '2025-07-20', 11, -22.0, 102, 2);
 
 INSERT INTO inbound_orders (order_number, order_date, employee_id, warehouse_id, product_batch_id) VALUES
    ('INB-1001', '2024-06-01 09:00:00', 1, 1, 1),
