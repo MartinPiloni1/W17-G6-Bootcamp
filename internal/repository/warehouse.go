@@ -167,7 +167,13 @@ func (p *WarehouseRepositoryDB) Delete(id int) error {
 	query := `DELETE FROM warehouses WHERE id = ?`
 	result, err := p.db.Exec(query, id)
 	if err != nil {
-		return httperrors.InternalServerError{Message: "error deleting warehouse"}
+		var sqlErrors *mysql.MySQLError
+		if errors.As(err, &sqlErrors) {
+			if sqlErrors.Number == 1451 {
+				return httperrors.InternalServerError{Message: "This warehouse cannot be deleted because it is associated with other entities"}
+			}
+			return httperrors.InternalServerError{Message: "error deleting warehouse"}
+		}
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
