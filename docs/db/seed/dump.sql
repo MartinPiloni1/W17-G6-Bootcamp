@@ -5,11 +5,11 @@ VALUES
         ('GHI003', 'Marta', 'Perez', 2),
         ('JKL004', 'Lucia', 'Romero', 2),
         ('MNO005', 'Sergio', 'Castro', 3);
-        
+
 INSERT INTO products (
-    description, 
+    description,
     expiration_rate,
-    freezing_rate, 
+    freezing_rate,
     height,
     length,
     width,
@@ -18,14 +18,14 @@ INSERT INTO products (
     recommended_freezing_temperature,
     product_type_id,
     seller_id
-) 
+)
 VALUES
     ('Pechuga de pollo', 4.50, 0.75, 3.0, 12.0, 8.0, 1.20, 'POL-0001', -18.0, 1, 1),
     ('Salmón', 6.00, 0.60, 2.5, 18.0, 14.0, 0.35, 'SAL-0001', -20.0, 2,  2),
     ('Leche entera', 7.00, 0.90, 25.0, 7.0, 7.0, 1.00, 'LCH-100L',  4.0, 3,   3),
     ('Yogurt helado', 5, 3, 6.4, 4.5, 1.2, 0.5, 'YOG01', -18, 4, 4)
 
-INSERT INTO `buyers` (`card_number_id`, `first_name`, `last_name`) 
+INSERT INTO `buyers` (`card_number_id`, `first_name`, `last_name`)
 VALUES
         (12345678, 'Juan', 'Pérez'),
         (23456789, 'Ana', 'Gómez'),
@@ -70,3 +70,15 @@ INSERT INTO warehouse (warehouse_code, address, telephone, minimun_capacity, min
     ("CBA2", 'Cordoba 5678', '3516000456', '20', '4'),
     ("DHK2", 'Monroe 1234', '47470001', '15', '10'),
     ("CBA3", 'Cordoba 91011', '3516000789', '25', '4');,
+
+INSERT IGNORE INTO sections (section_number, current_temperature, minimum_temperature, current_capacity, minimum_capacity, maximum_capacity, warehouse_id, product_type_id) VALUES
+        ('SEC-001', 5.00, 0.00, 50, 0, 100, 1, 1),
+        ('SEC-002', -18.00, -20.00, 20, 0, 50, 1, 2),
+        ('SEC-003', 20.00, 18.00, 80, 50, 150, 2, 3),
+        ('SEC-004', 8.50, 5.00, 10, 0, 30, 2, 1),
+        ('SEC-005', 1.00, -2.00, 75, 20, 100, 3, 2),
+        ('SEC-006', 22.00, 20.00, 120, 100, 200, 3, 3),
+        ('SEC-007', 0.00, -5.00, 30, 10, 50, 1, 3),
+        ('SEC-008', 15.50, 10.00, 60, 40, 80, 2, 2),
+        ('SEC-009', -1.00, -3.00, 5, 0, 10, 3, 1),
+        ('SEC-010', 10.00, 8.00, 90, 70, 110, 1, 1);

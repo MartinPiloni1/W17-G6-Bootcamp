@@ -61,11 +61,11 @@ type EmployeeService interface {
 }
 
 type SectionService interface {
-	Create(section models.Section) (models.Section, error)
-	GetAll() ([]models.Section, error)
-	GetByID(id int) (models.Section, error)
-	Update(id int, data models.UpdateSectionRequest) (models.Section, error)
-	Delete(id int) error
+	Create(ctx context.Context, section models.Section) (models.Section, error)
+	GetAll(ctx context.Context) ([]models.Section, error)
+	GetByID(ctx context.Context, id int) (models.Section, error)
+	Update(ctx context.Context, id int, data models.UpdateSectionRequest) (models.Section, error)
+	Delete(ctx context.Context, id int) error
 }
 
 // CarryService defines operations for managing carries.
