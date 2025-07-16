@@ -41,7 +41,7 @@ func (p *CarryRepositoryDB) Create(carryAttributes models.CarryAttributes) (mode
 		var sqlErrors *mysql.MySQLError
 		if errors.As(err, &sqlErrors) {
 			if sqlErrors.Number == 1452 {
-				return models.Carry{}, httperrors.NotFoundError{Message: "the LocalityId does not exist"}
+				return models.Carry{}, httperrors.ConflictError{Message: "the LocalityId does not exist"}
 			}
 			if sqlErrors.Number == 1062 {
 				return models.Carry{}, httperrors.ConflictError{Message: "the Cid already exists"}
