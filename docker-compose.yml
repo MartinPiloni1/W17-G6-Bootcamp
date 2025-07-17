@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   mysql:
     image: mysql:8.0
@@ -7,14 +5,14 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpass123      
-      MYSQL_DATABASE: fresh                # no cambiar, el script la crea con fresh
-      MYSQL_USER: ${DB_USER}            
-      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: fresh                # do not change name of the script db name
+      MYSQL_USER: ${DB_USER:-freshuser}          
+      MYSQL_PASSWORD: ${DB_PASS:-freshpass}
     ports:
-      - "3306:3306"
+      - "${DB_PORT:-3306}:3306"
     volumes:
-      - ./docs/db/init:/docker-entrypoint-initdb.d
-      # - ./docs/db/seed/:/docker-entrypoint-initdb.d/seed
+      - ./docs/db/migrations:/docker-entrypoint-initdb.d
+      - ./docs/db/seed/dump.sql:/docker-entrypoint-initdb.d/9999_seed.sql
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
@@ -31,11 +29,11 @@ services:
       mysql:
         condition: service_healthy
     environment:
-      ADDRESS: ${ADDRESS}
-      DB_HOST: mysql      
-      DB_PORT: ${DB_PORT}
-      DB_NAME: fresh      # no cambiar, el script la crea con fresh
-      DB_USER: ${DB_USER}
-      DB_PASS: ${DB_PASS}
+      ADDRESS: ${ADDRESS:-8080}
+      DB_HOST: mysql                    # name of the service in dockerfile
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: fresh                    # do not change name of the script db name
+      DB_USER: ${DB_USER:-freshuser}
+      DB_PASS: ${DB_PASS:-freshpass}
     ports:
-      - "8080:8080"
+      - "${ADDRESS:-8080}:8080"

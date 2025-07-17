@@ -18,21 +18,19 @@ type ServerChi struct {
 	DatabaseConfig mysql.Config
 }
 
-func LoadServerConf(withEnvFile bool) (*ServerChi, error) {
-
-	if withEnvFile {
-
-		err := godotenv.Load()
-		if err != nil {
-			return nil, fmt.Errorf("failed to load env file: %w", err)
-		}
+func LoadServerConf() (*ServerChi, error) {
+	// load env file but can be preloaded in the terminal
+	err := godotenv.Load()
+	if err != nil {
+		// just print the error but continue with the execution with docker
+		fmt.Println("failed to load env file:", err, " .Assuming preload of env already done")
 	}
 
 	// default values
 	serverAddr := os.Getenv("ADDRESS")
 
 	if serverAddr == "" {
-		serverAddr = ":8080"
+		serverAddr = "8080"
 	}
 
 	Host := os.Getenv("DB_HOST")
@@ -47,6 +45,7 @@ func LoadServerConf(withEnvFile bool) (*ServerChi, error) {
 		return nil, fmt.Errorf("DB conn settings not established")
 	}
 	dbConfig := storage.NewMySQLConfig(Host, Port, User, Pass, Name)
+	serverAddr = ":" + serverAddr // add two point to the address
 
 	return &ServerChi{
 		ServerAddr:     serverAddr,
