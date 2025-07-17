@@ -18,14 +18,12 @@ type ServerChi struct {
 	DatabaseConfig mysql.Config
 }
 
-func LoadServerConf(withEnvFile bool) (*ServerChi, error) {
-
-	if withEnvFile {
-
-		err := godotenv.Load()
-		if err != nil {
-			return nil, fmt.Errorf("failed to load env file: %w", err)
-		}
+func LoadServerConf() (*ServerChi, error) {
+	// load env file but can be preloaded in the terminal
+	err := godotenv.Load()
+	if err != nil {
+		// just print the error but continue with the execution with docker
+		fmt.Println("failed to load env file:", err, " .Assuming preload of env already done")
 	}
 
 	// default values

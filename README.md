@@ -29,7 +29,7 @@
 
 using the local mysql (not in docker) user host and password
 
-you can populate the .env file as you need
+you need to export these env variables to your terminal or create a .env file like this
 
 ```
 ADDRESS
@@ -39,7 +39,7 @@ DB_NAME=fresh  # must be this name for the migration scripts
 DB_USER
 DB_PASS
 ```
-dbName cant change because how the migration is implemented
+dbName cannot be changed, because how the migration is implemented
 
 install dependencies
 `go mod tidy`
@@ -54,14 +54,15 @@ then insert regiters to the table
 ### Use in docker-compose
 
 with docker and docker-compose, that reads a `.env` file or the root of the project with this structure
+if not provided it will asume the default values in the compose 
 
 ```
-ADDRESS=8080
-DB_PORT=3306
-DB_USER=freshuser # can be changed
-DB_PASS=freshpass # can be changed
+ADDRESS
+DB_PORT
+DB_USER
+DB_PASS
 ```
 
 run the project with
 
-`docker-compose up --build`
+`docker-compose up --build -d`
