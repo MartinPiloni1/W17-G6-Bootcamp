@@ -73,6 +73,8 @@ func (a *ServerChi) Run() (err error) {
 	carryRouter := application.CarryRouter(freshDB)
 	localitiesRouter := application.LocalityRouter(freshDB)
 	purchaseOrderRouter := application.PurchaseOrderRouter(freshDB)
+	inboundOrderRouter := application.InboundOrderRouter(freshDB)
+	productBatchRouter := application.ProductBatchRouter(freshDB)
 
 	router.Mount("/healthcheck", healthRouter)
 	router.Route("/api/v1", func(r chi.Router) {
@@ -86,6 +88,8 @@ func (a *ServerChi) Run() (err error) {
 		r.Mount("/localities", localitiesRouter)
 		r.Mount("/carries", carryRouter)
 		r.Mount("/purchaseOrders", purchaseOrderRouter)
+		r.Mount("/inboundOrders", inboundOrderRouter)
+		r.Mount("/productBatches", productBatchRouter)
 	})
 
 	err = http.ListenAndServe(a.ServerAddr, router)
