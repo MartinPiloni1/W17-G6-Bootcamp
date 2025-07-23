@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	config "github.com/aaguero_meli/W17-G6-Bootcamp/cmd/db"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+
+	config "github.com/aaguero_meli/W17-G6-Bootcamp/cmd/db"
 )
 
 func main() {
@@ -42,7 +42,7 @@ func main() {
 	}
 	rows.Close()
 
-	files, err := ioutil.ReadDir(migrationsDir)
+	files, err := os.ReadDir(migrationsDir)
 	if err != nil {
 		log.Fatalf("Could not read the migrations directory: %v", err)
 	}

@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	config "github.com/aaguero_meli/W17-G6-Bootcamp/cmd/db"
-	"io/ioutil"
 	"log"
+	"os"
+
+	config "github.com/aaguero_meli/W17-G6-Bootcamp/cmd/db"
 )
 
 func main() {
@@ -12,7 +13,7 @@ func main() {
 	defer db.Close()
 
 	dumpPath := "docs/db/seed/dump.sql"
-	data, err := ioutil.ReadFile(dumpPath)
+	data, err := os.ReadFile(dumpPath)
 	if err != nil {
 		log.Fatalf("Could not read the dump: %v", err)
 	}
