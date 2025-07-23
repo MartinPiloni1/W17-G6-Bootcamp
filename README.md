@@ -50,11 +50,14 @@ then create the tables
 then insert regiters to the table
 `go run cmd/seed/main.go`
 
+finally run the api
+`go run cmd/main.go`
+
 
 ### Use in docker-compose
 
-with docker and docker-compose, that reads a `.env` file or the root of the project with this structure
-if not provided it will asume the default values in the compose 
+with docker and docker-compose, that reads a `.env` file on the root of the project with this structure
+
 
 ```
 ADDRESS
@@ -62,7 +65,22 @@ DB_PORT
 DB_USER
 DB_PASS
 ```
+if not provided it will asume the default values in the compose
 
-run the project with
+then run the project with
 
 `docker-compose up --build -d`
+
+
+## Run test
+
+Run the next command on the root of the project to run all the test or you can do it package by package
+
+`go test -cover ./...`
+
+remove `-cover` if you dont want the coverage
+
+
+## Linter 
+
+Needs the staticcheck installed to run the linter

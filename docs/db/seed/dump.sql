@@ -1,3 +1,5 @@
+SET NAMES utf8mb4;
+
 INSERT IGNORE INTO warehouses (warehouse_code, address, telephone, minimun_capacity, minimun_temperature) VALUES
     ("DHK", 'Monroe 860', '47470000', '10', '10'),
     ("CBA", 'Cordoba 1234', '3516000123', '25', '4'),

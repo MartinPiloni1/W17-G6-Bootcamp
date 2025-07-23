@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/go-sql-driver/mysql"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func NewMySQLConfig(host, port, user, pass, dbname string) mysql.Config {
@@ -18,6 +17,7 @@ func NewMySQLConfig(host, port, user, pass, dbname string) mysql.Config {
 		ParseTime:            true,
 		AllowNativePasswords: true,
 		MultiStatements:      true,
+		Params:               map[string]string{"charset": "utf8mb4"},
 	}
 }
 

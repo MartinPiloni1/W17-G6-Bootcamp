@@ -53,13 +53,13 @@ func LoadServerConf() (*ServerChi, error) {
 	}, nil
 }
 
-func (a *ServerChi) Run() (err error) {
+func (a *ServerChi) SetUp() (chi.Router, error) {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger) // logger
 
 	freshDB, err := storage.InitMySQLConnection(a.DatabaseConfig)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	healthRouter := application.HealthRouter()
@@ -91,7 +91,10 @@ func (a *ServerChi) Run() (err error) {
 		r.Mount("/inboundOrders", inboundOrderRouter)
 		r.Mount("/productBatches", productBatchRouter)
 	})
+	return router, nil
+}
 
+func (a *ServerChi) Run(router chi.Router) (err error) {
 	err = http.ListenAndServe(a.ServerAddr, router)
 	return
 }
