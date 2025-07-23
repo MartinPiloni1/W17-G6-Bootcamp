@@ -79,3 +79,8 @@ Run the next command on the root of the project to run all the test or you can d
 `go test -cover ./...`
 
 remove `-cover` if you dont want the coverage
+
+
+## Linter 
+
+Needs the staticcheck installed to run the linter

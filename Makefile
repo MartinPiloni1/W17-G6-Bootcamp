@@ -1,25 +1,25 @@
-.PHONY: tests coverage coverage-html coverage-total linter clean migrate seed tidy run
+.PHONY: test coverage coverage-html coverage-total linter clean migrate seed tidy run
 
-# This command will run the tests for the project
-tests:
-	go test -v ./...
+PKGS := $(shell go list ./... | grep -vE '/test')
+
+# This command will run the test for the project
+test:
+	go test -v $(PKGS)
 
 # This command will generate a coverage report for the project
 coverage:
-	go test -cover -coverprofile=coverage.out ./...
+	go test -cover -coverprofile=coverage.out $(PKGS)
 
 # This command will display the coverage report in an HTML file
 coverage-html: coverage
 	go tool cover -html="coverage.out"
-	rm -f coverage.out
 
 # This command will display the coverage report in the terminal
 coverage-total: coverage
-	go tool cover -func="coverage.out"
+	go tool cover -func=coverage.out | grep total | awk '{print "total coverage: " $$3}'
 
 # This command will run the linter for the project
 linter:
-	go install honnef.co/go/tools/cmd/staticcheck@latest
 	staticcheck ./...
 
 # Remove test files
@@ -28,6 +28,7 @@ clean:
 
 # Creates database 
 migrate:
+
 	go run cmd/migrate/main.go
 
 # Populates the database tables
