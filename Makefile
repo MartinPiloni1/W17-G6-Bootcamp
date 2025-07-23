@@ -25,5 +25,22 @@ linter:
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	staticcheck ./...
 
+# Remove test files
 .PHONY: clean
 	rm -f coverage.out
+
+# Creates database 
+.PHONY: migrate
+	go run cmd/migrate/main.go
+
+# Populates the database tables
+.PHONY: seed
+	go run cmd/seed/main.go
+
+# Install dependencies
+.PHONY: tidy
+	go mod tidy
+
+# Run the api
+.PHONY: run
+	go run cmd/main.go
