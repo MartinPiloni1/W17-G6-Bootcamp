@@ -15,7 +15,8 @@ func HealthRouter() chi.Router {
 	//mount the endpoints and return to mount them in the Run()
 	router := chi.NewRouter()
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World!"))
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
 	})
 
 	return router

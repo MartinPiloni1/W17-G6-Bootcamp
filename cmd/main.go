@@ -14,8 +14,14 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
+	// set up globalRouter and api config
+	globalRouter, err := app.SetUp()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	// - run
-	if err := app.Run(); err != nil {
+	if err := app.Run(globalRouter); err != nil {
 		log.Fatal(err.Error())
 		return
 	}
