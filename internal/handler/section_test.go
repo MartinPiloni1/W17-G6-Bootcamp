@@ -358,3 +358,124 @@ func TestSectionHandler_Delete(t *testing.T) {
 		})
 	}
 }
+
+// Helper to create a pointer to a string.
+func stringPtr(s string) *string {
+	return &s
+}
+
+// Helper to create a pointer to an int.
+func intPtr(i int) *int {
+	return &i
+}
+
+func TestSectionHandler_Update(t *testing.T) {
+	// Data for the request body
+	updateRequest := models.UpdateSectionRequest{
+		// Use the helper function to get a pointer
+		SectionNumber:   stringPtr("SEC-102"),
+		CurrentCapacity: intPtr(75),
+	}
+
+	// Expected service response on success
+	updatedSectionResponse := models.Section{
+		ID:                 1,
+		SectionNumber:      "SEC-102",
+		CurrentTemperature: 20,
+		MinimumTemperature: 15,
+		CurrentCapacity:    75,
+		MinimumCapacity:    10,
+		MaximumCapacity:    100,
+		WarehouseID:        1,
+		ProductTypeID:      1,
+	}
+
+	tests := []struct {
+		testName      string
+		inputID       int
+		requestURL    string
+		requestBody   string
+		serviceInput  models.UpdateSectionRequest
+		serviceOutput models.Section
+		serviceError  error
+		expectedCode  int
+		expectedBody  string
+	}{
+		{
+			testName:     "Success: Update Section",
+			inputID:      1,
+			requestURL:   "/api/v1/sections/1",
+			requestBody:  `{"section_number": "SEC-102", "current_capacity": 75}`,
+			serviceInput: updateRequest,
+			serviceOutput:updatedSectionResponse,
+			serviceError: nil,
+			expectedCode: http.StatusOK,
+			expectedBody: `{"data": {"id": 1, "section_number": "SEC-102", "current_temperature": 20, "minimum_temperature": 15, "current_capacity": 75, "minimum_capacity": 10, "maximum_capacity": 100, "warehouse_id": 1, "product_type_id": 1}}`,
+		},
+		{
+			testName:     "Fail: Section not found",
+			inputID:      99,
+			requestURL:   "/api/v1/sections/99",
+			requestBody:  `{"section_number": "SEC-102"}`,
+			serviceInput: models.UpdateSectionRequest{SectionNumber: stringPtr("SEC-102")},
+			serviceError: httperrors.NotFoundError{Message: "Section not found"},
+			expectedCode: http.StatusNotFound,
+			expectedBody: `{"status": "Not Found", "message": "Section not found"}`,
+		},
+		{
+			testName:     "Fail: Invalid ID",
+			inputID:      0,
+			requestURL:   "/api/v1/sections/abc",
+			serviceError: nil,
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status": "Bad Request", "message": "Invalid ID"}`,
+		},
+		{
+			testName:     "Fail: Invalid JSON",
+			inputID:      1,
+			requestURL:   "/api/v1/sections/1",
+			requestBody:  `{"section_number": "SEC-102", "current_capacity": "75"}`,
+			serviceInput: models.UpdateSectionRequest{SectionNumber: stringPtr("SEC-102"), CurrentCapacity: intPtr(75)},
+			serviceError: nil,
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status": "Bad Request", "message": "Invalid body"}`,
+		},
+        {
+            testName:     "Fail: Unprocessable entity",
+            inputID:      1,
+            requestURL:   "/api/v1/sections/1",
+            requestBody:  `{"current_capacity": -5}`,
+            serviceInput: models.UpdateSectionRequest{}, 
+            serviceError: nil,
+            expectedCode: http.StatusUnprocessableEntity,
+            expectedBody: `{"status": "Unprocessable Entity", "message": "Invalid JSON body"}`,
+        },
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			mockService := new(mock.SectionServiceMock)
+
+			if tt.expectedCode == http.StatusOK || tt.expectedCode == http.StatusNotFound {
+				mockService.On("Update", testifyMock.Anything, tt.inputID, tt.serviceInput).Return(tt.serviceOutput, tt.serviceError)
+			}
+
+			handler := NewSectionHandler(mockService)
+			router := chi.NewRouter()
+			router.Patch("/api/v1/sections/{id}", handler.Update())
+
+			req := httptest.NewRequest(http.MethodPatch, tt.requestURL, bytes.NewBufferString(tt.requestBody))
+			req.Header.Set("Content-Type", "application/json")
+
+			response := httptest.NewRecorder()
+			router.ServeHTTP(response, req)
+
+			assert.Equal(t, tt.expectedCode, response.Code)
+			if tt.expectedBody != "" {
+				assert.JSONEq(t, tt.expectedBody, response.Body.String())
+			}
+
+			mockService.AssertExpectations(t)
+		})
+	}
+}
