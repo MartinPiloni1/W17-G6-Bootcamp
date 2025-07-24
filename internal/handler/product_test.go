@@ -3,8 +3,10 @@ package handler_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -371,6 +373,7 @@ func TestProductHandler_GetById(t *testing.T) {
 		testName     string
 		serviceData  models.Product
 		serviceError error
+		idParam      int
 		expectedCode int
 		expectedBody string
 	}{
@@ -378,6 +381,7 @@ func TestProductHandler_GetById(t *testing.T) {
 			testName:     "Success: Get product with ID 1",
 			serviceData:  product,
 			serviceError: nil,
+			idParam:      1,
 			expectedCode: http.StatusOK,
 			expectedBody: `
 			{
@@ -401,6 +405,7 @@ func TestProductHandler_GetById(t *testing.T) {
 			testName:     "Fail: Not found when giving a non existant ID",
 			serviceData:  models.Product{},
 			serviceError: httperrors.NotFoundError{Message: "Product not found"},
+			idParam:      10000,
 			expectedCode: http.StatusNotFound,
 			expectedBody: `
 				{
@@ -410,9 +415,23 @@ func TestProductHandler_GetById(t *testing.T) {
 			`,
 		},
 		{
+			testName:     "Fail: Bad request when giving an invalid ID",
+			serviceData:  models.Product{},
+			serviceError: httperrors.NotFoundError{Message: "Invalid ID"},
+			idParam:      -1,
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `
+				{
+					"status": "Bad Request",
+					"message": "Invalid ID"
+				}
+			`,
+		},
+		{
 			testName:     "Fail: Internal server error after a DB Error",
 			serviceData:  models.Product{},
 			serviceError: errors.New("db error"),
+			idParam:      1,
 			expectedCode: http.StatusInternalServerError,
 			expectedBody: `
 				{
@@ -429,12 +448,13 @@ func TestProductHandler_GetById(t *testing.T) {
 
 			// Arrange
 			serviceMock := &mocks.ProductServiceMock{}
-			serviceMock.On("GetByID", mock.Anything, 1).Return(tc.serviceData, tc.serviceError)
+			serviceMock.On("GetByID", mock.Anything, tc.idParam).Return(tc.serviceData, tc.serviceError)
 			handler := handler.NewProductHandler(serviceMock)
 
-			request := httptest.NewRequest(http.MethodGet, "/api/v1/products/1", nil)
+			url := fmt.Sprintf("/api/v1/products/%d", tc.idParam)
+			request := httptest.NewRequest(http.MethodGet, url, nil)
 			routeCtx := chi.NewRouteContext()
-			routeCtx.URLParams.Add("id", "1")
+			routeCtx.URLParams.Add("id", strconv.Itoa(tc.idParam))
 			request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, routeCtx))
 
 			response := httptest.NewRecorder()
