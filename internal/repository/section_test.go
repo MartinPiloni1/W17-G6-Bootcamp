@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"regexp"
 	"testing"
@@ -436,6 +437,78 @@ func TestSectionRepository_GetByID(t *testing.T) {
 			tt.mockSetup(mock)
 
 			result, err := repo.GetByID(context.Background(), inputID)
+
+			assert.Equal(t, tt.expectedError, err)
+			assert.Equal(t, tt.expectedResp, result)
+
+			err = mock.ExpectationsWereMet()
+			assert.NoError(t, err)
+		})
+	}
+}
+
+func TestSectionRepository_GetProductsReport(t *testing.T) {
+	inputID := 1
+	expectedQuery := regexp.QuoteMeta(`
+        SELECT s.id, s.section_number, COUNT(pb.id) as products_count
+        FROM sections s
+        LEFT JOIN product_batches pb ON s.id = pb.section_id
+        WHERE s.id = ?
+        GROUP BY s.id, s.section_number;
+    `)
+
+	columns := []string{"id", "section_number", "products_count"}
+
+	expectedReport := models.SectionProductsReport{
+		SectionID:     1,
+		SectionNumber: "SEC-101",
+		ProductsCount: 50,
+	}
+
+	tests := []struct {
+		testName      string
+		mockSetup     func(mock sqlmock.Sqlmock)
+		expectedResp  models.SectionProductsReport
+		expectedError error
+	}{
+		{
+			testName: "Success: Should return a product report by section ID",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				rows := sqlmock.NewRows(columns).
+					AddRow(expectedReport.SectionID, expectedReport.SectionNumber, expectedReport.ProductsCount)
+				mock.ExpectQuery(expectedQuery).WithArgs(inputID).WillReturnRows(rows)
+			},
+			expectedResp:  expectedReport,
+			expectedError: nil,
+		},
+		{
+			testName: "Fail: Section not found",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(expectedQuery).WithArgs(inputID).WillReturnError(sql.ErrNoRows)
+			},
+			expectedResp:  models.SectionProductsReport{},
+			expectedError: httperrors.NotFoundError{Message: "Section not found"},
+		},
+		{
+			testName: "Fail: Should return internal server error on scan error",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(expectedQuery).WithArgs(inputID).WillReturnError(errors.New("any other scan error"))
+			},
+			expectedResp:  models.SectionProductsReport{},
+			expectedError: httperrors.InternalServerError{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			assert.NoError(t, err)
+			defer db.Close()
+
+			repo := NewSectionRepositoryDB(db)
+			tt.mockSetup(mock)
+
+			result, err := repo.GetProductsReport(context.Background(), inputID)
 
 			assert.Equal(t, tt.expectedError, err)
 			assert.Equal(t, tt.expectedResp, result)
