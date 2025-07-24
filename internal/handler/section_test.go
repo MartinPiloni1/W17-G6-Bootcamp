@@ -206,3 +206,89 @@ func TestSectionHandler_GetAll(t *testing.T) {
 		})
 	}
 }
+
+
+func TestSectionHandler_GetByID(t *testing.T) {
+	sectionResponse := models.Section{
+		ID:                 1,
+		SectionNumber:      "SEC-101",
+		CurrentTemperature: 20,
+		MinimumTemperature: 15,
+		CurrentCapacity:    50,
+		MinimumCapacity:    10,
+		MaximumCapacity:    100,
+		WarehouseID:        1,
+		ProductTypeID:      1,
+	}
+
+	tests := []struct {
+		testName      string
+		inputID       int    // ID que espera el mock
+		requestURL    string // URL para la petición
+		serviceOutput models.Section
+		serviceError  error
+		expectedCode  int
+		expectedBody  string
+	}{
+		{
+			testName:      "Success: Get Section by ID",
+			inputID:       1,
+			requestURL:    "/api/v1/sections/1",
+			serviceOutput: sectionResponse,
+			serviceError:  nil,
+			expectedCode:  http.StatusOK,
+			expectedBody: `{
+                "data": {
+                    "id": 1, "section_number": "SEC-101", "current_temperature": 20, "minimum_temperature": 15,
+                    "current_capacity": 50, "minimum_capacity": 10, "maximum_capacity": 100,
+                    "warehouse_id": 1, "product_type_id": 1
+                }
+            }`,
+		},
+		{
+			testName:      "Fail: Invalid ID",
+			inputID:       0,
+			requestURL:    "/api/v1/sections/abc",
+			serviceOutput: models.Section{},
+			serviceError:  nil,
+			expectedCode:  http.StatusBadRequest,
+			expectedBody:  `{"status": "Bad Request", "message": "Invalid ID"}`,
+		},
+		{
+			testName:      "Fail: Section not found",
+			inputID:       99,
+			requestURL:    "/api/v1/sections/99",
+			serviceOutput: models.Section{},
+			serviceError:  httperrors.NotFoundError{Message: "Section not found"},
+			expectedCode:  http.StatusNotFound,
+			expectedBody:  `{"status": "Not Found", "message": "Section not found"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			mockService := new(mock.SectionServiceMock)
+
+			if tt.expectedCode == http.StatusOK || tt.expectedCode == http.StatusNotFound {
+				mockService.On("GetByID", testifyMock.Anything, tt.inputID).Return(tt.serviceOutput, tt.serviceError)
+			}
+
+			handler := NewSectionHandler(mockService)
+			router := chi.NewRouter()
+			router.Get("/api/v1/sections/{id}", handler.GetByID())
+
+			req := httptest.NewRequest(http.MethodGet, tt.requestURL, nil)
+			req.Header.Set("Content-Type", "application/json")
+
+			response := httptest.NewRecorder()
+			router.ServeHTTP(response, req)
+
+			assert.Equal(t, tt.expectedCode, response.Code)
+			if tt.expectedBody != "" {
+				assert.JSONEq(t, tt.expectedBody, response.Body.String())
+			}
+
+			mockService.AssertExpectations(t)
+		})
+	}
+}
