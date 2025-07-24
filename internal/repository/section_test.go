@@ -518,3 +518,87 @@ func TestSectionRepository_GetProductsReport(t *testing.T) {
 		})
 	}
 }
+
+func TestSectionRepository_GetAllProductsReport(t *testing.T) {
+	expectedQuery := regexp.QuoteMeta(`
+        SELECT s.id, s.section_number, COUNT(pb.id) as products_count
+        FROM sections s
+        LEFT JOIN product_batches pb ON s.id = pb.section_id
+        GROUP BY s.id, s.section_number;
+    `)
+
+	columns := []string{"id", "section_number", "products_count"}
+
+	expectedReports := []models.SectionProductsReport{
+		{SectionID: 1, SectionNumber: "SEC-101", ProductsCount: 50},
+		{SectionID: 2, SectionNumber: "SEC-102", ProductsCount: 75},
+	}
+
+	tests := []struct {
+		testName      string
+		mockSetup     func(mock sqlmock.Sqlmock)
+		expectedResp  []models.SectionProductsReport
+		expectedError error
+	}{
+		{
+			testName: "Success: Should return all product reports",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				rows := sqlmock.NewRows(columns).
+					AddRow(expectedReports[0].SectionID, expectedReports[0].SectionNumber, expectedReports[0].ProductsCount).
+					AddRow(expectedReports[1].SectionID, expectedReports[1].SectionNumber, expectedReports[1].ProductsCount)
+				mock.ExpectQuery(expectedQuery).WillReturnRows(rows)
+			},
+			expectedResp:  expectedReports,
+			expectedError: nil,
+		},
+		{
+			testName: "Fail: Should return internal server error on query error",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(expectedQuery).WillReturnError(errors.New("db query error"))
+			},
+			expectedResp:  nil,
+			expectedError: httperrors.InternalServerError{},
+		},
+		{
+			testName: "Fail: Should return internal server error on scan error",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				rows := sqlmock.NewRows(columns).AddRow("invalid_id", "SEC-101", 50)
+				mock.ExpectQuery(expectedQuery).WillReturnRows(rows)
+			},
+			expectedResp:  nil,
+			expectedError: httperrors.InternalServerError{},
+		},
+        {
+            testName: "Fail: Should return internal server error on rows error",
+            mockSetup: func(mock sqlmock.Sqlmock) {
+                rows := sqlmock.NewRows(columns).
+                    AddRow(expectedReports[0].SectionID, expectedReports[0].SectionNumber, expectedReports[0].ProductsCount)
+                
+                rows.CloseError(errors.New("rows iteration error"))
+                
+                mock.ExpectQuery(expectedQuery).WillReturnRows(rows)
+            },
+            expectedResp:  nil,
+            expectedError: httperrors.InternalServerError{},
+        },
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			assert.NoError(t, err)
+			defer db.Close()
+
+			repo := NewSectionRepositoryDB(db)
+			tt.mockSetup(mock)
+
+			result, err := repo.GetAllProductsReport(context.Background())
+
+			assert.Equal(t, tt.expectedError, err)
+			assert.Equal(t, tt.expectedResp, result)
+
+			err = mock.ExpectationsWereMet()
+			assert.NoError(t, err)
+		})
+	}
+}
