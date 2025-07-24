@@ -90,8 +90,6 @@ func (service *SectionServiceDefault) applyChanges(sectionToUpdate *models.Secti
 	if patchData.ProductTypeID != nil {
 		sectionToUpdate.ProductTypeID = *patchData.ProductTypeID
 	}
-
-	return
 }
 
 // GetProductsReport calls the repository to get a single section report.

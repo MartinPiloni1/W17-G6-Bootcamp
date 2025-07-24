@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/mock/repository"
@@ -11,7 +12,7 @@ import (
 	testifyMock "github.com/stretchr/testify/mock"
 )
 
-// Helper para crear un puntero a un string.
+// Helper to create a string pointer
 func stringPtr(s string) *string {
 	return &s
 }
@@ -21,7 +22,7 @@ func intPtr(i int) *int {
 	return &i
 }
 
-
+// TestSectionService_Update tests the Update method of SectionService
 func TestSectionService_Update(t *testing.T) {
 	// Arrange: Preparamos los datos de prueba.
 
@@ -142,6 +143,135 @@ func TestSectionService_Update(t *testing.T) {
 	}
 }
 
+// Helper to create a float64 pointer
 func float64Ptr(f float64) *float64 {
 	return &f
+}
+
+// TestSectionService_GetAll tests the GetAll method of SectionService
+func TestSectionService_GetAll(t *testing.T) {
+	// Arrange
+	expectedSections := []models.Section{
+		{ID: 1, SectionNumber: "SEC-101"},
+		{ID: 2, SectionNumber: "SEC-102"},
+	}
+	expectedError := errors.New("database error")
+
+	tests := []struct {
+		testName      string
+		mockResp      []models.Section
+		mockErr       error
+		expectedResp  []models.Section
+		expectedError error
+	}{
+		{
+			testName:      "Success: should return all sections",
+			mockResp:      expectedSections,
+			mockErr:       nil,
+			expectedResp:  expectedSections,
+			expectedError: nil,
+		},
+		{
+			testName:      "Fail: should return an error",
+			mockResp:      nil,
+			mockErr:       expectedError,
+			expectedResp:  []models.Section{},
+			expectedError: expectedError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			mockRepo := new(mock.SectionRepositoryDBMock)
+			service := NewSectionServiceDefault(mockRepo)
+
+			mockRepo.On("GetAll", testifyMock.Anything).Return(tt.mockResp, tt.mockErr)
+
+			// Act
+			result, err := service.GetAll(context.Background())
+
+			// Assert
+			assert.Equal(t, tt.expectedError, err)
+			assert.Equal(t, tt.expectedResp, result)
+			mockRepo.AssertExpectations(t)
+		})
+	}
+}
+
+// TestSectionService_GetByID tests the GetByID method of SectionService
+func TestSectionService_GetByID(t *testing.T) {
+	expectedSection := models.Section{ID: 1, SectionNumber: "SEC-101"}
+	inputID := 1
+	mockRepo := new(mock.SectionRepositoryDBMock)
+	service := NewSectionServiceDefault(mockRepo)
+
+	mockRepo.On("GetByID", testifyMock.Anything, inputID).Return(expectedSection, nil)
+
+	result, err := service.GetByID(context.Background(), inputID)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedSection, result)
+	mockRepo.AssertExpectations(t)
+}
+
+// TestSectionService_Delete tests the Delete method of SectionService
+func TestSectionService_Delete(t *testing.T) {
+	inputID := 1
+	mockRepo := new(mock.SectionRepositoryDBMock)
+	service := NewSectionServiceDefault(mockRepo)
+
+	mockRepo.On("Delete", testifyMock.Anything, inputID).Return(nil)
+
+	err := service.Delete(context.Background(), inputID)
+
+	assert.NoError(t, err)
+	mockRepo.AssertExpectations(t)
+}
+
+// TestSectionService_Create tests the Create method of SectionService
+func TestSectionService_Create(t *testing.T) {
+	sectionToCreate := models.Section{SectionNumber: "SEC-NEW"}
+	expectedSection := models.Section{ID: 1, SectionNumber: "SEC-NEW"}
+	mockRepo := new(mock.SectionRepositoryDBMock)
+	service := NewSectionServiceDefault(mockRepo)
+	mockRepo.On("Create", testifyMock.Anything, sectionToCreate).Return(expectedSection, nil)
+
+	result, err := service.Create(context.Background(), sectionToCreate)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedSection, result)
+	mockRepo.AssertExpectations(t)
+}
+
+// TestSectionService_GetProductsReport tests the GetProductsReport method of SectionService
+func TestSectionService_GetProductsReport(t *testing.T) {
+	expectedReport := models.SectionProductsReport{SectionID: 1, ProductsCount: 10}
+	inputID := 1
+	mockRepo := new(mock.SectionRepositoryDBMock)
+	service := NewSectionServiceDefault(mockRepo)
+	mockRepo.On("GetProductsReport", testifyMock.Anything, inputID).Return(expectedReport, nil)
+
+	result, err := service.GetProductsReport(context.Background(), inputID)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedReport, result)
+	mockRepo.AssertExpectations(t)
+}
+
+// TestSectionService_GetAllProductsReport tests the GetAllProductsReport method of SectionService
+func TestSectionService_GetAllProductsReport(t *testing.T) {
+	expectedReports := []models.SectionProductsReport{
+		{SectionID: 1, ProductsCount: 10},
+		{SectionID: 2, ProductsCount: 20},
+	}
+	mockRepo := new(mock.SectionRepositoryDBMock)
+	service := NewSectionServiceDefault(mockRepo)
+
+	mockRepo.On("GetAllProductsReport", testifyMock.Anything).Return(expectedReports, nil)
+
+	result, err := service.GetAllProductsReport(context.Background())
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedReports, result)
+	mockRepo.AssertExpectations(t)
 }
