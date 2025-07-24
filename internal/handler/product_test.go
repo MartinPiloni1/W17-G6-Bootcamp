@@ -539,6 +539,35 @@ func TestProductHandler_Update(t *testing.T) {
 		"netweight": 10.0
 	}`
 
+	payloadWithUnkownFields := `{
+		"description": "Pechuga de pollo",
+		"anUnkownField": 1,
+		"expiration_rate": 6,
+		"freezing_rate": 3,
+		"height": 11.5,
+		"length": 22.0,
+		"width": 13.0,
+		"netweight": 10.0,
+		"product_code": "POL01",
+		"recommended_freezing_temperature": -3.0,
+		"product_type_id": 2,
+		"seller_id": 2
+	}`
+
+	payloadWithInvalidField := `{
+		"description": "Pechuga de pollo",
+		"expiration_rate": -1,
+		"freezing_rate": -3,
+		"height": -11.5,
+		"length": -22.0,
+		"width": -13.0,
+		"netweight": 10.0,
+		"product_code": "POL01",
+		"recommended_freezing_temperature": -3.0,
+		"product_type_id": 2,
+		"seller_id": -2
+	}`
+
 	tests := []struct {
 		testName          string
 		serviceData       models.Product
@@ -610,10 +639,10 @@ func TestProductHandler_Update(t *testing.T) {
 			productAttributes: productAttributes,
 			expectedCode:      http.StatusNotFound,
 			expectedBody: `
-				{
-					"status": "Not Found",
-					"message": "Product not found"
-				}
+			{
+				"status": "Not Found",
+				"message": "Product not found"
+			}
 			`,
 		},
 		{
@@ -625,10 +654,40 @@ func TestProductHandler_Update(t *testing.T) {
 			productAttributes: productAttributes,
 			expectedCode:      http.StatusBadRequest,
 			expectedBody: `
-				{
-					"status": "Bad Request",
-					"message": "Invalid ID"
-				}
+			{
+				"status": "Bad Request",
+				"message": "Invalid ID"
+			}
+			`,
+		},
+		{
+			testName:          "Fail: Bad request when body contains unknown fields",
+			serviceData:       models.Product{},
+			serviceError:      httperrors.BadRequestError{Message: "Invalid JSON body"},
+			payload:           payloadWithUnkownFields,
+			idParam:           1,
+			productAttributes: productAttributes,
+			expectedCode:      http.StatusBadRequest,
+			expectedBody: `
+			{
+				"status": "Bad Request",
+				"message": "Invalid JSON body"
+			}
+			`,
+		},
+		{
+			testName:          "Fail: Bad request when body contains an invalid value in some field",
+			serviceData:       models.Product{},
+			serviceError:      httperrors.UnprocessableEntityError{Message: "Invalid JSON body"},
+			payload:           payloadWithInvalidField,
+			idParam:           1,
+			productAttributes: productAttributes,
+			expectedCode:      http.StatusUnprocessableEntity,
+			expectedBody: `
+			{
+				"status": "Unprocessable Entity",
+				"message": "Invalid JSON body"
+			}
 			`,
 		},
 		{
@@ -640,10 +699,10 @@ func TestProductHandler_Update(t *testing.T) {
 			productAttributes: productAttributes,
 			expectedCode:      http.StatusInternalServerError,
 			expectedBody: `
-				{
-					"status": "Internal Server Error",
-					"message": "Internal Server Error"
-				}
+			{
+				"status": "Internal Server Error",
+				"message": "Internal Server Error"
+			}
 			`,
 		},
 	}
