@@ -350,7 +350,6 @@ func TestProductHandler_GetAll(t *testing.T) {
 }
 
 func TestProductHandler_GetById(t *testing.T) {
-	// TODO: Add invalid ID Test
 	// TODO: Generate random products with values in a valid range
 	product := models.Product{
 		ID: 1,
@@ -465,6 +464,88 @@ func TestProductHandler_GetById(t *testing.T) {
 			// Assert
 			require.Equal(t, tc.expectedCode, response.Code)
 			require.JSONEq(t, tc.expectedBody, response.Body.String())
+		})
+	}
+}
+
+func TestProductHandler_Delete(t *testing.T) {
+	tests := []struct {
+		testName     string
+		serviceError error
+		idParam      int
+		expectedCode int
+		expectedBody string
+	}{
+		{
+			testName:     "Success: Delete product with ID 1",
+			serviceError: nil,
+			idParam:      1,
+			expectedCode: http.StatusNoContent,
+			expectedBody: "null",
+		},
+		{
+			testName:     "Fail: Not found when giving a non existant ID",
+			serviceError: httperrors.NotFoundError{Message: "Product not found"},
+			idParam:      10000,
+			expectedCode: http.StatusNotFound,
+			expectedBody: `
+				{
+					"status": "Not Found",
+					"message": "Product not found"
+				}
+			`,
+		},
+		{
+			testName:     "Fail: Bad request when giving an invalid ID",
+			serviceError: httperrors.NotFoundError{Message: "Invalid ID"},
+			idParam:      -1,
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `
+				{
+					"status": "Bad Request",
+					"message": "Invalid ID"
+				}
+			`,
+		},
+		{
+			testName:     "Fail: Internal server error after a DB Error",
+			serviceError: errors.New("db error"),
+			idParam:      1,
+			expectedCode: http.StatusInternalServerError,
+			expectedBody: `
+				{
+					"status": "Internal Server Error",
+					"message": "Internal Server Error"
+				}
+			`,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			// Run tests parallel
+			t.Parallel()
+
+			// Arrange
+			serviceMock := &mocks.ProductServiceMock{}
+			serviceMock.On("Delete", mock.Anything, tc.idParam).Return(tc.serviceError)
+			handler := handler.NewProductHandler(serviceMock)
+
+			url := fmt.Sprintf("/api/v1/products/%d", tc.idParam)
+			request := httptest.NewRequest(http.MethodDelete, url, nil)
+			routeCtx := chi.NewRouteContext()
+			routeCtx.URLParams.Add("id", strconv.Itoa(tc.idParam))
+			request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, routeCtx))
+
+			response := httptest.NewRecorder()
+
+			// Act
+			handler.Delete()(response, request)
+
+			// Assert
+			require.Equal(t, tc.expectedCode, response.Code)
+			if tc.expectedCode != http.StatusNoContent {
+				require.JSONEq(t, tc.expectedBody, response.Body.String())
+			}
 		})
 	}
 }
