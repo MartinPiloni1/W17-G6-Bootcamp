@@ -366,3 +366,82 @@ func TestSectionRepository_GetAll(t *testing.T) {
 		})
 	}
 }
+
+func TestSectionRepository_GetByID(t *testing.T) {
+	inputID := 1
+	expectedQuery := regexp.QuoteMeta(`
+        SELECT
+            id, section_number, current_temperature, minimum_temperature,
+            current_capacity, minimum_capacity, maximum_capacity,
+            warehouse_id, product_type_id
+        FROM sections
+        WHERE id = ?
+    `)
+
+	columns := []string{
+		"id", "section_number", "current_temperature", "minimum_temperature",
+		"current_capacity", "minimum_capacity", "maximum_capacity",
+		"warehouse_id", "product_type_id",
+	}
+
+	expectedSection := models.Section{
+		ID: 1, SectionNumber: "SEC-101", CurrentTemperature: 20, MinimumTemperature: 15,
+		CurrentCapacity: 50, MinimumCapacity: 10, MaximumCapacity: 100,
+		WarehouseID: 1, ProductTypeID: 1,
+	}
+
+	tests := []struct {
+		testName      string
+		mockSetup     func(mock sqlmock.Sqlmock)
+		expectedResp  models.Section
+		expectedError error
+	}{
+		{
+			testName: "Success: Should return a section by ID",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				rows := sqlmock.NewRows(columns).
+					AddRow(expectedSection.ID, expectedSection.SectionNumber, expectedSection.CurrentTemperature, expectedSection.MinimumTemperature, expectedSection.CurrentCapacity, expectedSection.MinimumCapacity, expectedSection.MaximumCapacity, expectedSection.WarehouseID, expectedSection.ProductTypeID)
+				
+				mock.ExpectQuery(expectedQuery).WithArgs(inputID).WillReturnRows(rows)
+			},
+			expectedResp:  expectedSection,
+			expectedError: nil,
+		},
+		{
+			testName: "Fail: Section not found",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				rows := sqlmock.NewRows(columns)
+				mock.ExpectQuery(expectedQuery).WithArgs(inputID).WillReturnRows(rows)
+			},
+			expectedResp:  models.Section{},
+			expectedError: httperrors.NotFoundError{Message: "Section not found"},
+		},
+		{
+			testName: "Fail: Should return internal server error on query error",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(expectedQuery).WithArgs(inputID).WillReturnError(errors.New("db query error"))
+			},
+			expectedResp:  models.Section{},
+			expectedError: httperrors.InternalServerError{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			assert.NoError(t, err)
+			defer db.Close()
+
+			repo := NewSectionRepositoryDB(db)
+			tt.mockSetup(mock)
+
+			result, err := repo.GetByID(context.Background(), inputID)
+
+			assert.Equal(t, tt.expectedError, err)
+			assert.Equal(t, tt.expectedResp, result)
+
+			err = mock.ExpectationsWereMet()
+			assert.NoError(t, err)
+		})
+	}
+}
