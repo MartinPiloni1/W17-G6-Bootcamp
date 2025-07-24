@@ -292,3 +292,69 @@ func TestSectionHandler_GetByID(t *testing.T) {
 		})
 	}
 }
+
+
+func TestSectionHandler_Delete(t *testing.T) {
+	tests := []struct {
+		testName      string
+		inputID       int
+		requestURL    string
+		serviceError  error
+		expectedCode  int
+		expectedBody  string
+	}{
+		{
+			testName:      "Success: Delete Section",
+			inputID:       1,
+			requestURL:    "/api/v1/sections/1",
+			serviceError:  nil,
+			expectedCode:  http.StatusNoContent,
+			expectedBody:  "",
+		},
+		{
+			testName:      "Fail: Section not found",
+			inputID:       99,
+			requestURL:    "/api/v1/sections/99",
+			serviceError:  httperrors.NotFoundError{Message: "Section not found"},
+			expectedCode:  http.StatusNotFound,
+			expectedBody:  `{"status": "Not Found", "message": "Section not found"}`,
+		},
+		{
+			testName:      "Fail: Invalid ID",
+			inputID:       0,
+			requestURL:    "/api/v1/sections/abc",
+			serviceError:  nil,
+			expectedCode:  http.StatusBadRequest,
+			expectedBody:  `{"status": "Bad Request", "message": "Invalid ID"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			mockService := new(mock.SectionServiceMock)
+
+			if tt.expectedCode == http.StatusNoContent || tt.expectedCode == http.StatusNotFound {
+				mockService.On("Delete", testifyMock.Anything, tt.inputID).Return(tt.serviceError)
+			}
+
+			handler := NewSectionHandler(mockService)
+			router := chi.NewRouter()
+			router.Delete("/api/v1/sections/{id}", handler.Delete())
+
+			req := httptest.NewRequest(http.MethodDelete, tt.requestURL, nil)
+			
+			response := httptest.NewRecorder()
+			router.ServeHTTP(response, req)
+
+			assert.Equal(t, tt.expectedCode, response.Code)
+			
+			if tt.expectedBody != "" {
+				assert.JSONEq(t, tt.expectedBody, response.Body.String())
+			} else {
+				assert.Empty(t, response.Body.String())
+			}
+
+			mockService.AssertExpectations(t)
+		})
+	}
+}
