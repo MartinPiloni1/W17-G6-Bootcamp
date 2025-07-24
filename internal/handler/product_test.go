@@ -543,7 +543,9 @@ func TestProductHandler_Delete(t *testing.T) {
 
 			// Assert
 			require.Equal(t, tc.expectedCode, response.Code)
-			if tc.expectedCode != http.StatusNoContent {
+			if tc.expectedCode == http.StatusNoContent {
+				require.Empty(t, response.Body.String())
+			} else {
 				require.JSONEq(t, tc.expectedBody, response.Body.String())
 			}
 		})
