@@ -276,3 +276,93 @@ func TestSectionRepository_Delete(t *testing.T) {
 		})
 	}
 }
+
+func TestSectionRepository_GetAll(t *testing.T) {
+	expectedQuery := regexp.QuoteMeta(`
+        SELECT
+            id, section_number, current_temperature, minimum_temperature,
+            current_capacity, minimum_capacity, maximum_capacity,
+            warehouse_id, product_type_id
+        FROM sections
+    `)
+
+	columns := []string{
+		"id", "section_number", "current_temperature", "minimum_temperature",
+		"current_capacity", "minimum_capacity", "maximum_capacity",
+		"warehouse_id", "product_type_id",
+	}
+
+	expectedSections := []models.Section{
+		{ID: 1, SectionNumber: "SEC-101", CurrentTemperature: 20, MinimumTemperature: 15, CurrentCapacity: 50, MinimumCapacity: 10, MaximumCapacity: 100, WarehouseID: 1, ProductTypeID: 1},
+		{ID: 2, SectionNumber: "SEC-102", CurrentTemperature: 22, MinimumTemperature: 18, CurrentCapacity: 70, MinimumCapacity: 20, MaximumCapacity: 150, WarehouseID: 1, ProductTypeID: 2},
+	}
+
+	tests := []struct {
+		testName      string
+		mockSetup     func(mock sqlmock.Sqlmock)
+		expectedResp  []models.Section
+		expectedError error
+	}{
+		{
+			testName: "Success: Should return all sections",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				rows := sqlmock.NewRows(columns).
+					AddRow(expectedSections[0].ID, expectedSections[0].SectionNumber, expectedSections[0].CurrentTemperature, expectedSections[0].MinimumTemperature, expectedSections[0].CurrentCapacity, expectedSections[0].MinimumCapacity, expectedSections[0].MaximumCapacity, expectedSections[0].WarehouseID, expectedSections[0].ProductTypeID).
+					AddRow(expectedSections[1].ID, expectedSections[1].SectionNumber, expectedSections[1].CurrentTemperature, expectedSections[1].MinimumTemperature, expectedSections[1].CurrentCapacity, expectedSections[1].MinimumCapacity, expectedSections[1].MaximumCapacity, expectedSections[1].WarehouseID, expectedSections[1].ProductTypeID)
+				
+				mock.ExpectQuery(expectedQuery).WillReturnRows(rows)
+			},
+			expectedResp:  expectedSections,
+			expectedError: nil,
+		},
+		{
+			testName: "Fail: Should return internal server error on query error",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				mock.ExpectQuery(expectedQuery).WillReturnError(errors.New("db query error"))
+			},
+			expectedResp:  nil,
+			expectedError: httperrors.InternalServerError{},
+		},
+		{
+			testName: "Fail: Should return internal server error on scan error",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				rows := sqlmock.NewRows(columns).AddRow("invalid_id", "SEC-101", 20, 15, 50, 10, 100, 1, 1)
+				mock.ExpectQuery(expectedQuery).WillReturnRows(rows)
+			},
+			expectedResp:  nil,
+			expectedError: httperrors.InternalServerError{},
+		},
+        {
+            testName: "Fail: Should return internal server error on rows error",
+            mockSetup: func(mock sqlmock.Sqlmock) {
+                rows := sqlmock.NewRows(columns).
+                    AddRow(expectedSections[0].ID, expectedSections[0].SectionNumber, expectedSections[0].CurrentTemperature, expectedSections[0].MinimumTemperature, expectedSections[0].CurrentCapacity, expectedSections[0].MinimumCapacity, expectedSections[0].MaximumCapacity, expectedSections[0].WarehouseID, expectedSections[0].ProductTypeID)
+                
+                rows.CloseError(errors.New("rows iteration error"))
+                
+                mock.ExpectQuery(expectedQuery).WillReturnRows(rows)
+            },
+            expectedResp:  nil,
+            expectedError: httperrors.InternalServerError{},
+        },
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			assert.NoError(t, err)
+			defer db.Close()
+
+			repo := NewSectionRepositoryDB(db)
+			tt.mockSetup(mock)
+
+			result, err := repo.GetAll(context.Background())
+
+			assert.Equal(t, tt.expectedError, err)
+			assert.Equal(t, tt.expectedResp, result)
+
+			err = mock.ExpectationsWereMet()
+			assert.NoError(t, err)
+		})
+	}
+}
