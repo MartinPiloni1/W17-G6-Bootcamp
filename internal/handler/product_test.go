@@ -130,21 +130,18 @@ func TestProductHandler_GetAll(t *testing.T) {
 			// Arrange
 			serviceMock := &mocks.ProductServiceMock{}
 			serviceMock.On("GetAll", mock.Anything).Return(tt.serviceData, tt.serviceError)
+			handler := handler.NewProductHandler(serviceMock)
 
-			hd := handler.NewProductHandler(serviceMock)
-			getAllFunc := hd.GetAll()
+			getAllFunc := handler.GetAll()
 			request := httptest.NewRequest(http.MethodGet, "/", nil)
 			response := httptest.NewRecorder()
-
-			expectedCode := tt.expectedCode
-			expectedBody := tt.expectedBody
 
 			// Act
 			getAllFunc(response, request)
 
 			// Assert
-			require.Equal(t, expectedCode, response.Code)
-			require.JSONEq(t, expectedBody, response.Body.String())
+			require.Equal(t, tt.expectedCode, response.Code)
+			require.JSONEq(t, tt.expectedBody, response.Body.String())
 		})
 	}
 }
