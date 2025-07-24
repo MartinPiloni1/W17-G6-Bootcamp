@@ -1,6 +1,7 @@
 package handler_test
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +12,7 @@ import (
 	mocks "github.com/aaguero_meli/W17-G6-Bootcamp/internal/mocks/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -341,6 +343,108 @@ func TestProductHandler_GetAll(t *testing.T) {
 			// Assert
 			require.Equal(t, tt.expectedCode, response.Code)
 			require.JSONEq(t, tt.expectedBody, response.Body.String())
+		})
+	}
+}
+
+func TestProductHandler_GetById(t *testing.T) {
+	// TODO: Add invalid ID Test
+	// TODO: Generate random products with values in a valid range
+	product := models.Product{
+		ID: 1,
+		ProductAttributes: models.ProductAttributes{
+			Description:                    "Yogurt helado",
+			ExpirationRate:                 7,
+			FreezingRate:                   2,
+			Height:                         10.5,
+			Length:                         20.0,
+			Width:                          15.0,
+			NetWeight:                      1.2,
+			ProductCode:                    "YOG01",
+			RecommendedFreezingTemperature: -5.0,
+			ProductTypeID:                  3,
+			SellerID:                       Ptr(1),
+		},
+	}
+
+	tests := []struct {
+		testName     string
+		serviceData  models.Product
+		serviceError error
+		expectedCode int
+		expectedBody string
+	}{
+		{
+			testName:     "Success: Get product with ID 1",
+			serviceData:  product,
+			serviceError: nil,
+			expectedCode: http.StatusOK,
+			expectedBody: `
+			{
+				"data": {
+					"id": 1,
+					"description": "Yogurt helado",
+					"expiration_rate": 7,
+					"freezing_rate": 2,
+					"height": 10.5,
+					"length": 20.0,
+					"width": 15.0,
+					"netweight": 1.2,
+					"product_code": "YOG01",
+					"recommended_freezing_temperature": -5.0,
+					"product_type_id": 3,
+					"seller_id": 1
+				}
+			}`,
+		},
+		{
+			testName:     "Fail: Not found when giving a non existant ID",
+			serviceData:  models.Product{},
+			serviceError: httperrors.NotFoundError{Message: "Product not found"},
+			expectedCode: http.StatusNotFound,
+			expectedBody: `
+				{
+					"status": "Not Found",
+					"message": "Product not found"
+				}
+			`,
+		},
+		{
+			testName:     "Fail: Internal server error after a DB Error",
+			serviceData:  models.Product{},
+			serviceError: errors.New("db error"),
+			expectedCode: http.StatusInternalServerError,
+			expectedBody: `
+				{
+					"status": "Internal Server Error",
+					"message": "Internal Server Error"
+				}
+			`,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			// Run tests parallel
+			t.Parallel()
+
+			// Arrange
+			serviceMock := &mocks.ProductServiceMock{}
+			serviceMock.On("GetByID", mock.Anything, 1).Return(tc.serviceData, tc.serviceError)
+			handler := handler.NewProductHandler(serviceMock)
+
+			request := httptest.NewRequest(http.MethodGet, "/api/v1/products/1", nil)
+			routeCtx := chi.NewRouteContext()
+			routeCtx.URLParams.Add("id", "1")
+			request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, routeCtx))
+
+			response := httptest.NewRecorder()
+
+			// Act
+			handler.GetByID()(response, request)
+
+			// Assert
+			require.Equal(t, tc.expectedCode, response.Code)
+			require.JSONEq(t, tc.expectedBody, response.Body.String())
 		})
 	}
 }
