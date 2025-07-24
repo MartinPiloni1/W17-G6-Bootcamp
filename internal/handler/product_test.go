@@ -468,6 +468,215 @@ func TestProductHandler_GetById(t *testing.T) {
 	}
 }
 
+func TestProductHandler_Update(t *testing.T) {
+	productAttributes := models.ProductPatchRequest{
+		Description:                    Ptr("Pechuga de pollo"),
+		ExpirationRate:                 Ptr(6),
+		FreezingRate:                   Ptr(3),
+		Height:                         Ptr(11.5),
+		Length:                         Ptr(22.0),
+		Width:                          Ptr(13.0),
+		NetWeight:                      Ptr(10.0),
+		ProductCode:                    Ptr("POL01"),
+		RecommendedFreezingTemperature: Ptr(-3.0),
+		ProductTypeID:                  Ptr(2),
+		SellerID:                       Ptr(2),
+	}
+
+	singleProductAttribute := models.ProductPatchRequest{
+		NetWeight: Ptr(10.0),
+	}
+
+	updatedProduct := models.Product{
+		ID: 1,
+		ProductAttributes: models.ProductAttributes{
+			Description:                    "Pechuga de pollo",
+			ExpirationRate:                 6,
+			FreezingRate:                   3,
+			Height:                         11.5,
+			Length:                         22.0,
+			Width:                          13.0,
+			NetWeight:                      10.0,
+			ProductCode:                    "POL01",
+			RecommendedFreezingTemperature: -3.0,
+			ProductTypeID:                  2,
+			SellerID:                       Ptr(2),
+		},
+	}
+
+	singleFieldUpdatedProduct := models.Product{
+		ID: 1,
+		ProductAttributes: models.ProductAttributes{
+			Description:                    "Yogurt helado",
+			ExpirationRate:                 7,
+			FreezingRate:                   2,
+			Height:                         10.5,
+			Length:                         20.0,
+			Width:                          15.0,
+			NetWeight:                      10.0,
+			ProductCode:                    "YOG01",
+			RecommendedFreezingTemperature: -5.0,
+			ProductTypeID:                  3,
+			SellerID:                       Ptr(1),
+		},
+	}
+
+	payloadUpdatedProduct := `{
+		"description": "Pechuga de pollo",
+		"expiration_rate": 6,
+		"freezing_rate": 3,
+		"height": 11.5,
+		"length": 22.0,
+		"width": 13.0,
+		"netweight": 10.0,
+		"product_code": "POL01",
+		"recommended_freezing_temperature": -3.0,
+		"product_type_id": 2,
+		"seller_id": 2
+	}`
+
+	payloadSingleFieldUpdatedProduct := `{
+		"netweight": 10.0
+	}`
+
+	tests := []struct {
+		testName          string
+		serviceData       models.Product
+		serviceError      error
+		payload           string
+		idParam           int
+		productAttributes models.ProductPatchRequest
+		expectedCode      int
+		expectedBody      string
+	}{
+		{
+			testName:          "Success: Update all fields of product with ID 1",
+			serviceData:       updatedProduct,
+			serviceError:      nil,
+			payload:           payloadUpdatedProduct,
+			idParam:           1,
+			productAttributes: productAttributes,
+			expectedCode:      http.StatusOK,
+			expectedBody: `
+			{
+				"data": {
+					"id": 1,
+					"description": "Pechuga de pollo",
+					"expiration_rate": 6,
+					"freezing_rate": 3,
+					"height": 11.5,
+					"length": 22.0,
+					"width": 13.0,
+					"netweight": 10.0,
+					"product_code": "POL01",
+					"recommended_freezing_temperature": -3.0,
+					"product_type_id": 2,
+					"seller_id": 2
+				}
+			}`,
+		},
+		{
+			testName:          "Success: Update a single field of product with ID 1",
+			serviceData:       singleFieldUpdatedProduct,
+			serviceError:      nil,
+			payload:           payloadSingleFieldUpdatedProduct,
+			idParam:           1,
+			productAttributes: singleProductAttribute,
+			expectedCode:      http.StatusOK,
+			expectedBody: `
+			{
+				"data": {
+					"id": 1,
+					"description": "Yogurt helado",
+					"expiration_rate": 7,
+					"freezing_rate": 2,
+					"height": 10.5,
+					"length": 20.0,
+					"width": 15.0,
+					"netweight": 10.0,
+					"product_code": "YOG01",
+					"recommended_freezing_temperature": -5.0,
+					"product_type_id": 3,
+					"seller_id": 1
+				}
+			}`,
+		},
+		{
+			testName:          "Fail: Not found when giving a non existant ID",
+			serviceData:       models.Product{},
+			serviceError:      httperrors.NotFoundError{Message: "Product not found"},
+			payload:           payloadUpdatedProduct,
+			idParam:           10000,
+			productAttributes: productAttributes,
+			expectedCode:      http.StatusNotFound,
+			expectedBody: `
+				{
+					"status": "Not Found",
+					"message": "Product not found"
+				}
+			`,
+		},
+		{
+			testName:          "Fail: Bad request when giving an invalid ID",
+			serviceData:       models.Product{},
+			serviceError:      httperrors.NotFoundError{Message: "Invalid ID"},
+			payload:           payloadUpdatedProduct,
+			idParam:           -1,
+			productAttributes: productAttributes,
+			expectedCode:      http.StatusBadRequest,
+			expectedBody: `
+				{
+					"status": "Bad Request",
+					"message": "Invalid ID"
+				}
+			`,
+		},
+		{
+			testName:          "Fail: Internal server error after a DB Error",
+			serviceData:       models.Product{},
+			serviceError:      errors.New("db error"),
+			payload:           payloadUpdatedProduct,
+			idParam:           1,
+			productAttributes: productAttributes,
+			expectedCode:      http.StatusInternalServerError,
+			expectedBody: `
+				{
+					"status": "Internal Server Error",
+					"message": "Internal Server Error"
+				}
+			`,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			// Run tests parallel
+			t.Parallel()
+
+			// Arrange
+			serviceMock := &mocks.ProductServiceMock{}
+			serviceMock.
+				On("Update", mock.Anything, tc.idParam, tc.productAttributes).
+				Return(tc.serviceData, tc.serviceError)
+			handler := handler.NewProductHandler(serviceMock)
+
+			url := fmt.Sprintf("/api/v1/products/%d", tc.idParam)
+			request := httptest.NewRequest(http.MethodPatch, url, strings.NewReader(tc.payload))
+			routeCtx := chi.NewRouteContext()
+			routeCtx.URLParams.Add("id", strconv.Itoa(tc.idParam))
+			request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, routeCtx))
+
+			response := httptest.NewRecorder()
+
+			// Act
+			handler.Update()(response, request)
+
+			// Assert
+			require.Equal(t, tc.expectedCode, response.Code)
+			require.JSONEq(t, tc.expectedBody, response.Body.String())
+		})
+	}
+}
+
 func TestProductHandler_Delete(t *testing.T) {
 	tests := []struct {
 		testName     string
