@@ -4,17 +4,218 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/handler"
 	mocks "github.com/aaguero_meli/W17-G6-Bootcamp/internal/mocks/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 // TODO: Move this function to an utils package
 func Ptr[T any](v T) *T { return &v }
+
+func TestProductHandler_Create(t *testing.T) {
+	// TODO: Generate random products with values in a valid range
+	newProductAttributes := models.ProductAttributes{
+		Description:                    "Yogurt helado",
+		ExpirationRate:                 7,
+		FreezingRate:                   2,
+		Height:                         10.5,
+		Length:                         20.0,
+		Width:                          15.0,
+		NetWeight:                      1.2,
+		ProductCode:                    "YOG01",
+		RecommendedFreezingTemperature: -5.0,
+		ProductTypeID:                  3,
+		SellerID:                       Ptr(1),
+	}
+
+	newProduct := models.Product{
+		ID:                1,
+		ProductAttributes: newProductAttributes,
+	}
+
+	payload := `
+		{
+			"description": "Yogurt helado",
+			"expiration_rate": 7,
+			"freezing_rate": 2,
+			"height": 10.5,
+			"length": 20.0,
+			"width": 15.0,
+			"netweight": 1.2,
+			"product_code": "YOG01",
+			"recommended_freezing_temperature": -5.0,
+			"product_type_id": 3,
+			"seller_id": 1
+		}
+	`
+
+	payloadWithMissingFields := `
+		{
+			"description": "Yogurt helado",
+			"recommended_freezing_temperature": -5.0,
+			"product_type_id": 3,
+			"seller_id": 1
+		}
+	`
+
+	payloadWithWrongValues := `
+		{
+			"description": "Yogurt helado",
+			"expiration_rate": 7,
+			"freezing_rate": 2,
+			"height": -10,
+			"length": -20.0,
+			"width": -15.0,
+			"netweight": -50.0,
+			"product_code": "YOG01",
+			"recommended_freezing_temperature": -5.0,
+			"product_type_id": 3,
+			"seller_id": -1
+		}
+	`
+
+	payloadWithUnkownFields := `
+		{
+			"description": "Yogurt helado",
+			"anUnkownField": 1,
+			"expiration_rate": 7,
+			"freezing_rate": 2,
+			"height": -10,
+			"length": -20.0,
+			"width": -15.0,
+			"netweight": -50.0,
+			"product_code": "YOG01",
+			"recommended_freezing_temperature": -5.0,
+			"product_type_id": 3,
+			"seller_id": -1
+		}
+	`
+
+	tests := []struct {
+		testName     string
+		serviceData  models.Product
+		serviceError error
+		payload      string
+		expectedCode int
+		expectedBody string
+	}{
+		{
+			testName:     "Success: Create a new product",
+			serviceData:  newProduct,
+			serviceError: nil,
+			payload:      payload,
+			expectedCode: http.StatusCreated,
+			expectedBody: `
+			{
+				"data": {
+					"id": 1,
+					"description": "Yogurt helado",
+					"expiration_rate": 7,
+					"freezing_rate": 2,
+					"height": 10.5,
+					"length": 20.0,
+					"width": 15.0,
+					"netweight": 1.2,
+					"product_code": "YOG01",
+					"recommended_freezing_temperature": -5.0,
+					"product_type_id": 3,
+					"seller_id": 1
+				}
+			}`,
+		},
+		{
+			testName:     "Fail: Unprocessable entity when payload with missing fields is given",
+			serviceData:  models.Product{},
+			serviceError: httperrors.ConflictError{Message: "A product with the given product code already exists"},
+			payload:      payloadWithMissingFields,
+			expectedCode: http.StatusUnprocessableEntity,
+			expectedBody: `
+				{
+					"status": "Unprocessable Entity",
+					"message": "Invalid JSON body"
+				}
+			`,
+		},
+		{
+			testName:     "Fail: Unprocessable entity when payload with wrong values is given",
+			serviceData:  models.Product{},
+			serviceError: httperrors.ConflictError{Message: "A product with the given product code already exists"},
+			payload:      payloadWithWrongValues,
+			expectedCode: http.StatusUnprocessableEntity,
+			expectedBody: `
+				{
+					"status": "Unprocessable Entity",
+					"message": "Invalid JSON body"
+				}
+			`,
+		},
+		{
+			testName:     "Fail: Bad request when payload with unkown fields is given",
+			serviceData:  models.Product{},
+			serviceError: httperrors.ConflictError{Message: "A product with the given product code already exists"},
+			payload:      payloadWithUnkownFields,
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `
+				{
+					"status": "Bad Request",
+					"message": "Invalid JSON body"
+				}
+			`,
+		},
+		{
+			testName:     "Fail: Conflict error when the given product code already exists",
+			serviceData:  models.Product{},
+			serviceError: httperrors.ConflictError{Message: "A product with the given product code already exists"},
+			payload:      payload,
+			expectedCode: http.StatusConflict,
+			expectedBody: `
+				{
+					"status": "Conflict",
+					"message": "A product with the given product code already exists"
+				}
+			`,
+		},
+		{
+			testName:     "Fail: Internal server error after a DB Error",
+			serviceData:  models.Product{},
+			serviceError: errors.New("db error"),
+			payload:      payload,
+			expectedCode: http.StatusInternalServerError,
+			expectedBody: `
+				{
+					"status": "Internal Server Error",
+					"message": "Internal Server Error"
+				}
+			`,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			// Run tests parallel
+			t.Parallel()
+
+			// Arrange
+			serviceMock := &mocks.ProductServiceMock{}
+			serviceMock.On("Create", mock.Anything, newProductAttributes).Return(tc.serviceData, tc.serviceError)
+			handler := handler.NewProductHandler(serviceMock)
+			request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(tc.payload))
+			response := httptest.NewRecorder()
+
+			// Act
+			handler.Create()(response, request)
+
+			// Assert
+			require.Equal(t, tc.expectedCode, response.Code)
+			require.JSONEq(t, tc.expectedBody, response.Body.String())
+		})
+	}
+}
 
 func TestProductHandler_GetAll(t *testing.T) {
 	// TODO: Generate random products with values in a valid range
@@ -99,7 +300,7 @@ func TestProductHandler_GetAll(t *testing.T) {
 			}`,
 		},
 		{
-			testName:     "Success: Empty DB",
+			testName:     "Success: Get an empty list if the DB is empty",
 			serviceData:  []models.Product{},
 			serviceError: nil,
 			expectedCode: http.StatusOK,
@@ -110,7 +311,7 @@ func TestProductHandler_GetAll(t *testing.T) {
 			`,
 		},
 		{
-			testName:     "Fail: DB Error",
+			testName:     "Fail: Internal server error after a DB Error",
 			serviceData:  nil,
 			serviceError: errors.New("db error"),
 			expectedCode: http.StatusInternalServerError,
@@ -131,13 +332,11 @@ func TestProductHandler_GetAll(t *testing.T) {
 			serviceMock := &mocks.ProductServiceMock{}
 			serviceMock.On("GetAll", mock.Anything).Return(tt.serviceData, tt.serviceError)
 			handler := handler.NewProductHandler(serviceMock)
-
-			getAllFunc := handler.GetAll()
 			request := httptest.NewRequest(http.MethodGet, "/", nil)
 			response := httptest.NewRecorder()
 
 			// Act
-			getAllFunc(response, request)
+			handler.GetAll()(response, request)
 
 			// Assert
 			require.Equal(t, tt.expectedCode, response.Code)
