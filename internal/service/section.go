@@ -51,16 +51,13 @@ func (service *SectionServiceDefault) Update(ctx context.Context, id int, patchD
 		return models.Section{}, err
 	}
 
-	err = service.applyChanges(&section, patchData)
-	if err != nil {
-		return models.Section{}, err
-	}
+	service.applyChanges(&section, patchData)
 
 	return service.repository.Update(ctx, id, section)
 }
 
 // applyChanges, applies the changes to the section
-func (service *SectionServiceDefault) applyChanges(sectionToUpdate *models.Section, patchData models.UpdateSectionRequest) error {
+func (service *SectionServiceDefault) applyChanges(sectionToUpdate *models.Section, patchData models.UpdateSectionRequest) {
 	// Update section number
 	if patchData.SectionNumber != nil {
 		sectionToUpdate.SectionNumber = *patchData.SectionNumber
@@ -94,7 +91,7 @@ func (service *SectionServiceDefault) applyChanges(sectionToUpdate *models.Secti
 		sectionToUpdate.ProductTypeID = *patchData.ProductTypeID
 	}
 
-	return nil
+	return
 }
 
 // GetProductsReport calls the repository to get a single section report.
