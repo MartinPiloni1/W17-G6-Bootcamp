@@ -479,3 +479,101 @@ func TestSectionHandler_Update(t *testing.T) {
 		})
 	}
 }
+
+func TestSectionHandler_GetProductsReport(t *testing.T) {
+	report1 := models.SectionProductsReport{
+		SectionID:     1,
+		SectionNumber: "SEC-101",
+		ProductsCount: 50,
+	}
+	report2 := models.SectionProductsReport{
+		SectionID:     2,
+		SectionNumber: "SEC-102",
+		ProductsCount: 75,
+	}
+
+	tests := []struct {
+		testName            string
+		requestURL          string
+		mockMethod          string
+		inputID             int
+		serviceOutputSingle models.SectionProductsReport
+		serviceOutputAll    []models.SectionProductsReport
+		serviceError        error
+		expectedCode        int
+		expectedBody        string
+	}{
+		{
+			testName:            "Success: Get report for single section",
+			requestURL:          "/api/v1/sections/reportProducts?id=1",
+			mockMethod:          "GetProductsReport",
+			inputID:             1,
+			serviceOutputSingle: report1,
+			serviceError:        nil,
+			expectedCode:        http.StatusOK,
+			expectedBody:        `{"data": [{"section_id":1, "section_number":"SEC-101", "products_count":50}]}`,
+		},
+		{
+			testName:            "Fail: Section not found for single report",
+			requestURL:          "/api/v1/sections/reportProducts?id=99",
+			mockMethod:          "GetProductsReport",
+			inputID:             99,
+			serviceError:        httperrors.NotFoundError{Message: "Section not found"},
+			expectedCode:        http.StatusNotFound,
+			expectedBody:        `{"status": "Not Found", "message": "Section not found"}`,
+		},
+		{
+			testName:     "Fail: Invalid ID for single report",
+			requestURL:   "/api/v1/sections/reportProducts?id=abc",
+			mockMethod:   "", 
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `{"status": "Bad Request", "message": "Invalid section ID"}`,
+		},
+		{
+			testName:         "Success: Get report for all sections",
+			requestURL:       "/api/v1/sections/reportProducts",
+			mockMethod:       "GetAllProductsReport",
+			serviceOutputAll: []models.SectionProductsReport{report1, report2},
+			serviceError:     nil,
+			expectedCode:     http.StatusOK,
+			expectedBody:     `{"data": [{"section_id":1, "section_number":"SEC-101", "products_count":50}, {"section_id":2, "section_number":"SEC-102", "products_count":75}]}`,
+		},
+		{
+			testName:     "Fail: Service error on get all reports",
+			requestURL:   "/api/v1/sections/reportProducts",
+			mockMethod:   "GetAllProductsReport",
+			serviceError: errors.New("internal server error"),
+			expectedCode: http.StatusInternalServerError,
+			expectedBody: `{"status": "Internal Server Error", "message": "Internal Server Error"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			mockService := new(mock.SectionServiceMock)
+
+			switch tt.mockMethod {
+			case "GetProductsReport":
+				mockService.On(tt.mockMethod, testifyMock.Anything, tt.inputID).Return(tt.serviceOutputSingle, tt.serviceError)
+			case "GetAllProductsReport":
+				mockService.On(tt.mockMethod, testifyMock.Anything).Return(tt.serviceOutputAll, tt.serviceError)
+			}
+
+			handler := NewSectionHandler(mockService)
+			router := chi.NewRouter()
+			router.Get("/api/v1/sections/reportProducts", handler.GetProductsReport())
+
+			req := httptest.NewRequest(http.MethodGet, tt.requestURL, nil)
+
+			response := httptest.NewRecorder()
+			router.ServeHTTP(response, req)
+
+			assert.Equal(t, tt.expectedCode, response.Code)
+			if tt.expectedBody != "" {
+				assert.JSONEq(t, tt.expectedBody, response.Body.String())
+			}
+
+			mockService.AssertExpectations(t)
+		})
+	}
+}
