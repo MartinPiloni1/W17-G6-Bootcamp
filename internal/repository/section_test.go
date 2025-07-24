@@ -209,3 +209,70 @@ func TestSectionRepository_Update(t *testing.T) {
 		})
 	}
 }
+
+func TestSectionRepository_Delete(t *testing.T) {
+	inputID := 1
+	expectedQuery := regexp.QuoteMeta("DELETE FROM sections WHERE id = ?")
+
+	tests := []struct {
+		testName      string
+		mockSetup     func(mock sqlmock.Sqlmock)
+		expectedError error
+	}{
+		{
+			testName: "Success: Should delete section correctly",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(expectedQuery).
+					WithArgs(inputID).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+			},
+			expectedError: nil,
+		},
+		{
+			testName: "Fail: Section not found",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(expectedQuery).
+					WithArgs(inputID).
+					WillReturnResult(sqlmock.NewResult(0, 0))
+			},
+			expectedError: httperrors.NotFoundError{Message: "Section not found"},
+		},
+		{
+			testName: "Fail: Should return internal server error on exec error",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(expectedQuery).
+					WithArgs(inputID).
+					WillReturnError(errors.New("db error on exec"))
+			},
+			expectedError: httperrors.InternalServerError{},
+		},
+		{
+			testName: "Fail: Should return internal server error on RowsAffected error",
+			mockSetup: func(mock sqlmock.Sqlmock) {
+				mock.ExpectExec(expectedQuery).
+					WithArgs(inputID).
+					WillReturnResult(sqlmock.NewErrorResult(errors.New("rows affected error")))
+			},
+			expectedError: httperrors.InternalServerError{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			assert.NoError(t, err)
+			defer db.Close()
+
+			repo := NewSectionRepositoryDB(db)
+
+			tt.mockSetup(mock)
+
+			err = repo.Delete(context.Background(), inputID)
+
+			assert.Equal(t, tt.expectedError, err)
+
+			err = mock.ExpectationsWereMet()
+			assert.NoError(t, err)
+		})
+	}
+}
