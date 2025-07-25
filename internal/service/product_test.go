@@ -15,6 +15,87 @@ import (
 
 func Ptr[T any](v T) *T { return &v }
 
+func TestProductService_Create(t *testing.T) {
+	// Arrange
+	newProduct := models.ProductAttributes{
+		Description:                    "",
+		ExpirationRate:                 1,
+		FreezingRate:                   2,
+		Height:                         1,
+		Length:                         1,
+		Width:                          1,
+		NetWeight:                      1,
+		ProductCode:                    "",
+		RecommendedFreezingTemperature: 1,
+		ProductTypeID:                  1,
+		SellerID:                       Ptr(1),
+	}
+
+	createdProduct := models.Product{
+		ID:                1,
+		ProductAttributes: newProduct,
+	}
+
+	tests := []struct {
+		testName        string
+		repositoryData  models.Product
+		repositoryError error
+		expectedResp    models.Product
+		expectedError   error
+	}{
+		{
+			testName:        "Success: Should create a product",
+			repositoryData:  createdProduct,
+			repositoryError: nil,
+			expectedResp:    createdProduct,
+			expectedError:   nil,
+		},
+		{
+			testName:        "Fail: should return a Conflict Error if a product with the given product_code already exists ",
+			repositoryData:  models.Product{},
+			repositoryError: httperrors.ConflictError{Message: "A product with the given product code already exists"},
+			expectedResp:    models.Product{},
+			expectedError:   httperrors.ConflictError{Message: "A product with the given product code already exists"},
+		},
+		{
+			testName:        "Fail: should return a Conflict Error if the given seller id doesn't exists",
+			repositoryData:  models.Product{},
+			repositoryError: httperrors.ConflictError{Message: "The given seller id does not exists"},
+			expectedResp:    models.Product{},
+			expectedError:   httperrors.ConflictError{Message: "The given seller id does not exists"},
+		},
+		{
+			testName:        "Fail: should return a DB Error",
+			repositoryData:  models.Product{},
+			repositoryError: errors.New("db error"),
+			expectedResp:    models.Product{},
+			expectedError:   errors.New("db error"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			t.Parallel()
+
+			// Arrange
+			repositoryMock := mocks.ProductRepositoryDBMock{}
+			service := service.NewProductServiceDefault(&repositoryMock)
+
+			repositoryMock.
+				On("Create", mock.Anything, newProduct).
+				Return(tc.repositoryData, tc.repositoryError)
+
+			// Act
+			result, err := service.Create(context.Background(), newProduct)
+
+			// Assert
+			assert.Equal(t, tc.expectedError, err)
+			assert.Equal(t, tc.expectedResp, result)
+			repositoryMock.AssertExpectations(t)
+		})
+	}
+}
+
 func TestProductService_GetAll(t *testing.T) {
 	// Arrange
 	products := []models.Product{
