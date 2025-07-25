@@ -468,6 +468,121 @@ func TestProductHandler_GetById(t *testing.T) {
 	}
 }
 
+func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
+	record1 := models.ProductRecordCount{
+		ProductID:    1,
+		Description:  "Yogurt helado",
+		RecordsCount: 3,
+	}
+
+	record2 := models.ProductRecordCount{
+		ProductID:    2,
+		Description:  "Pechuga de pollo",
+		RecordsCount: 1,
+	}
+
+	tests := []struct {
+		testName     string
+		serviceData  []models.ProductRecordCount
+		serviceError error
+		idParam      *int
+		expectedCode int
+		expectedBody string
+	}{
+		{
+			testName:     "Success: Get all product if no ID query param is given",
+			serviceData:  []models.ProductRecordCount{record1, record2},
+			serviceError: nil,
+			idParam:      nil,
+			expectedCode: http.StatusOK,
+			expectedBody: `
+			{
+				"data": [
+					{
+						"product_id": 1,
+						"description": "Yogurt helado",
+						"records_count": 3
+					},
+					{
+						"product_id": 2,
+						"description": "Pechuga de pollo",
+						"records_count": 1
+					}
+				]
+			}`,
+		},
+		{
+			testName:     "Success: Get a single product if ID query param is given",
+			serviceData:  []models.ProductRecordCount{record2},
+			serviceError: nil,
+			idParam:      Ptr(2),
+			expectedCode: http.StatusOK,
+			expectedBody: `
+			{
+				"data": [
+					{
+						"product_id": 2,
+						"description": "Pechuga de pollo",
+						"records_count": 1
+					}
+				]
+			}`,
+		},
+		{
+			testName:     "Fail: Invalid ID is given",
+			serviceData:  nil,
+			serviceError: errors.New("invalid id"),
+			idParam:      Ptr(-1),
+			expectedCode: http.StatusBadRequest,
+			expectedBody: `
+			{
+				"status": "Bad Request",
+				"message": "invalid id"
+			}`,
+		},
+		{
+			testName:     "Fail: Internal server error after a DB Error",
+			serviceData:  nil,
+			serviceError: errors.New("db error"),
+			idParam:      Ptr(1),
+			expectedCode: http.StatusInternalServerError,
+			expectedBody: `
+				{
+					"status": "Internal Server Error",
+					"message": "Internal Server Error"
+				}
+			`,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			// Run tests parallel
+			t.Parallel()
+
+			// Arrange
+			serviceMock := &mocks.ProductServiceMock{}
+			serviceMock.On("GetRecordsPerProduct", mock.Anything, tc.idParam).Return(tc.serviceData, tc.serviceError)
+			handler := handler.NewProductHandler(serviceMock)
+
+			url := "/api/v1/products/reportRecords"
+			fmt.Println(url)
+			if tc.idParam != nil {
+				url += fmt.Sprintf("?id=%d", *tc.idParam)
+			}
+
+			request := httptest.NewRequest(http.MethodGet, url, nil)
+			response := httptest.NewRecorder()
+
+			// Act
+			handler.GetRecordsPerProduct()(response, request)
+
+			// Assert
+			require.Equal(t, tc.expectedCode, response.Code)
+			require.JSONEq(t, tc.expectedBody, response.Body.String())
+		})
+	}
+}
+
 func TestProductHandler_Update(t *testing.T) {
 	productAttributes := models.ProductPatchRequest{
 		Description:                    Ptr("Pechuga de pollo"),

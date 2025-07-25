@@ -132,7 +132,7 @@ func (h *ProductHandler) GetRecordsPerProduct() http.HandlerFunc {
 		idAsString := r.URL.Query().Get("id")
 		if idAsString != "" {
 			val, err := strconv.Atoi(idAsString)
-			if err != nil {
+			if err != nil || val <= 0 {
 				response.Error(w, http.StatusBadRequest, "invalid id")
 				return
 			}
