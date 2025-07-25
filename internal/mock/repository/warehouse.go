@@ -34,10 +34,10 @@ func (w *WarehouseRepositoryMock) Update(id int, warehouseAttributes models.Ware
 	return args.Get(0).(models.Warehouse), args.Error(1)
 }
 
-// GetById retrieves a warehouse by its id from the mock repository.
+// GetByID retrieves a warehouse by its id from the mock repository.
 // Receives: an int (id) identifying the warehouse.
 // Returns: the Warehouse and an error.
-func (w *WarehouseRepositoryMock) GetById(id int) (models.Warehouse, error) {
+func (w *WarehouseRepositoryMock) GetByID(id int) (models.Warehouse, error) {
 	args := w.Called(id)
 	return args.Get(0).(models.Warehouse), args.Error(1)
 }

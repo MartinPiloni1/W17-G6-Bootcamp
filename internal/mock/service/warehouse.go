@@ -37,7 +37,7 @@ func (w *WarehouseServiceMock) Update(id int, warehouseAttributes models.Warehou
 // GetById retrieves a warehouse by its id from the mock service.
 // Receives: an int (id) identifying the warehouse.
 // Returns: the Warehouse and an error.
-func (w *WarehouseServiceMock) GetById(id int) (models.Warehouse, error) {
+func (w *WarehouseServiceMock) GetByID(id int) (models.Warehouse, error) {
 	args := w.Called(id)
 	return args.Get(0).(models.Warehouse), args.Error(1)
 }
