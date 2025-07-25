@@ -10,7 +10,7 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/stretchr/testify/mock"
-	"gopkg.in/go-playground/assert.v1"
+	"github.com/stretchr/testify/require"
 )
 
 func Ptr[T any](v T) *T { return &v }
@@ -89,8 +89,8 @@ func TestProductService_Create(t *testing.T) {
 			result, err := service.Create(context.Background(), newProduct)
 
 			// Assert
-			assert.Equal(t, tc.expectedError, err)
-			assert.Equal(t, tc.expectedResp, result)
+			require.Equal(t, tc.expectedError, err)
+			require.Equal(t, tc.expectedResp, result)
 			repositoryMock.AssertExpectations(t)
 		})
 	}
@@ -172,8 +172,8 @@ func TestProductService_GetAll(t *testing.T) {
 			result, err := service.GetAll(context.Background())
 
 			// Assert
-			assert.Equal(t, tc.expectedError, err)
-			assert.Equal(t, tc.expectedResp, result)
+			require.Equal(t, tc.expectedError, err)
+			require.Equal(t, tc.expectedResp, result)
 			repositoryMock.AssertExpectations(t)
 		})
 	}
@@ -246,8 +246,8 @@ func TestProductService_GetByID(t *testing.T) {
 			result, err := service.GetByID(context.Background(), tc.idParam)
 
 			// Assert
-			assert.Equal(t, tc.expectedError, err)
-			assert.Equal(t, tc.expectedResp, result)
+			require.Equal(t, tc.expectedError, err)
+			require.Equal(t, tc.expectedResp, result)
 			repositoryMock.AssertExpectations(t)
 		})
 	}
@@ -334,8 +334,8 @@ func TestProductService_GetRecordsPerProduct(t *testing.T) {
 			result, err := service.GetRecordsPerProduct(context.Background(), tc.idParam)
 
 			// Assert
-			assert.Equal(t, tc.expectedError, err)
-			assert.Equal(t, tc.expectedResp, result)
+			require.Equal(t, tc.expectedError, err)
+			require.Equal(t, tc.expectedResp, result)
 			repositoryMock.AssertExpectations(t)
 		})
 	}
@@ -485,8 +485,8 @@ func TestProductService_Update(t *testing.T) {
 			result, err := service.Update(context.Background(), tc.idParam, updatePayload)
 
 			// Assert
-			assert.Equal(t, tc.expectedError, err)
-			assert.Equal(t, tc.expectedResp, result)
+			require.Equal(t, tc.expectedError, err)
+			require.Equal(t, tc.expectedResp, result)
 		})
 	}
 }
@@ -547,7 +547,7 @@ func TestProductService_Delete(t *testing.T) {
 			err := service.Delete(context.Background(), tc.idParam)
 
 			// Assert
-			assert.Equal(t, tc.expectedError, err)
+			require.Equal(t, tc.expectedError, err)
 			repositoryMock.AssertExpectations(t)
 		})
 	}
