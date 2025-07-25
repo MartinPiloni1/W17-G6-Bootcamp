@@ -253,6 +253,94 @@ func TestProductService_GetByID(t *testing.T) {
 	}
 }
 
+func TestProductService_GetRecordsPerProduct(t *testing.T) {
+	// Arrange
+	recordsPerProduct := []models.ProductRecordCount{
+		{
+			ProductID:    1,
+			Description:  "Yogurt helado",
+			RecordsCount: 3,
+		},
+		{
+			ProductID:    2,
+			Description:  "Pechuga de pollo",
+			RecordsCount: 1,
+		},
+	}
+
+	singleRecord := []models.ProductRecordCount{
+		{
+			ProductID:    2,
+			Description:  "Pechuga de pollo",
+			RecordsCount: 1,
+		},
+	}
+
+	tests := []struct {
+		testName        string
+		repositoryData  []models.ProductRecordCount
+		repositoryError error
+		idParam         *int
+		expectedResp    []models.ProductRecordCount
+		expectedError   error
+	}{
+		{
+			testName:        "Success: Should return product record count of every product",
+			repositoryData:  recordsPerProduct,
+			repositoryError: nil,
+			idParam:         nil,
+			expectedResp:    recordsPerProduct,
+			expectedError:   nil,
+		},
+		{
+			testName:        "Success: Should return product record count of every product",
+			repositoryData:  singleRecord,
+			repositoryError: nil,
+			idParam:         Ptr(2),
+			expectedResp:    singleRecord,
+			expectedError:   nil,
+		},
+		{
+			testName:        "Fail: should return Not Found error",
+			repositoryData:  []models.ProductRecordCount{},
+			repositoryError: httperrors.NotFoundError{Message: "Product not found"},
+			idParam:         Ptr(10000),
+			expectedResp:    []models.ProductRecordCount{},
+			expectedError:   httperrors.NotFoundError{Message: "Product not found"},
+		},
+		{
+			testName:        "Fail: should return a DB Error",
+			repositoryData:  []models.ProductRecordCount{},
+			repositoryError: errors.New("db error"),
+			idParam:         nil,
+			expectedResp:    []models.ProductRecordCount{},
+			expectedError:   errors.New("db error"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			t.Parallel()
+
+			// Arrange
+			repositoryMock := mocks.ProductRepositoryDBMock{}
+			service := service.NewProductServiceDefault(&repositoryMock)
+
+			repositoryMock.
+				On("GetRecordsPerProduct", mock.Anything, tc.idParam).
+				Return(tc.repositoryData, tc.repositoryError)
+
+			// Act
+			result, err := service.GetRecordsPerProduct(context.Background(), tc.idParam)
+
+			// Assert
+			assert.Equal(t, tc.expectedError, err)
+			assert.Equal(t, tc.expectedResp, result)
+			repositoryMock.AssertExpectations(t)
+		})
+	}
+}
+
 func TestProductService_Delete(t *testing.T) {
 	// Arrange
 	tests := []struct {
