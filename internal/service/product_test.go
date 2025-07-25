@@ -252,3 +252,65 @@ func TestProductService_GetByID(t *testing.T) {
 		})
 	}
 }
+
+func TestProductService_Delete(t *testing.T) {
+	// Arrange
+	tests := []struct {
+		testName        string
+		idParam         int
+		repositoryError error
+		expectedError   error
+	}{
+		{
+			testName:        "Success: should delete the product with the given ID",
+			idParam:         1,
+			repositoryError: nil,
+			expectedError:   nil,
+		},
+		{
+			testName:        "Fail: should return a not found error",
+			idParam:         1,
+			repositoryError: httperrors.NotFoundError{Message: "Product not found"},
+			expectedError:   httperrors.NotFoundError{Message: "Product not found"},
+		},
+		{
+			testName:        "Fail: should return a not found error",
+			idParam:         1,
+			repositoryError: httperrors.NotFoundError{Message: "Product not found"},
+			expectedError:   httperrors.NotFoundError{Message: "Product not found"},
+		},
+		{
+			testName:        "Fail: should return a conflict error",
+			idParam:         1,
+			repositoryError: httperrors.ConflictError{Message: "The product to delete is still referenced by some product records"},
+			expectedError:   httperrors.ConflictError{Message: "The product to delete is still referenced by some product records"},
+		},
+		{
+			testName:        "Fail: should return a DB Error",
+			idParam:         1,
+			repositoryError: errors.New("db error"),
+			expectedError:   errors.New("db error"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			t.Parallel()
+
+			// Arrange
+			repositoryMock := mocks.ProductRepositoryDBMock{}
+			service := service.NewProductServiceDefault(&repositoryMock)
+
+			repositoryMock.
+				On("Delete", mock.Anything, tc.idParam).
+				Return(tc.repositoryError)
+
+			// Act
+			err := service.Delete(context.Background(), tc.idParam)
+
+			// Assert
+			assert.Equal(t, tc.expectedError, err)
+			repositoryMock.AssertExpectations(t)
+		})
+	}
+}
