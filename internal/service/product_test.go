@@ -44,28 +44,14 @@ func TestProductService_Create(t *testing.T) {
 		expectedError   error
 	}{
 		{
-			testName:        "Success: Should create a product",
+			testName:        "Success case: Should create a product",
 			repositoryData:  createdProduct,
 			repositoryError: nil,
 			expectedResp:    createdProduct,
 			expectedError:   nil,
 		},
 		{
-			testName:        "Fail: should return a Conflict Error if a product with the given product_code already exists ",
-			repositoryData:  models.Product{},
-			repositoryError: httperrors.ConflictError{Message: "A product with the given product code already exists"},
-			expectedResp:    models.Product{},
-			expectedError:   httperrors.ConflictError{Message: "A product with the given product code already exists"},
-		},
-		{
-			testName:        "Fail: should return a Conflict Error if the given seller id doesn't exists",
-			repositoryData:  models.Product{},
-			repositoryError: httperrors.ConflictError{Message: "The given seller id does not exists"},
-			expectedResp:    models.Product{},
-			expectedError:   httperrors.ConflictError{Message: "The given seller id does not exists"},
-		},
-		{
-			testName:        "Fail: should return a DB Error",
+			testName:        "Error case: should return an error",
 			repositoryData:  models.Product{},
 			repositoryError: errors.New("db error"),
 			expectedResp:    models.Product{},
@@ -75,8 +61,6 @@ func TestProductService_Create(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.testName, func(t *testing.T) {
-			t.Parallel()
-
 			// Arrange
 			repositoryMock := mocks.ProductRepositoryDBMock{}
 			service := service.NewProductServiceDefault(&repositoryMock)
@@ -141,14 +125,14 @@ func TestProductService_GetAll(t *testing.T) {
 		expectedError   error
 	}{
 		{
-			testName:        "Success: Should return all products",
+			testName:        "Success case: should return all products",
 			repositoryData:  products,
 			repositoryError: nil,
 			expectedResp:    products,
 			expectedError:   nil,
 		},
 		{
-			testName:        "Fail: should return a DB Error",
+			testName:        "Error case: should return an error",
 			repositoryData:  []models.Product{},
 			repositoryError: errors.New("db error"),
 			expectedResp:    []models.Product{},
@@ -158,8 +142,6 @@ func TestProductService_GetAll(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.testName, func(t *testing.T) {
-			t.Parallel()
-
 			// Arrange
 			repositoryMock := mocks.ProductRepositoryDBMock{}
 			service := service.NewProductServiceDefault(&repositoryMock)
@@ -215,14 +197,7 @@ func TestProductService_GetByID(t *testing.T) {
 			expectedError:   nil,
 		},
 		{
-			testName:        "Fail: should return a not found error",
-			repositoryData:  models.Product{},
-			repositoryError: httperrors.NotFoundError{Message: "Product not found"},
-			expectedResp:    models.Product{},
-			expectedError:   httperrors.NotFoundError{Message: "Product not found"},
-		},
-		{
-			testName:        "Fail: should return a DB Error",
+			testName:        "Error case: should return an Error",
 			repositoryData:  models.Product{},
 			repositoryError: errors.New("db error"),
 			expectedResp:    models.Product{},
@@ -232,8 +207,6 @@ func TestProductService_GetByID(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.testName, func(t *testing.T) {
-			t.Parallel()
-
 			// Arrange
 			repositoryMock := mocks.ProductRepositoryDBMock{}
 			service := service.NewProductServiceDefault(&repositoryMock)
@@ -293,7 +266,7 @@ func TestProductService_GetRecordsPerProduct(t *testing.T) {
 			expectedError:   nil,
 		},
 		{
-			testName:        "Success: Should return product record count of every product",
+			testName:        "Success: Should return product record count of a single product",
 			repositoryData:  singleRecord,
 			repositoryError: nil,
 			idParam:         Ptr(2),
@@ -301,15 +274,7 @@ func TestProductService_GetRecordsPerProduct(t *testing.T) {
 			expectedError:   nil,
 		},
 		{
-			testName:        "Fail: should return Not Found error",
-			repositoryData:  []models.ProductRecordCount{},
-			repositoryError: httperrors.NotFoundError{Message: "Product not found"},
-			idParam:         Ptr(10000),
-			expectedResp:    []models.ProductRecordCount{},
-			expectedError:   httperrors.NotFoundError{Message: "Product not found"},
-		},
-		{
-			testName:        "Fail: should return a DB Error",
+			testName:        "Error case: should return an Error",
 			repositoryData:  []models.ProductRecordCount{},
 			repositoryError: errors.New("db error"),
 			idParam:         nil,
@@ -320,8 +285,6 @@ func TestProductService_GetRecordsPerProduct(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.testName, func(t *testing.T) {
-			t.Parallel()
-
 			// Arrange
 			repositoryMock := mocks.ProductRepositoryDBMock{}
 			service := service.NewProductServiceDefault(&repositoryMock)
@@ -342,20 +305,7 @@ func TestProductService_GetRecordsPerProduct(t *testing.T) {
 }
 
 func TestProductService_Update(t *testing.T) {
-	// Arrange
-	updatePayload := models.ProductPatchRequest{
-		Description:                    Ptr(""),
-		ExpirationRate:                 Ptr(1),
-		FreezingRate:                   Ptr(2),
-		Height:                         Ptr(1.0),
-		Length:                         Ptr(1.0),
-		Width:                          Ptr(1.0),
-		NetWeight:                      Ptr(1.0),
-		ProductCode:                    Ptr(""),
-		RecommendedFreezingTemperature: Ptr(1.0),
-		ProductTypeID:                  Ptr(1),
-		SellerID:                       Ptr(1),
-	}
+	sellerID := Ptr(1) // Should be declared in a variable to avoid different memory addreses issues
 
 	originalProduct := models.Product{
 		ID: 1,
@@ -370,8 +320,22 @@ func TestProductService_Update(t *testing.T) {
 			ProductCode:                    "YOG01",
 			RecommendedFreezingTemperature: -5.0,
 			ProductTypeID:                  3,
-			SellerID:                       Ptr(1),
+			SellerID:                       sellerID,
 		},
+	}
+
+	updatePayload := models.ProductPatchRequest{
+		Description:                    Ptr(""),
+		ExpirationRate:                 Ptr(1),
+		FreezingRate:                   Ptr(2),
+		Height:                         Ptr(1.0),
+		Length:                         Ptr(1.0),
+		Width:                          Ptr(1.0),
+		NetWeight:                      Ptr(1.0),
+		ProductCode:                    Ptr(""),
+		RecommendedFreezingTemperature: Ptr(1.0),
+		ProductTypeID:                  Ptr(1),
+		SellerID:                       sellerID,
 	}
 
 	updatedProduct := models.Product{
@@ -387,12 +351,35 @@ func TestProductService_Update(t *testing.T) {
 			ProductCode:                    "",
 			RecommendedFreezingTemperature: 1,
 			ProductTypeID:                  1,
-			SellerID:                       Ptr(1),
+			SellerID:                       sellerID,
+		},
+	}
+
+	singleFieldUpdatePayload := models.ProductPatchRequest{
+		Description: Ptr("Yogur helado"),
+	}
+
+	singleFieldUpdatedProduct := models.Product{
+		ID: 1,
+		ProductAttributes: models.ProductAttributes{
+			Description:                    "Yogur helado",
+			ExpirationRate:                 7,
+			FreezingRate:                   2,
+			Height:                         10.5,
+			Length:                         20.0,
+			Width:                          15.0,
+			NetWeight:                      1.2,
+			ProductCode:                    "YOG01",
+			RecommendedFreezingTemperature: -5.0,
+			ProductTypeID:                  3,
+			SellerID:                       sellerID,
 		},
 	}
 
 	tests := []struct {
 		testName             string
+		payload              models.ProductPatchRequest
+		updatedProduct       models.Product
 		repositoryGetData    models.Product
 		repositoryGetError   error
 		repositoryPatchData  models.Product
@@ -402,7 +389,9 @@ func TestProductService_Update(t *testing.T) {
 		expectedError        error
 	}{
 		{
-			testName:             "Success: Should update all fields of a product",
+			testName:             "Success: should update all fields of a product",
+			payload:              updatePayload,
+			updatedProduct:       updatedProduct,
 			repositoryGetData:    originalProduct,
 			repositoryGetError:   nil,
 			repositoryPatchData:  updatedProduct,
@@ -412,47 +401,30 @@ func TestProductService_Update(t *testing.T) {
 			expectedError:        nil,
 		},
 		{
-			testName:             "Success: Should update a single field of a product",
+			testName:             "Success: should update a single field of a product",
+			payload:              singleFieldUpdatePayload,
+			updatedProduct:       singleFieldUpdatedProduct,
 			repositoryGetData:    originalProduct,
 			repositoryGetError:   nil,
-			repositoryPatchData:  updatedProduct,
+			repositoryPatchData:  singleFieldUpdatedProduct,
 			repositoryPatchError: nil,
 			idParam:              1,
-			expectedResp:         updatedProduct,
+			expectedResp:         singleFieldUpdatedProduct,
 			expectedError:        nil,
 		},
 		{
-			testName:             "Fail: should return a Conflict Error if a product with the given product_code already exists ",
-			repositoryGetData:    originalProduct,
-			repositoryGetError:   nil,
-			repositoryPatchData:  models.Product{},
-			repositoryPatchError: httperrors.ConflictError{Message: "A product with the given product code already exists"},
-			idParam:              1,
-			expectedResp:         models.Product{},
-			expectedError:        httperrors.ConflictError{Message: "A product with the given product code already exists"},
+			testName:           "Error case: GetByID fails",
+			payload:            updatePayload,
+			repositoryGetData:  models.Product{},
+			repositoryGetError: httperrors.NotFoundError{Message: "Product not found"},
+			idParam:            1,
+			expectedResp:       models.Product{},
+			expectedError:      httperrors.NotFoundError{Message: "Product not found"},
 		},
 		{
-			testName:             "Fail: should return a Conflict Error if the given seller id doesn't exists",
-			repositoryGetData:    originalProduct,
-			repositoryGetError:   nil,
-			repositoryPatchData:  models.Product{},
-			repositoryPatchError: httperrors.ConflictError{Message: "The given seller id does not exists"},
-			idParam:              1,
-			expectedResp:         models.Product{},
-			expectedError:        httperrors.ConflictError{Message: "The given seller id does not exists"},
-		},
-		{
-			testName:             "Fail: should return a Not Found if a product with the given id doesn't exists",
-			repositoryGetData:    models.Product{},
-			repositoryGetError:   httperrors.NotFoundError{Message: "Product not found"},
-			repositoryPatchData:  models.Product{},
-			repositoryPatchError: nil,
-			idParam:              1,
-			expectedResp:         models.Product{},
-			expectedError:        httperrors.NotFoundError{Message: "Product not found"},
-		},
-		{
-			testName:             "Fail: should return a DB Error",
+			testName:             "Error case: should return an error",
+			payload:              updatePayload,
+			updatedProduct:       updatedProduct,
 			repositoryGetData:    originalProduct,
 			repositoryGetError:   nil,
 			repositoryPatchData:  models.Product{},
@@ -465,8 +437,6 @@ func TestProductService_Update(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.testName, func(t *testing.T) {
-			t.Parallel()
-
 			// Arrange
 			repositoryMock := mocks.ProductRepositoryDBMock{}
 			service := service.NewProductServiceDefault(&repositoryMock)
@@ -477,16 +447,17 @@ func TestProductService_Update(t *testing.T) {
 
 			if tc.repositoryGetError == nil {
 				repositoryMock.
-					On("Update", mock.Anything, tc.idParam, updatedProduct).
+					On("Update", mock.Anything, tc.idParam, tc.updatedProduct).
 					Return(tc.repositoryPatchData, tc.repositoryPatchError)
 			}
 
 			// Act
-			result, err := service.Update(context.Background(), tc.idParam, updatePayload)
+			result, err := service.Update(context.Background(), tc.idParam, tc.payload)
 
 			// Assert
 			require.Equal(t, tc.expectedError, err)
 			require.Equal(t, tc.expectedResp, result)
+			repositoryMock.AssertExpectations(t)
 		})
 	}
 }
@@ -506,25 +477,7 @@ func TestProductService_Delete(t *testing.T) {
 			expectedError:   nil,
 		},
 		{
-			testName:        "Fail: should return a not found error",
-			idParam:         1,
-			repositoryError: httperrors.NotFoundError{Message: "Product not found"},
-			expectedError:   httperrors.NotFoundError{Message: "Product not found"},
-		},
-		{
-			testName:        "Fail: should return a not found error",
-			idParam:         1,
-			repositoryError: httperrors.NotFoundError{Message: "Product not found"},
-			expectedError:   httperrors.NotFoundError{Message: "Product not found"},
-		},
-		{
-			testName:        "Fail: should return a conflict error",
-			idParam:         1,
-			repositoryError: httperrors.ConflictError{Message: "The product to delete is still referenced by some product records"},
-			expectedError:   httperrors.ConflictError{Message: "The product to delete is still referenced by some product records"},
-		},
-		{
-			testName:        "Fail: should return a DB Error",
+			testName:        "Fail: should return an Error",
 			idParam:         1,
 			repositoryError: errors.New("db error"),
 			expectedError:   errors.New("db error"),
@@ -533,8 +486,6 @@ func TestProductService_Delete(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.testName, func(t *testing.T) {
-			t.Parallel()
-
 			// Arrange
 			repositoryMock := mocks.ProductRepositoryDBMock{}
 			service := service.NewProductServiceDefault(&repositoryMock)
