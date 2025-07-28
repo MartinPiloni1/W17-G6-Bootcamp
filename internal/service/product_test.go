@@ -14,11 +14,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Verifies the behavior of the HTTP handler responsible for creating a new Product. It covers:
+// Verifies the behavior of the service layer responsible for creating a new Product. It covers:
 // - Successful creation
 // - Error propagation from the repository layer
 func TestProductService_Create(t *testing.T) {
-	// Define the products used in common by the test cases
+	// Define the product used in common by the test cases
 	newProduct := models.ProductAttributes{
 		Description:                    "",
 		ExpirationRate:                 1,
@@ -88,8 +88,12 @@ func TestProductService_Create(t *testing.T) {
 	}
 }
 
+// Verifies the behavior of the service layer responsible for retrieving all products.
+// It covers:
+// - Successful retrieval of multiple products
+// - Error propagation from the repository layer
 func TestProductService_GetAll(t *testing.T) {
-	// Arrange
+	// Define the products used in common by the test cases
 	products := []models.Product{
 		{
 			ID: 1,
@@ -125,25 +129,31 @@ func TestProductService_GetAll(t *testing.T) {
 		},
 	}
 
+	// Each test case is constructed by:
+	// testName            — human‐readable description
+	// repositoryData      — the Products slice returned by the mocked repository
+	// repositoryError     — the error returned by the mocked repository
+	// expectedData        — the data we expect the service to produce
+	// expectedError       — the error we expect the service to produce
 	tests := []struct {
 		testName        string
 		repositoryData  []models.Product
 		repositoryError error
-		expectedResp    []models.Product
+		expectedData    []models.Product
 		expectedError   error
 	}{
 		{
 			testName:        "Success case: should return all products",
 			repositoryData:  products,
 			repositoryError: nil,
-			expectedResp:    products,
+			expectedData:    products,
 			expectedError:   nil,
 		},
 		{
 			testName:        "Error case: should return an error",
 			repositoryData:  []models.Product{},
 			repositoryError: errors.New("db error"),
-			expectedResp:    []models.Product{},
+			expectedData:    []models.Product{},
 			expectedError:   errors.New("db error"),
 		},
 	}
@@ -163,7 +173,7 @@ func TestProductService_GetAll(t *testing.T) {
 
 			// Assert
 			require.Equal(t, tc.expectedError, err)
-			require.Equal(t, tc.expectedResp, result)
+			require.Equal(t, tc.expectedData, result)
 			repositoryMock.AssertExpectations(t)
 		})
 	}
