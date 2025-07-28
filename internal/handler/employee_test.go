@@ -16,6 +16,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// getValidEmployeeToCreate returns a valid set of employee attributes for creation tests.
 func getValidEmployeeToCreate() models.EmployeeAttributes {
 	return models.EmployeeAttributes{
 		CardNumberID: "10000000",
@@ -25,6 +26,7 @@ func getValidEmployeeToCreate() models.EmployeeAttributes {
 	}
 }
 
+// getValidEmployeeCreated returns a valid Employee with the given ID and attributes.
 func getValidEmployeeCreated(id int, attrs models.EmployeeAttributes) models.Employee {
 	return models.Employee{
 		Id:                 id,
@@ -32,6 +34,7 @@ func getValidEmployeeCreated(id int, attrs models.EmployeeAttributes) models.Emp
 	}
 }
 
+// createRequestWithBody constructs an HTTP request with a marshaled JSON body.
 func createRequestWithBody(method, url string, data interface{}) *http.Request {
 	body, err := json.Marshal(data)
 	if err != nil {
@@ -42,6 +45,7 @@ func createRequestWithBody(method, url string, data interface{}) *http.Request {
 	return req
 }
 
+// createRequestWithContext adds a URL parameter to the request context for routing.
 func createRequestWithContext(method, url, paramKey, paramValue string) *http.Request {
 	req := httptest.NewRequest(method, url, nil)
 	rctx := chi.NewRouteContext()
@@ -50,6 +54,7 @@ func createRequestWithContext(method, url, paramKey, paramValue string) *http.Re
 	return req
 }
 
+// createRequestWithBodyAndContext builds a request with both a JSON body and route context.
 func createRequestWithBodyAndContext(method, url string, data interface{}, paramKey, paramValue string) *http.Request {
 	body, err := json.Marshal(data)
 	if err != nil {
@@ -63,7 +68,9 @@ func createRequestWithBodyAndContext(method, url string, data interface{}, param
 	return req
 }
 
+// TestEmployeeHandler_Create tests the Create handler for various scenarios.
 func TestEmployeeHandler_Create(t *testing.T) {
+	// Tests successful creation of an employee.
 	t.Run("create_ok: success to create employee", func(t *testing.T) {
 		// arrange
 		employee := getValidEmployeeToCreate()
@@ -89,12 +96,13 @@ func TestEmployeeHandler_Create(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
+	// Tests that creating with missing required fields returns 422 and does not call the service.
 	t.Run("create_fail: fail to create employee - missing required field", func(t *testing.T) {
 		// arrange
 		invalidEmployee := models.EmployeeAttributes{
 			CardNumberID: "10000000",
 			FirstName:    "Thomas",
-			// Missing LastName
+			// missing LastName
 			WarehouseID: 1,
 		}
 
@@ -116,6 +124,7 @@ func TestEmployeeHandler_Create(t *testing.T) {
 		mockService.AssertNotCalled(t, "Create")
 	})
 
+	// Tests that attempting to create a conflicting card number returns 409 Conflict.
 	t.Run("create_conflict: fail to create employee - conflict card number", func(t *testing.T) {
 		// arrange
 		employee := getValidEmployeeToCreate()
@@ -139,9 +148,28 @@ func TestEmployeeHandler_Create(t *testing.T) {
 		require.Equal(t, expectedHeaders, rr.Header())
 		mockService.AssertExpectations(t)
 	})
+
+	// Tests that an invalid JSON body results in a 400 Bad Request.
+	t.Run("create_bad_request: invalid json body", func(t *testing.T) {
+		// arrange
+		mockService := &serviceMocks.MockEmployeeService{}
+		h := handler.NewEmployeeHandler(mockService)
+		rr := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPost, "/employees", bytes.NewBufferString("{bad json"))
+		req.Header.Set("Content-Type", "application/json")
+
+		// act
+		h.Create()(rr, req)
+
+		// assert
+		require.Equal(t, http.StatusBadRequest, rr.Code)
+		require.Contains(t, rr.Body.String(), "Invalid JSON body")
+	})
 }
 
+// TestEmployeeHandler_Get tests retrieval (find) endpoints for employees.
 func TestEmployeeHandler_Get(t *testing.T) {
+	// Tests retrieval of all employees returns status OK and correct data.
 	t.Run("find_all: success get all employees", func(t *testing.T) {
 		// arrange
 		employeeAFields := getValidEmployeeToCreate()
@@ -175,6 +203,7 @@ func TestEmployeeHandler_Get(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
+	// Tests retrieval of a single employee by an existing ID returns correct data.
 	t.Run("find_by_id_existent: success get employee by existent id", func(t *testing.T) {
 		// arrange
 		expectedEmployee := getValidEmployeeCreated(1, getValidEmployeeToCreate())
@@ -198,6 +227,7 @@ func TestEmployeeHandler_Get(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
+	// Tests retrieval by a non-existent ID returns 404 Not Found.
 	t.Run("find_by_id_non_existent: fail - get employee by non-existent id", func(t *testing.T) {
 		// arrange
 		notFoundError := httperrors.NotFoundError{Message: "Employee not found"}
@@ -222,7 +252,9 @@ func TestEmployeeHandler_Get(t *testing.T) {
 	})
 }
 
+// TestEmployeeHandler_Update tests employee update logic for success and not-found cases.
 func TestEmployeeHandler_Update(t *testing.T) {
+	// Tests successful update of an employee.
 	t.Run("update_ok: success update employee", func(t *testing.T) {
 		// arrange
 		employee := getValidEmployeeToCreate()
@@ -248,6 +280,7 @@ func TestEmployeeHandler_Update(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
+	// Tests that updating a non-existent employee returns 404 Not Found.
 	t.Run("update_non_existent: fail - update non-existent employee", func(t *testing.T) {
 		// arrange
 		employee := getValidEmployeeToCreate()
@@ -273,7 +306,9 @@ func TestEmployeeHandler_Update(t *testing.T) {
 	})
 }
 
+// TestEmployeeHandler_Delete tests the Delete handler for both successful and not-found cases.
 func TestEmployeeHandler_Delete(t *testing.T) {
+	// Tests successful deletion of an employee results in 204 No Content.
 	t.Run("delete_ok: success delete employee", func(t *testing.T) {
 		// arrange
 		mockService := &serviceMocks.MockEmployeeService{}
@@ -292,6 +327,7 @@ func TestEmployeeHandler_Delete(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
+	// Tests deletion of a non-existent employee returns 404 Not Found.
 	t.Run("delete_non_existent: fail - delete non-existent employee", func(t *testing.T) {
 		// arrange
 		notFoundError := httperrors.NotFoundError{Message: "Employee not found"}
@@ -315,7 +351,9 @@ func TestEmployeeHandler_Delete(t *testing.T) {
 	})
 }
 
+// TestEmployeeHandler_GetInboundOrderReport tests the report handler for inbound orders report generation.
 func TestEmployeeHandler_GetInboundOrderReport(t *testing.T) {
+	// Tests report generation for all employees (no 'id' query param).
 	t.Run("report_all: success - sin id", func(t *testing.T) {
 		// arrange
 		mockService := &serviceMocks.MockEmployeeService{}
@@ -355,6 +393,7 @@ func TestEmployeeHandler_GetInboundOrderReport(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
+	// Tests report generation for a specific employee by valid 'id'.
 	t.Run("report_by_id: success - con id válido", func(t *testing.T) {
 		// arrange
 		mockService := &serviceMocks.MockEmployeeService{}
@@ -384,6 +423,7 @@ func TestEmployeeHandler_GetInboundOrderReport(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
+	// Tests that an invalid 'id' query returns 400 Bad Request.
 	t.Run("report_invalid_id: fail - id inválido", func(t *testing.T) {
 		mockService := &serviceMocks.MockEmployeeService{}
 		req := httptest.NewRequest(http.MethodGet, "/employees/report-inbound-orders?id=foo", nil)
@@ -398,8 +438,9 @@ func TestEmployeeHandler_GetInboundOrderReport(t *testing.T) {
 		require.Contains(t, rr.Body.String(), "Invalid employee_id")
 	})
 
+	// Tests report generation returns a service error (404 Not Found).
 	t.Run("report_service_error: fail - error del service", func(t *testing.T) {
-		notFoundErr := httperrors.NotFoundError{Message: "Employee(s) not found"}
+		notFoundErr := httperrors.NotFoundError{Message: "Employee/s not found"}
 		mockService := &serviceMocks.MockEmployeeService{}
 		mockService.On("ReportInboundOrders", 1).Return([]models.EmployeeWithInboundCount{}, notFoundErr)
 		req := httptest.NewRequest(http.MethodGet, "/employees/report-inbound-orders?id=1", nil)
@@ -411,7 +452,7 @@ func TestEmployeeHandler_GetInboundOrderReport(t *testing.T) {
 
 		// assert
 		require.Equal(t, http.StatusNotFound, rr.Code)
-		require.Contains(t, rr.Body.String(), "Employee(s) not found")
+		require.Contains(t, rr.Body.String(), "Employee/s not found")
 		require.Equal(t, http.Header{"Content-Type": []string{"application/json"}}, rr.Header())
 		mockService.AssertExpectations(t)
 	})
