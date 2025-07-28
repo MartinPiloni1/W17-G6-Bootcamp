@@ -113,6 +113,7 @@ func TestProductHandler_Create(t *testing.T) {
 	// serviceData         — the Product object returned by the mocked service
 	// serviceError        — the error returned by the mocked service
 	// expectedCode        — HTTP status code we expect the handler to produce
+	// expectedHeaders     — HTTP headers we expect in the HTTP response
 	// expectedBody        — JSON body (string) we expect in the HTTP response
 	tests := []struct {
 		testName          string
@@ -122,6 +123,7 @@ func TestProductHandler_Create(t *testing.T) {
 		serviceData       models.Product
 		serviceError      error
 		expectedCode      int
+		expectedHeaders   http.Header
 		expectedBody      string
 	}{
 		{
@@ -132,6 +134,7 @@ func TestProductHandler_Create(t *testing.T) {
 			serviceData:       newProduct,
 			serviceError:      nil,
 			expectedCode:      http.StatusCreated,
+			expectedHeaders:   http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 			{
 				"data": {
@@ -158,6 +161,7 @@ func TestProductHandler_Create(t *testing.T) {
 			serviceData:       models.Product{},
 			serviceError:      nil,
 			expectedCode:      http.StatusUnprocessableEntity,
+			expectedHeaders:   http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 				{
 					"status": "Unprocessable Entity",
@@ -173,6 +177,7 @@ func TestProductHandler_Create(t *testing.T) {
 			serviceData:       models.Product{},
 			serviceError:      nil,
 			expectedCode:      http.StatusUnprocessableEntity,
+			expectedHeaders:   http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 				{
 					"status": "Unprocessable Entity",
@@ -188,6 +193,7 @@ func TestProductHandler_Create(t *testing.T) {
 			serviceData:       models.Product{},
 			serviceError:      nil,
 			expectedCode:      http.StatusBadRequest,
+			expectedHeaders:   http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 				{
 					"status": "Bad Request",
@@ -203,6 +209,7 @@ func TestProductHandler_Create(t *testing.T) {
 			serviceData:       models.Product{},
 			serviceError:      errors.New("db error"),
 			expectedCode:      http.StatusInternalServerError,
+			expectedHeaders:   http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 				{
 					"status": "Internal Server Error",
@@ -225,6 +232,7 @@ func TestProductHandler_Create(t *testing.T) {
 
 			handler := handler.NewProductHandler(serviceMock)
 			request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(tc.payload))
+			request.Header.Set("Content-Type", "application/json")
 			response := httptest.NewRecorder()
 
 			// Act
@@ -232,6 +240,7 @@ func TestProductHandler_Create(t *testing.T) {
 
 			// Assert
 			require.Equal(t, tc.expectedCode, response.Code)
+			require.Equal(t, tc.expectedHeaders, response.Header())
 			require.JSONEq(t, tc.expectedBody, response.Body.String())
 			serviceMock.AssertExpectations(t)
 		})
@@ -284,19 +293,22 @@ func TestProductHandler_GetAll(t *testing.T) {
 	// serviceData         — the Products slice returned by the mocked service
 	// serviceError        — the error returned by the mocked service
 	// expectedCode        — HTTP status code we expect the handler to produce
+	// expectedHeaders     — HTTP headers we expect in the HTTP response
 	// expectedBody        — JSON body (string) we expect in the HTTP response
 	tests := []struct {
-		testName     string
-		serviceData  []models.Product
-		serviceError error
-		expectedCode int
-		expectedBody string
+		testName        string
+		serviceData     []models.Product
+		serviceError    error
+		expectedCode    int
+		expectedHeaders http.Header
+		expectedBody    string
 	}{
 		{
-			testName:     "Success: Get all products",
-			serviceData:  []models.Product{product1, product2},
-			serviceError: nil,
-			expectedCode: http.StatusOK,
+			testName:        "Success: Get all products",
+			serviceData:     []models.Product{product1, product2},
+			serviceError:    nil,
+			expectedCode:    http.StatusOK,
+			expectedHeaders: http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 			{
 				"data": [
@@ -332,10 +344,11 @@ func TestProductHandler_GetAll(t *testing.T) {
 			}`,
 		},
 		{
-			testName:     "Success: Get an empty list if the DB is empty",
-			serviceData:  []models.Product{},
-			serviceError: nil,
-			expectedCode: http.StatusOK,
+			testName:        "Success: Get an empty list if the DB is empty",
+			serviceData:     []models.Product{},
+			serviceError:    nil,
+			expectedCode:    http.StatusOK,
+			expectedHeaders: http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 				{
 					"data": []
@@ -343,10 +356,11 @@ func TestProductHandler_GetAll(t *testing.T) {
 			`,
 		},
 		{
-			testName:     "Error case: Process an error from the service layer",
-			serviceData:  nil,
-			serviceError: errors.New("db error"),
-			expectedCode: http.StatusInternalServerError,
+			testName:        "Error case: Process an error from the service layer",
+			serviceData:     nil,
+			serviceError:    errors.New("db error"),
+			expectedCode:    http.StatusInternalServerError,
+			expectedHeaders: http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 				{
 					"status": "Internal Server Error",
@@ -355,21 +369,23 @@ func TestProductHandler_GetAll(t *testing.T) {
 			`,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.testName, func(t *testing.T) {
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
 			// Arrange
 			serviceMock := &mocks.ProductServiceMock{}
-			serviceMock.On("GetAll", mock.Anything).Return(tt.serviceData, tt.serviceError)
+			serviceMock.On("GetAll", mock.Anything).Return(tc.serviceData, tc.serviceError)
 			handler := handler.NewProductHandler(serviceMock)
 			request := httptest.NewRequest(http.MethodGet, "/", nil)
+			request.Header.Set("Content-Type", "application/json")
 			response := httptest.NewRecorder()
 
 			// Act
 			handler.GetAll()(response, request)
 
 			// Assert
-			require.Equal(t, tt.expectedCode, response.Code)
-			require.JSONEq(t, tt.expectedBody, response.Body.String())
+			require.Equal(t, tc.expectedCode, response.Code)
+			require.Equal(t, tc.expectedHeaders, response.Header())
+			require.JSONEq(t, tc.expectedBody, response.Body.String())
 			serviceMock.AssertExpectations(t)
 		})
 	}
@@ -406,23 +422,26 @@ func TestProductHandler_GetById(t *testing.T) {
 	// serviceData         — the Product object returned by the mocked service
 	// serviceError        — the error returned by the mocked service
 	// expectedCode        — HTTP status code we expect the handler to produce
+	// expectedHeaders     — HTTP headers we expect in the HTTP response
 	// expectedBody        — JSON body (string) we expect in the HTTP response
 	tests := []struct {
-		testName     string
-		id           int
-		isIdError    bool
-		serviceData  models.Product
-		serviceError error
-		expectedCode int
-		expectedBody string
+		testName        string
+		id              int
+		isIdError       bool
+		serviceData     models.Product
+		serviceError    error
+		expectedCode    int
+		expectedHeaders http.Header
+		expectedBody    string
 	}{
 		{
-			testName:     "Success: Get product with ID 1",
-			id:           1,
-			isIdError:    false,
-			serviceData:  product,
-			serviceError: nil,
-			expectedCode: http.StatusOK,
+			testName:        "Success: Get product with ID 1",
+			id:              1,
+			isIdError:       false,
+			serviceData:     product,
+			serviceError:    nil,
+			expectedCode:    http.StatusOK,
+			expectedHeaders: http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 			{
 				"data": {
@@ -442,12 +461,13 @@ func TestProductHandler_GetById(t *testing.T) {
 			}`,
 		},
 		{
-			testName:     "Error case: Invalid ID is given",
-			id:           -1,
-			isIdError:    true,
-			serviceData:  models.Product{},
-			serviceError: httperrors.NotFoundError{Message: "Invalid ID"},
-			expectedCode: http.StatusBadRequest,
+			testName:        "Error case: Invalid ID is given",
+			id:              -1,
+			isIdError:       true,
+			serviceData:     models.Product{},
+			serviceError:    httperrors.NotFoundError{Message: "Invalid ID"},
+			expectedCode:    http.StatusBadRequest,
+			expectedHeaders: http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 				{
 					"status": "Bad Request",
@@ -456,12 +476,13 @@ func TestProductHandler_GetById(t *testing.T) {
 			`,
 		},
 		{
-			testName:     "Error case: Process an error from the service layer",
-			id:           1,
-			isIdError:    false,
-			serviceData:  models.Product{},
-			serviceError: errors.New("db error"),
-			expectedCode: http.StatusInternalServerError,
+			testName:        "Error case: Process an error from the service layer",
+			id:              1,
+			isIdError:       false,
+			serviceData:     models.Product{},
+			serviceError:    errors.New("db error"),
+			expectedCode:    http.StatusInternalServerError,
+			expectedHeaders: http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 				{
 					"status": "Internal Server Error",
@@ -490,6 +511,7 @@ func TestProductHandler_GetById(t *testing.T) {
 			routeCtx := chi.NewRouteContext()
 			routeCtx.URLParams.Add("id", strconv.Itoa(tc.id))
 			request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, routeCtx))
+			request.Header.Set("Content-Type", "application/json")
 
 			response := httptest.NewRecorder()
 
@@ -498,6 +520,7 @@ func TestProductHandler_GetById(t *testing.T) {
 
 			// Assert
 			require.Equal(t, tc.expectedCode, response.Code)
+			require.Equal(t, tc.expectedHeaders, response.Header())
 			require.JSONEq(t, tc.expectedBody, response.Body.String())
 			serviceMock.AssertExpectations(t)
 		})
@@ -531,23 +554,26 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 	// serviceData         — the records per product slice returned by the mocked service
 	// serviceError        — the error returned by the mocked service
 	// expectedCode        — HTTP status code we expect the handler to produce
+	// expectedHeaders     — HTTP headers we expect in the HTTP response
 	// expectedBody        — JSON body (string) we expect in the HTTP response
 	tests := []struct {
-		testName     string
-		id           *int
-		isIdError    bool
-		serviceData  []models.ProductRecordCount
-		serviceError error
-		expectedCode int
-		expectedBody string
+		testName        string
+		id              *int
+		isIdError       bool
+		serviceData     []models.ProductRecordCount
+		serviceError    error
+		expectedCode    int
+		expectedHeaders http.Header
+		expectedBody    string
 	}{
 		{
-			testName:     "Success: Get all product if no ID query param is given",
-			id:           nil,
-			isIdError:    false,
-			serviceData:  []models.ProductRecordCount{record1, record2},
-			serviceError: nil,
-			expectedCode: http.StatusOK,
+			testName:        "Success: Get all product if no ID query param is given",
+			id:              nil,
+			isIdError:       false,
+			serviceData:     []models.ProductRecordCount{record1, record2},
+			serviceError:    nil,
+			expectedCode:    http.StatusOK,
+			expectedHeaders: http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 			{
 				"data": [
@@ -565,12 +591,13 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 			}`,
 		},
 		{
-			testName:     "Success: Get a single product if ID query param is given",
-			id:           utils.Ptr(2),
-			isIdError:    false,
-			serviceData:  []models.ProductRecordCount{record2},
-			serviceError: nil,
-			expectedCode: http.StatusOK,
+			testName:        "Success: Get a single product if ID query param is given",
+			id:              utils.Ptr(2),
+			isIdError:       false,
+			serviceData:     []models.ProductRecordCount{record2},
+			serviceError:    nil,
+			expectedCode:    http.StatusOK,
+			expectedHeaders: http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 			{
 				"data": [
@@ -583,12 +610,13 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 			}`,
 		},
 		{
-			testName:     "Error case: Invalid ID is given",
-			id:           utils.Ptr(-1),
-			isIdError:    true,
-			serviceData:  nil,
-			serviceError: errors.New("invalid id"),
-			expectedCode: http.StatusBadRequest,
+			testName:        "Error case: Invalid ID is given",
+			id:              utils.Ptr(-1),
+			isIdError:       true,
+			serviceData:     nil,
+			serviceError:    errors.New("invalid id"),
+			expectedCode:    http.StatusBadRequest,
+			expectedHeaders: http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 			{
 				"status": "Bad Request",
@@ -596,12 +624,13 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 			}`,
 		},
 		{
-			testName:     "Error case: Process an error from the service layer",
-			id:           utils.Ptr(1),
-			isIdError:    false,
-			serviceData:  nil,
-			serviceError: errors.New("db error"),
-			expectedCode: http.StatusInternalServerError,
+			testName:        "Error case: Process an error from the service layer",
+			id:              utils.Ptr(1),
+			isIdError:       false,
+			serviceData:     nil,
+			serviceError:    errors.New("db error"),
+			expectedCode:    http.StatusInternalServerError,
+			expectedHeaders: http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 				{
 					"status": "Internal Server Error",
@@ -630,6 +659,7 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 			}
 
 			request := httptest.NewRequest(http.MethodGet, url, nil)
+			request.Header.Set("Content-Type", "application/json")
 			response := httptest.NewRecorder()
 
 			// Act
@@ -637,6 +667,7 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 
 			// Assert
 			require.Equal(t, tc.expectedCode, response.Code)
+			require.Equal(t, tc.expectedHeaders, response.Header())
 			require.JSONEq(t, tc.expectedBody, response.Body.String())
 			serviceMock.AssertExpectations(t)
 		})
@@ -759,6 +790,7 @@ func TestProductHandler_Update(t *testing.T) {
 	// serviceData         — the product returned by the mocked service
 	// serviceError        — the error returned by the mocked service
 	// expectedCode        — HTTP status code we expect the handler to produce
+	// expectedHeaders     — HTTP headers we expect in the HTTP response
 	// expectedBody        — JSON body (string) we expect in the HTTP response
 	tests := []struct {
 		testName          string
@@ -769,6 +801,7 @@ func TestProductHandler_Update(t *testing.T) {
 		serviceData       models.Product
 		serviceError      error
 		expectedCode      int
+		expectedHeaders   http.Header
 		expectedBody      string
 	}{
 		{
@@ -780,6 +813,7 @@ func TestProductHandler_Update(t *testing.T) {
 			serviceData:       updatedProduct,
 			serviceError:      nil,
 			expectedCode:      http.StatusOK,
+			expectedHeaders:   http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 			{
 				"data": {
@@ -807,6 +841,7 @@ func TestProductHandler_Update(t *testing.T) {
 			serviceData:       singleFieldUpdatedProduct,
 			serviceError:      nil,
 			expectedCode:      http.StatusOK,
+			expectedHeaders:   http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 			{
 				"data": {
@@ -834,6 +869,7 @@ func TestProductHandler_Update(t *testing.T) {
 			serviceData:       models.Product{},
 			serviceError:      httperrors.NotFoundError{Message: "Invalid ID"},
 			expectedCode:      http.StatusBadRequest,
+			expectedHeaders:   http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 			{
 				"status": "Bad Request",
@@ -850,6 +886,7 @@ func TestProductHandler_Update(t *testing.T) {
 			serviceData:       models.Product{},
 			serviceError:      httperrors.BadRequestError{Message: "Invalid JSON body"},
 			expectedCode:      http.StatusBadRequest,
+			expectedHeaders:   http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 			{
 				"status": "Bad Request",
@@ -866,6 +903,7 @@ func TestProductHandler_Update(t *testing.T) {
 			serviceData:       models.Product{},
 			serviceError:      httperrors.UnprocessableEntityError{Message: "Invalid JSON body"},
 			expectedCode:      http.StatusUnprocessableEntity,
+			expectedHeaders:   http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 			{
 				"status": "Unprocessable Entity",
@@ -882,6 +920,7 @@ func TestProductHandler_Update(t *testing.T) {
 			serviceData:       models.Product{},
 			serviceError:      errors.New("db error"),
 			expectedCode:      http.StatusInternalServerError,
+			expectedHeaders:   http.Header{"Content-Type": []string{"application/json"}},
 			expectedBody: `
 			{
 				"status": "Internal Server Error",
@@ -910,6 +949,7 @@ func TestProductHandler_Update(t *testing.T) {
 			routeCtx := chi.NewRouteContext()
 			routeCtx.URLParams.Add("id", strconv.Itoa(tc.id))
 			request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, routeCtx))
+			request.Header.Set("Content-Type", "application/json")
 
 			response := httptest.NewRecorder()
 
@@ -918,6 +958,7 @@ func TestProductHandler_Update(t *testing.T) {
 
 			// Assert
 			require.Equal(t, tc.expectedCode, response.Code)
+			require.Equal(t, tc.expectedHeaders, response.Header())
 			require.JSONEq(t, tc.expectedBody, response.Body.String())
 			serviceMock.AssertExpectations(t)
 		})
