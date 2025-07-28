@@ -19,51 +19,55 @@ import (
 // - Error propagation from the repository layer
 func TestProductService_Create(t *testing.T) {
 	// Define the product used in common by the test cases
-	newProduct := models.ProductAttributes{
-		Description:                    "",
-		ExpirationRate:                 1,
+	newProductAttributes := models.ProductAttributes{
+		Description:                    "Yogurt helado",
+		ExpirationRate:                 7,
 		FreezingRate:                   2,
-		Height:                         1,
-		Length:                         1,
-		Width:                          1,
-		NetWeight:                      1,
-		ProductCode:                    "",
-		RecommendedFreezingTemperature: 1,
-		ProductTypeID:                  1,
+		Height:                         10.5,
+		Length:                         20.0,
+		Width:                          15.0,
+		NetWeight:                      1.2,
+		ProductCode:                    "YOG01",
+		RecommendedFreezingTemperature: -5.0,
+		ProductTypeID:                  3,
 		SellerID:                       utils.Ptr(1),
 	}
 
-	createdProduct := models.Product{
+	newProduct := models.Product{
 		ID:                1,
-		ProductAttributes: newProduct,
+		ProductAttributes: newProductAttributes,
 	}
 
 	// Each test case is constructed by:
 	// testName            — human‐readable description
+	// productAttributes   — Product attributes of the new product
 	// repositoryData      — the Product object returned by the mocked repository
 	// repositoryError     — the error returned by the mocked repository
 	// expectedData        — the data we expect the service to produce
 	// expectedError       — the error we expect the service to produce
 	tests := []struct {
-		testName        string
-		repositoryData  models.Product
-		repositoryError error
-		expectedData    models.Product
-		expectedError   error
+		testName          string
+		productAttributes models.ProductAttributes
+		repositoryData    models.Product
+		repositoryError   error
+		expectedData      models.Product
+		expectedError     error
 	}{
 		{
-			testName:        "Success case: Should create a product",
-			repositoryData:  createdProduct,
-			repositoryError: nil,
-			expectedData:    createdProduct,
-			expectedError:   nil,
+			testName:          "Success case: Should create a product",
+			productAttributes: newProductAttributes,
+			repositoryData:    newProduct,
+			repositoryError:   nil,
+			expectedData:      newProduct,
+			expectedError:     nil,
 		},
 		{
-			testName:        "Error case: Process an error from the repository layer",
-			repositoryData:  models.Product{},
-			repositoryError: errors.New("db error"),
-			expectedData:    models.Product{},
-			expectedError:   errors.New("db error"),
+			testName:          "Error case: Process an error from the repository layer",
+			productAttributes: newProductAttributes,
+			repositoryData:    models.Product{},
+			repositoryError:   errors.New("db error"),
+			expectedData:      models.Product{},
+			expectedError:     errors.New("db error"),
 		},
 	}
 
@@ -74,11 +78,11 @@ func TestProductService_Create(t *testing.T) {
 			service := service.NewProductServiceDefault(&repositoryMock)
 
 			repositoryMock.
-				On("Create", mock.Anything, newProduct).
+				On("Create", mock.Anything, tc.productAttributes).
 				Return(tc.repositoryData, tc.repositoryError)
 
 			// Act
-			result, err := service.Create(context.Background(), newProduct)
+			result, err := service.Create(context.Background(), newProductAttributes)
 
 			// Assert
 			require.Equal(t, tc.expectedError, err)
@@ -98,33 +102,33 @@ func TestProductService_GetAll(t *testing.T) {
 		{
 			ID: 1,
 			ProductAttributes: models.ProductAttributes{
-				Description:                    "",
-				ExpirationRate:                 1,
+				Description:                    "Yogurt helado",
+				ExpirationRate:                 7,
 				FreezingRate:                   2,
-				Height:                         1,
-				Length:                         1,
-				Width:                          1,
-				NetWeight:                      1,
-				ProductCode:                    "",
-				RecommendedFreezingTemperature: 1,
-				ProductTypeID:                  1,
+				Height:                         10.5,
+				Length:                         20.0,
+				Width:                          15.0,
+				NetWeight:                      1.2,
+				ProductCode:                    "YOG01",
+				RecommendedFreezingTemperature: -5.0,
+				ProductTypeID:                  3,
 				SellerID:                       utils.Ptr(1),
 			},
 		},
 		{
 			ID: 2,
 			ProductAttributes: models.ProductAttributes{
-				Description:                    "",
-				ExpirationRate:                 1,
-				FreezingRate:                   2,
-				Height:                         1,
-				Length:                         1,
-				Width:                          1,
-				NetWeight:                      1,
-				ProductCode:                    "",
-				RecommendedFreezingTemperature: 1,
-				ProductTypeID:                  1,
-				SellerID:                       utils.Ptr(1),
+				Description:                    "Pechuga de pollo",
+				ExpirationRate:                 3,
+				FreezingRate:                   1,
+				Height:                         5.0,
+				Length:                         25.0,
+				Width:                          12.5,
+				NetWeight:                      0.8,
+				ProductCode:                    "POLLO01",
+				RecommendedFreezingTemperature: 0.0,
+				ProductTypeID:                  7,
+				SellerID:                       utils.Ptr(2),
 			},
 		},
 	}
@@ -188,16 +192,16 @@ func TestProductService_GetByID(t *testing.T) {
 	product := models.Product{
 		ID: 1,
 		ProductAttributes: models.ProductAttributes{
-			Description:                    "",
-			ExpirationRate:                 1,
+			Description:                    "Yogurt helado",
+			ExpirationRate:                 7,
 			FreezingRate:                   2,
-			Height:                         1,
-			Length:                         1,
-			Width:                          1,
-			NetWeight:                      1,
-			ProductCode:                    "",
-			RecommendedFreezingTemperature: 1,
-			ProductTypeID:                  1,
+			Height:                         10.5,
+			Length:                         20.0,
+			Width:                          15.0,
+			NetWeight:                      1.2,
+			ProductCode:                    "YOG01",
+			RecommendedFreezingTemperature: -5.0,
+			ProductTypeID:                  3,
 			SellerID:                       utils.Ptr(1),
 		},
 	}
@@ -355,7 +359,8 @@ func TestProductService_GetRecordsPerProduct(t *testing.T) {
 func TestProductService_Update(t *testing.T) {
 	// Define the products used in common by the test cases
 
-	sellerID := utils.Ptr(1) // Should be declared in a variable to avoid different memory addreses issues
+	sellerID := utils.Ptr(1)  // Should be declared in a variable to avoid different memory addreses issues
+	sellerID2 := utils.Ptr(2) // Should be declared in a variable to avoid different memory addreses issues
 
 	originalProduct := models.Product{
 		ID: 1,
@@ -375,33 +380,33 @@ func TestProductService_Update(t *testing.T) {
 	}
 
 	updatePayload := models.ProductPatchRequest{
-		Description:                    utils.Ptr(""),
-		ExpirationRate:                 utils.Ptr(1),
-		FreezingRate:                   utils.Ptr(2),
-		Height:                         utils.Ptr(1.0),
-		Length:                         utils.Ptr(1.0),
-		Width:                          utils.Ptr(1.0),
-		NetWeight:                      utils.Ptr(1.0),
-		ProductCode:                    utils.Ptr(""),
-		RecommendedFreezingTemperature: utils.Ptr(1.0),
-		ProductTypeID:                  utils.Ptr(1),
-		SellerID:                       sellerID,
+		Description:                    utils.Ptr("Pechuga de pollo"),
+		ExpirationRate:                 utils.Ptr(3),
+		FreezingRate:                   utils.Ptr(1),
+		Height:                         utils.Ptr(5.0),
+		Length:                         utils.Ptr(25.0),
+		Width:                          utils.Ptr(12.5),
+		NetWeight:                      utils.Ptr(0.8),
+		ProductCode:                    utils.Ptr("POLLO01"),
+		RecommendedFreezingTemperature: utils.Ptr(0.0),
+		ProductTypeID:                  utils.Ptr(7),
+		SellerID:                       sellerID2,
 	}
 
 	updatedProduct := models.Product{
 		ID: 1,
 		ProductAttributes: models.ProductAttributes{
-			Description:                    "",
-			ExpirationRate:                 1,
-			FreezingRate:                   2,
-			Height:                         1,
-			Length:                         1,
-			Width:                          1,
-			NetWeight:                      1,
-			ProductCode:                    "",
-			RecommendedFreezingTemperature: 1,
-			ProductTypeID:                  1,
-			SellerID:                       sellerID,
+			Description:                    "Pechuga de pollo",
+			ExpirationRate:                 3,
+			FreezingRate:                   1,
+			Height:                         5.0,
+			Length:                         25.0,
+			Width:                          12.5,
+			NetWeight:                      0.8,
+			ProductCode:                    "POLLO01",
+			RecommendedFreezingTemperature: 0.0,
+			ProductTypeID:                  7,
+			SellerID:                       sellerID2,
 		},
 	}
 

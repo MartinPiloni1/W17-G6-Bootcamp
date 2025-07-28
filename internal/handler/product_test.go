@@ -109,7 +109,7 @@ func TestProductHandler_Create(t *testing.T) {
 	// testName            — human‐readable description
 	// payload             — raw JSON payload sent in the HTTP request
 	// isPayloadError      — whether we expect JSON validation to fail inside the handler
-	// productAttributes   — attributes the code under test will pass to the service layer
+	// productAttributes   — Product attributes of the new product
 	// serviceData         — the Product object returned by the mocked service
 	// serviceError        — the error returned by the mocked service
 	// expectedCode        — HTTP status code we expect the handler to produce
