@@ -143,14 +143,14 @@ func TestProductService_GetAll(t *testing.T) {
 		expectedError   error
 	}{
 		{
-			testName:        "Success case: should return all products",
+			testName:        "Success case: Should return all products",
 			repositoryData:  products,
 			repositoryError: nil,
 			expectedData:    products,
 			expectedError:   nil,
 		},
 		{
-			testName:        "Error case: should return an error",
+			testName:        "Error case: Process an error from the repository layer",
 			repositoryData:  []models.Product{},
 			repositoryError: errors.New("db error"),
 			expectedData:    []models.Product{},
@@ -179,8 +179,12 @@ func TestProductService_GetAll(t *testing.T) {
 	}
 }
 
+// Verifies the behavior of the service layer responsible for retrieving a single product.
+// It covers:
+// - Successful retrieval of a single product
+// - Error propagation from the service layer
 func TestProductService_GetByID(t *testing.T) {
-	// Arrange
+	// Define the product used in common by the test cases
 	product := models.Product{
 		ID: 1,
 		ProductAttributes: models.ProductAttributes{
@@ -198,27 +202,35 @@ func TestProductService_GetByID(t *testing.T) {
 		},
 	}
 
+	// Each test case is constructed by:
+	// testName            — human‐readable description
+	// id                  - ID of the product to retrieve
+	// repositoryData      — the Product returned by the mocked repository
+	// repositoryError     — the error returned by the mocked repository
+	// expectedData        — the data we expect the service to produce
+	// expectedError       — the error we expect the service to produce
 	tests := []struct {
 		testName        string
+		id              int
 		repositoryData  models.Product
 		repositoryError error
-		idParam         int
-		expectedResp    models.Product
+		expectedData    models.Product
 		expectedError   error
 	}{
 		{
-			testName:        "Success: Should return all products",
+			testName:        "Success: Should return a single product",
+			id:              1,
 			repositoryData:  product,
 			repositoryError: nil,
-			idParam:         1,
-			expectedResp:    product,
+			expectedData:    product,
 			expectedError:   nil,
 		},
 		{
-			testName:        "Error case: should return an Error",
+			testName:        "Error case: Process an error from the repository layer",
+			id:              1,
 			repositoryData:  models.Product{},
 			repositoryError: errors.New("db error"),
-			expectedResp:    models.Product{},
+			expectedData:    models.Product{},
 			expectedError:   errors.New("db error"),
 		},
 	}
@@ -230,15 +242,15 @@ func TestProductService_GetByID(t *testing.T) {
 			service := service.NewProductServiceDefault(&repositoryMock)
 
 			repositoryMock.
-				On("GetByID", mock.Anything, tc.idParam).
+				On("GetByID", mock.Anything, tc.id).
 				Return(tc.repositoryData, tc.repositoryError)
 
 			// Act
-			result, err := service.GetByID(context.Background(), tc.idParam)
+			result, err := service.GetByID(context.Background(), tc.id)
 
 			// Assert
 			require.Equal(t, tc.expectedError, err)
-			require.Equal(t, tc.expectedResp, result)
+			require.Equal(t, tc.expectedData, result)
 			repositoryMock.AssertExpectations(t)
 		})
 	}
