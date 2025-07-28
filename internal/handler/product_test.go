@@ -154,7 +154,7 @@ func TestProductHandler_Create(t *testing.T) {
 			}`,
 		},
 		{
-			testName:          "Error case: Unprocessable entity when payload with missing fields is given",
+			testName:          "Error case: JSON with missing fields",
 			payload:           payloadWithMissingFields,
 			isPayloadError:    true,
 			productAttributes: models.ProductAttributes{},
@@ -170,7 +170,7 @@ func TestProductHandler_Create(t *testing.T) {
 			`,
 		},
 		{
-			testName:          "Error case: Unprocessable entity when payload with wrong values is given",
+			testName:          "Error case: Wrong value in a JSON field",
 			payload:           payloadWithWrongValues,
 			isPayloadError:    true,
 			productAttributes: models.ProductAttributes{},
@@ -186,7 +186,7 @@ func TestProductHandler_Create(t *testing.T) {
 			`,
 		},
 		{
-			testName:          "Error case: Bad request when payload with unknown fields is given",
+			testName:          "Error case: Unknown JSON fields",
 			payload:           payloadWithUnkownFields,
 			isPayloadError:    true,
 			productAttributes: models.ProductAttributes{},
