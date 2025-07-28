@@ -610,7 +610,7 @@ func TestProductRepository_GetRecordPerProduct(t *testing.T) {
 					ExpectQuery(query).
 					WithArgs(inputID).
 					WillReturnRows(rows)
-			}
+			},
 			expectedResp:  nil,
 			expectedError: httperrors.InternalServerError{},
 		},
