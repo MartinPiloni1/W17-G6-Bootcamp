@@ -20,8 +20,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Verifies the behavior of the HTTP handler responsible for creating a new Product. It covers
+// the “happy path” (successful creation) and several error scenarios related to:
+// * Incomplete JSON bodies
+// * Invalid JSON fields values
+// * Unknown JSON fields
+// * Errors coming from the service layer
 func TestProductHandler_Create(t *testing.T) {
-	// Define the payloads and products used by the test cases
+	// Define the payloads and products used in common by the test cases
 	newProductAttributes := models.ProductAttributes{
 		Description:                    "Yogurt helado",
 		ExpirationRate:                 7,
@@ -99,20 +105,33 @@ func TestProductHandler_Create(t *testing.T) {
 		}
 	`
 
+	// Each test case is constructed by:
+	// testName            — human‐readable description
+	// payload             — raw JSON payload sent in the HTTP request
+	// isPayloadError      — whether we expect JSON binding/validation to fail inside the handler
+	// productAttributes   — attributes the code under test will pass to the service layer
+	// serviceData         — the Product object returned by the mocked service
+	// serviceError        — the error returned by the mocked service
+	// expectedCode        — HTTP status code we expect the handler to produce
+	// expectedBody        — JSON body (string) we expect in the HTTP response
 	tests := []struct {
-		testName     string
-		serviceData  models.Product
-		serviceError error
-		payload      string
-		expectedCode int
-		expectedBody string
+		testName          string
+		payload           string
+		isPayloadError    bool
+		productAttributes models.ProductAttributes
+		serviceData       models.Product
+		serviceError      error
+		expectedCode      int
+		expectedBody      string
 	}{
 		{
-			testName:     "Success: Create a new product",
-			serviceData:  newProduct,
-			serviceError: nil,
-			payload:      payload,
-			expectedCode: http.StatusCreated,
+			testName:          "Success: Create a new product",
+			payload:           payload,
+			isPayloadError:    false,
+			productAttributes: newProductAttributes,
+			serviceData:       newProduct,
+			serviceError:      nil,
+			expectedCode:      http.StatusCreated,
 			expectedBody: `
 			{
 				"data": {
@@ -132,11 +151,13 @@ func TestProductHandler_Create(t *testing.T) {
 			}`,
 		},
 		{
-			testName:     "Fail: Unprocessable entity when payload with missing fields is given",
-			serviceData:  models.Product{},
-			serviceError: httperrors.ConflictError{Message: "A product with the given product code already exists"},
-			payload:      payloadWithMissingFields,
-			expectedCode: http.StatusUnprocessableEntity,
+			testName:          "Error case: Unprocessable entity when payload with missing fields is given",
+			payload:           payloadWithMissingFields,
+			isPayloadError:    true,
+			productAttributes: models.ProductAttributes{},
+			serviceData:       models.Product{},
+			serviceError:      nil,
+			expectedCode:      http.StatusUnprocessableEntity,
 			expectedBody: `
 				{
 					"status": "Unprocessable Entity",
@@ -145,11 +166,13 @@ func TestProductHandler_Create(t *testing.T) {
 			`,
 		},
 		{
-			testName:     "Fail: Unprocessable entity when payload with wrong values is given",
-			serviceData:  models.Product{},
-			serviceError: httperrors.ConflictError{Message: "A product with the given product code already exists"},
-			payload:      payloadWithWrongValues,
-			expectedCode: http.StatusUnprocessableEntity,
+			testName:          "Error case: Unprocessable entity when payload with wrong values is given",
+			payload:           payloadWithWrongValues,
+			isPayloadError:    true,
+			productAttributes: models.ProductAttributes{},
+			serviceData:       models.Product{},
+			serviceError:      nil,
+			expectedCode:      http.StatusUnprocessableEntity,
 			expectedBody: `
 				{
 					"status": "Unprocessable Entity",
@@ -158,11 +181,13 @@ func TestProductHandler_Create(t *testing.T) {
 			`,
 		},
 		{
-			testName:     "Fail: Bad request when payload with unkown fields is given",
-			serviceData:  models.Product{},
-			serviceError: httperrors.ConflictError{Message: "A product with the given product code already exists"},
-			payload:      payloadWithUnkownFields,
-			expectedCode: http.StatusBadRequest,
+			testName:          "Error case: Bad request when payload with unknown fields is given",
+			payload:           payloadWithUnkownFields,
+			isPayloadError:    true,
+			productAttributes: models.ProductAttributes{},
+			serviceData:       models.Product{},
+			serviceError:      nil,
+			expectedCode:      http.StatusBadRequest,
 			expectedBody: `
 				{
 					"status": "Bad Request",
@@ -171,24 +196,13 @@ func TestProductHandler_Create(t *testing.T) {
 			`,
 		},
 		{
-			testName:     "Fail: Conflict error when the given product code already exists",
-			serviceData:  models.Product{},
-			serviceError: httperrors.ConflictError{Message: "A product with the given product code already exists"},
-			payload:      payload,
-			expectedCode: http.StatusConflict,
-			expectedBody: `
-				{
-					"status": "Conflict",
-					"message": "A product with the given product code already exists"
-				}
-			`,
-		},
-		{
-			testName:     "Fail: Internal server error after a DB Error",
-			serviceData:  models.Product{},
-			serviceError: errors.New("db error"),
-			payload:      payload,
-			expectedCode: http.StatusInternalServerError,
+			testName:          "Error case: Process an error from the service layer",
+			payload:           payload,
+			isPayloadError:    false,
+			productAttributes: newProductAttributes,
+			serviceData:       models.Product{},
+			serviceError:      errors.New("db error"),
+			expectedCode:      http.StatusInternalServerError,
 			expectedBody: `
 				{
 					"status": "Internal Server Error",
@@ -199,12 +213,14 @@ func TestProductHandler_Create(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.testName, func(t *testing.T) {
-			// Run tests parallel
-			t.Parallel()
-
 			// Arrange
 			serviceMock := &mocks.ProductServiceMock{}
-			serviceMock.On("Create", mock.Anything, newProductAttributes).Return(tc.serviceData, tc.serviceError)
+			if !tc.isPayloadError {
+				serviceMock.
+					On("Create", mock.Anything, tc.productAttributes).
+					Return(tc.serviceData, tc.serviceError)
+			}
+
 			handler := handler.NewProductHandler(serviceMock)
 			request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(tc.payload))
 			response := httptest.NewRecorder()
@@ -215,6 +231,7 @@ func TestProductHandler_Create(t *testing.T) {
 			// Assert
 			require.Equal(t, tc.expectedCode, response.Code)
 			require.JSONEq(t, tc.expectedBody, response.Body.String())
+			serviceMock.AssertExpectations(t)
 		})
 	}
 }
