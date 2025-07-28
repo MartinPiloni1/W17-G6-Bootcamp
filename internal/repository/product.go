@@ -76,18 +76,22 @@ func (r *ProductRepositoryDB) Create(ctx context.Context, productAttributes mode
 			switch sqlError.Number {
 			case 1062:
 				return models.Product{},
-					httperrors.ConflictError{Message: "A product with the given product code already exists"}
+					httperrors.ConflictError{
+						Message: "A product with the given product code already exists",
+					}
 			case 1452:
 				return models.Product{},
-					httperrors.ConflictError{Message: "The given seller id does not exists"}
+					httperrors.ConflictError{
+						Message: "The given seller id does not exists",
+					}
 			}
 		}
-		return models.Product{}, err
+		return models.Product{}, httperrors.InternalServerError{}
 	}
 
 	lastId, err := result.LastInsertId()
 	if err != nil {
-		return models.Product{}, err
+		return models.Product{}, httperrors.InternalServerError{}
 	}
 
 	newProduct := models.Product{
@@ -120,7 +124,7 @@ func (r *ProductRepositoryDB) GetAll(ctx context.Context) ([]models.Product, err
 
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
-		return nil, err
+		return nil, httperrors.InternalServerError{}
 	}
 	defer rows.Close()
 
@@ -142,14 +146,14 @@ func (r *ProductRepositoryDB) GetAll(ctx context.Context) ([]models.Product, err
 			&product.SellerID,
 		)
 		if err != nil {
-			return nil, err
+			return nil, httperrors.InternalServerError{}
 		}
 
 		products = append(products, product)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, httperrors.InternalServerError{}
 	}
 	return products, nil
 }
@@ -178,7 +182,7 @@ func (r *ProductRepositoryDB) GetByID(ctx context.Context, id int) (models.Produ
 
 	row := r.db.QueryRowContext(ctx, query, id)
 	if err := row.Err(); err != nil {
-		return models.Product{}, err
+		return models.Product{}, httperrors.InternalServerError{}
 	}
 
 	var product models.Product
@@ -196,10 +200,9 @@ func (r *ProductRepositoryDB) GetByID(ctx context.Context, id int) (models.Produ
 		&product.ProductTypeID,
 		&product.SellerID,
 	)
-	if errors.Is(err, sql.ErrNoRows) {
-		return models.Product{}, httperrors.NotFoundError{Message: "Product not found"}
-	} else if err != nil {
-		return models.Product{}, err
+	if err != nil {
+		return models.Product{},
+			httperrors.NotFoundError{Message: "Product not found"}
 	}
 
 	return product, nil
@@ -227,7 +230,7 @@ func (r *ProductRepositoryDB) GetRecordsPerProduct(ctx context.Context, id *int)
 
 	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, httperrors.InternalServerError{}
 	}
 	defer rows.Close()
 
@@ -240,7 +243,7 @@ func (r *ProductRepositoryDB) GetRecordsPerProduct(ctx context.Context, id *int)
 			&productRecordCount.RecordsCount,
 		)
 		if err != nil {
-			return nil, err
+			return nil, httperrors.InternalServerError{}
 		}
 		ProductsRecordsCount = append(ProductsRecordsCount, productRecordCount)
 	}
@@ -303,13 +306,17 @@ func (r *ProductRepositoryDB) Update(ctx context.Context, id int, updatedProduct
 			switch sqlError.Number {
 			case 1062:
 				return models.Product{},
-					httperrors.ConflictError{Message: "A product with the given product code already exists"}
+					httperrors.ConflictError{
+						Message: "A product with the given product code already exists",
+					}
 			case 1452:
 				return models.Product{},
-					httperrors.ConflictError{Message: "The given seller id does not exists"}
+					httperrors.ConflictError{
+						Message: "The given seller id does not exists",
+					}
 			}
 		}
-		return models.Product{}, err
+		return models.Product{}, httperrors.InternalServerError{}
 	}
 
 	return updatedProduct, nil
@@ -328,14 +335,16 @@ func (r *ProductRepositoryDB) Delete(ctx context.Context, id int) error {
 	if err != nil {
 		var sqlError *mysql.MySQLError
 		if errors.As(err, &sqlError) && sqlError.Number == 1451 {
-			return httperrors.ConflictError{Message: "The product to delete is still referenced by some product records"}
+			return httperrors.ConflictError{
+				Message: "The product to delete is still referenced by some product records",
+			}
 		}
-		return err
+		return httperrors.InternalServerError{}
 	}
 
 	count, err := res.RowsAffected()
 	if err != nil {
-		return err
+		return httperrors.InternalServerError{}
 	} else if count == 0 {
 		return httperrors.NotFoundError{Message: "Product not found"}
 	}
