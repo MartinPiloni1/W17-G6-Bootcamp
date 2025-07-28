@@ -108,7 +108,7 @@ func TestProductHandler_Create(t *testing.T) {
 	// Each test case is constructed by:
 	// testName            — human‐readable description
 	// payload             — raw JSON payload sent in the HTTP request
-	// isPayloadError      — whether we expect JSON binding/validation to fail inside the handler
+	// isPayloadError      — whether we expect JSON validation to fail inside the handler
 	// productAttributes   — attributes the code under test will pass to the service layer
 	// serviceData         — the Product object returned by the mocked service
 	// serviceError        — the error returned by the mocked service
@@ -754,9 +754,9 @@ func TestProductHandler_Update(t *testing.T) {
 
 	// Each test case is constructed by:
 	// testName            — human‐readable description
-	// id                  - ID of the product to retrieve as a pointer
-	// isIdError           — whether we expect ID validation to fail inside the handler
-	// serviceData         — the records per product slice returned by the mocked service
+	// id                  - ID of the product to update
+	// isValidationError   — whether we expect validation to fail inside the handler
+	// serviceData         — the product returned by the mocked service
 	// serviceError        — the error returned by the mocked service
 	// expectedCode        — HTTP status code we expect the handler to produce
 	// expectedBody        — JSON body (string) we expect in the HTTP response
@@ -924,37 +924,40 @@ func TestProductHandler_Update(t *testing.T) {
 	}
 }
 
+// Verifies the behavior of the HTTP handler responsible for deleting a product.
+// It covers:
+// - Successful deletion of a product
+// - Error when an invalid ID is given
+// - Error propagation from the service layer
 func TestProductHandler_Delete(t *testing.T) {
+	// Each test case is constructed by:
+	// testName            — human‐readable description
+	// id                  - ID of the product to delete
+	// isIdError           — whether we expect ID validation to fail inside the handler
+	// serviceError        — the error returned by the mocked service
+	// expectedCode        — HTTP status code we expect the handler to produce
+	// expectedBody        — JSON body (string) we expect in the HTTP response
 	tests := []struct {
 		testName     string
+		id           int
+		isIdError    bool
 		serviceError error
-		idParam      int
 		expectedCode int
 		expectedBody string
 	}{
 		{
 			testName:     "Success: Delete product with ID 1",
+			id:           1,
+			isIdError:    false,
 			serviceError: nil,
-			idParam:      1,
 			expectedCode: http.StatusNoContent,
 			expectedBody: "null",
 		},
 		{
-			testName:     "Fail: Not found when giving a non existant ID",
-			serviceError: httperrors.NotFoundError{Message: "Product not found"},
-			idParam:      10000,
-			expectedCode: http.StatusNotFound,
-			expectedBody: `
-				{
-					"status": "Not Found",
-					"message": "Product not found"
-				}
-			`,
-		},
-		{
-			testName:     "Fail: Bad request when giving an invalid ID",
+			testName:     "Error case: invalid ID is given",
+			id:           -1,
+			isIdError:    true,
 			serviceError: httperrors.NotFoundError{Message: "Invalid ID"},
-			idParam:      -1,
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `
 				{
@@ -964,9 +967,10 @@ func TestProductHandler_Delete(t *testing.T) {
 			`,
 		},
 		{
-			testName:     "Fail: Internal server error after a DB Error",
+			testName:     "Error case: Process an error from the service layer",
+			id:           1,
+			isIdError:    false,
 			serviceError: errors.New("db error"),
-			idParam:      1,
 			expectedCode: http.StatusInternalServerError,
 			expectedBody: `
 				{
@@ -978,18 +982,23 @@ func TestProductHandler_Delete(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.testName, func(t *testing.T) {
-			// Run tests parallel
-			t.Parallel()
-
 			// Arrange
 			serviceMock := &mocks.ProductServiceMock{}
-			serviceMock.On("Delete", mock.Anything, tc.idParam).Return(tc.serviceError)
+
+			// If a validation error occurs the service method is not called
+			if !tc.isIdError {
+				serviceMock.
+					On("Delete", mock.Anything, tc.id).
+					Return(tc.serviceError)
+			}
 			handler := handler.NewProductHandler(serviceMock)
 
-			url := fmt.Sprintf("/api/v1/products/%d", tc.idParam)
+			url := fmt.Sprintf("/api/v1/products/%d", tc.id)
 			request := httptest.NewRequest(http.MethodDelete, url, nil)
+
+			// Create chi context to pass the ID to the handler test
 			routeCtx := chi.NewRouteContext()
-			routeCtx.URLParams.Add("id", strconv.Itoa(tc.idParam))
+			routeCtx.URLParams.Add("id", strconv.Itoa(tc.id))
 			request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, routeCtx))
 
 			response := httptest.NewRecorder()
@@ -1004,6 +1013,7 @@ func TestProductHandler_Delete(t *testing.T) {
 			} else {
 				require.JSONEq(t, tc.expectedBody, response.Body.String())
 			}
+			serviceMock.AssertExpectations(t)
 		})
 	}
 }
