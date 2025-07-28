@@ -541,7 +541,7 @@ func TestProductRepository_GetRecordPerProduct(t *testing.T) {
 		expectedError error
 	}{
 		{
-			testName: "Success: Should return a product report by section ID",
+			testName: "Success: Should return a product record count by product ID",
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.
 					NewRows(columns).
@@ -610,7 +610,7 @@ func TestProductRepository_GetRecordPerProduct(t *testing.T) {
 					ExpectQuery(query).
 					WithArgs(inputID).
 					WillReturnRows(rows)
-			},
+			}
 			expectedResp:  nil,
 			expectedError: httperrors.InternalServerError{},
 		},
