@@ -14,16 +14,14 @@ import (
 	mocks "github.com/aaguero_meli/W17-G6-Bootcamp/internal/mocks/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
-// TODO: Move this function to an utils package
-func Ptr[T any](v T) *T { return &v }
-
 func TestProductHandler_Create(t *testing.T) {
-	// TODO: Generate random products with values in a valid range
+	// Define the payloads and products used by the test cases
 	newProductAttributes := models.ProductAttributes{
 		Description:                    "Yogurt helado",
 		ExpirationRate:                 7,
@@ -35,7 +33,7 @@ func TestProductHandler_Create(t *testing.T) {
 		ProductCode:                    "YOG01",
 		RecommendedFreezingTemperature: -5.0,
 		ProductTypeID:                  3,
-		SellerID:                       Ptr(1),
+		SellerID:                       utils.Ptr(1),
 	}
 
 	newProduct := models.Product{
@@ -236,7 +234,7 @@ func TestProductHandler_GetAll(t *testing.T) {
 			ProductCode:                    "YOG01",
 			RecommendedFreezingTemperature: -5.0,
 			ProductTypeID:                  3,
-			SellerID:                       Ptr(1),
+			SellerID:                       utils.Ptr(1),
 		},
 	}
 
@@ -253,7 +251,7 @@ func TestProductHandler_GetAll(t *testing.T) {
 			ProductCode:                    "POLLO01",
 			RecommendedFreezingTemperature: 0.0,
 			ProductTypeID:                  7,
-			SellerID:                       Ptr(2),
+			SellerID:                       utils.Ptr(2),
 		},
 	}
 
@@ -364,7 +362,7 @@ func TestProductHandler_GetById(t *testing.T) {
 			ProductCode:                    "YOG01",
 			RecommendedFreezingTemperature: -5.0,
 			ProductTypeID:                  3,
-			SellerID:                       Ptr(1),
+			SellerID:                       utils.Ptr(1),
 		},
 	}
 
@@ -515,7 +513,7 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 			testName:     "Success: Get a single product if ID query param is given",
 			serviceData:  []models.ProductRecordCount{record2},
 			serviceError: nil,
-			idParam:      Ptr(2),
+			idParam:      utils.Ptr(2),
 			expectedCode: http.StatusOK,
 			expectedBody: `
 			{
@@ -532,7 +530,7 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 			testName:     "Fail: Invalid ID is given",
 			serviceData:  nil,
 			serviceError: errors.New("invalid id"),
-			idParam:      Ptr(-1),
+			idParam:      utils.Ptr(-1),
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `
 			{
@@ -544,7 +542,7 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 			testName:     "Fail: Internal server error after a DB Error",
 			serviceData:  nil,
 			serviceError: errors.New("db error"),
-			idParam:      Ptr(1),
+			idParam:      utils.Ptr(1),
 			expectedCode: http.StatusInternalServerError,
 			expectedBody: `
 				{
@@ -585,21 +583,21 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 
 func TestProductHandler_Update(t *testing.T) {
 	productAttributes := models.ProductPatchRequest{
-		Description:                    Ptr("Pechuga de pollo"),
-		ExpirationRate:                 Ptr(6),
-		FreezingRate:                   Ptr(3),
-		Height:                         Ptr(11.5),
-		Length:                         Ptr(22.0),
-		Width:                          Ptr(13.0),
-		NetWeight:                      Ptr(10.0),
-		ProductCode:                    Ptr("POL01"),
-		RecommendedFreezingTemperature: Ptr(-3.0),
-		ProductTypeID:                  Ptr(2),
-		SellerID:                       Ptr(2),
+		Description:                    utils.Ptr("Pechuga de pollo"),
+		ExpirationRate:                 utils.Ptr(6),
+		FreezingRate:                   utils.Ptr(3),
+		Height:                         utils.Ptr(11.5),
+		Length:                         utils.Ptr(22.0),
+		Width:                          utils.Ptr(13.0),
+		NetWeight:                      utils.Ptr(10.0),
+		ProductCode:                    utils.Ptr("POL01"),
+		RecommendedFreezingTemperature: utils.Ptr(-3.0),
+		ProductTypeID:                  utils.Ptr(2),
+		SellerID:                       utils.Ptr(2),
 	}
 
 	singleProductAttribute := models.ProductPatchRequest{
-		NetWeight: Ptr(10.0),
+		NetWeight: utils.Ptr(10.0),
 	}
 
 	updatedProduct := models.Product{
@@ -615,7 +613,7 @@ func TestProductHandler_Update(t *testing.T) {
 			ProductCode:                    "POL01",
 			RecommendedFreezingTemperature: -3.0,
 			ProductTypeID:                  2,
-			SellerID:                       Ptr(2),
+			SellerID:                       utils.Ptr(2),
 		},
 	}
 
@@ -632,7 +630,7 @@ func TestProductHandler_Update(t *testing.T) {
 			ProductCode:                    "YOG01",
 			RecommendedFreezingTemperature: -5.0,
 			ProductTypeID:                  3,
-			SellerID:                       Ptr(1),
+			SellerID:                       utils.Ptr(1),
 		},
 	}
 
