@@ -182,7 +182,7 @@ func TestProductService_GetAll(t *testing.T) {
 // Verifies the behavior of the service layer responsible for retrieving a single product.
 // It covers:
 // - Successful retrieval of a single product
-// - Error propagation from the service layer
+// - Error propagation from the repository layer
 func TestProductService_GetByID(t *testing.T) {
 	// Define the product used in common by the test cases
 	product := models.Product{
@@ -464,7 +464,7 @@ func TestProductService_Update(t *testing.T) {
 			expectedError:      httperrors.NotFoundError{Message: "Product not found"},
 		},
 		{
-			testName:             "Error case: should return an error",
+			testName:             "Error case: Process an error from the repository layer",
 			payload:              updatePayload,
 			updatedProduct:       updatedProduct,
 			repositoryGetData:    originalProduct,
@@ -504,23 +504,31 @@ func TestProductService_Update(t *testing.T) {
 	}
 }
 
+// Verifies the behavior of the service layer responsible for deleting a product.
+// It covers:
+// - Successful deletion of a product
+// - Error propagation from the repository layer
 func TestProductService_Delete(t *testing.T) {
-	// Arrange
+	// Each test case is constructed by:
+	// testName            — human‐readable description
+	// id                  - ID of the product to delete
+	// repositoryError     — the error returned by the mocked repository
+	// expectedError       — the error we expect the service to produce
 	tests := []struct {
 		testName        string
-		idParam         int
+		id              int
 		repositoryError error
 		expectedError   error
 	}{
 		{
 			testName:        "Success: should delete the product with the given ID",
-			idParam:         1,
+			id:              1,
 			repositoryError: nil,
 			expectedError:   nil,
 		},
 		{
-			testName:        "Fail: should return an Error",
-			idParam:         1,
+			testName:        "Error case: Process an error from the repository layer",
+			id:              1,
 			repositoryError: errors.New("db error"),
 			expectedError:   errors.New("db error"),
 		},
@@ -533,11 +541,11 @@ func TestProductService_Delete(t *testing.T) {
 			service := service.NewProductServiceDefault(&repositoryMock)
 
 			repositoryMock.
-				On("Delete", mock.Anything, tc.idParam).
+				On("Delete", mock.Anything, tc.id).
 				Return(tc.repositoryError)
 
 			// Act
-			err := service.Delete(context.Background(), tc.idParam)
+			err := service.Delete(context.Background(), tc.id)
 
 			// Assert
 			require.Equal(t, tc.expectedError, err)
