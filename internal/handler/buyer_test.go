@@ -692,7 +692,7 @@ func TestBuyerHandler_Update(t *testing.T) {
 		serviceMock.AssertNotCalled(t, "Update")
 	})
 
-	t.Run("service returns error gets mapped", func(t *testing.T) {
+	t.Run("service returns error NotFoundError that can be returned as it is", func(t *testing.T) {
 		serviceMock := mocks.NewBuyerServiceDefaultMock()
 		buyerHandler := handler.NewBuyerHandler(serviceMock)
 

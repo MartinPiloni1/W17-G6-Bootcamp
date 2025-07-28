@@ -24,9 +24,6 @@ func (s *BuyerServiceDefault) Create(ctx context.Context, newBuyer models.BuyerA
 // Get all buyers
 func (s *BuyerServiceDefault) GetAll(ctx context.Context) ([]models.Buyer, error) {
 	buyerData, err := s.repository.GetAll(ctx)
-	if err != nil {
-		return nil, err
-	}
 	return buyerData, err
 }
 
