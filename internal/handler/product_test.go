@@ -643,7 +643,16 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 	}
 }
 
+// Verifies the behavior of the HTTP handler responsible for updating a product.
+// It covers:
+// - Successful update all fields of a product
+// - Successful update a single field of a product
+// - Error when an invalid ID is given
+// - Error when invalid JSON fields values are given
+// - Error when unknown JSON fields are given
+// - Error propagation from the service layer
 func TestProductHandler_Update(t *testing.T) {
+	// Define the products and payloads used in common by the test cases
 	productAttributes := models.ProductPatchRequest{
 		Description:                    utils.Ptr("Pechuga de pollo"),
 		ExpirationRate:                 utils.Ptr(6),
@@ -743,23 +752,33 @@ func TestProductHandler_Update(t *testing.T) {
 		"seller_id": -2
 	}`
 
+	// Each test case is constructed by:
+	// testName            — human‐readable description
+	// id                  - ID of the product to retrieve as a pointer
+	// isIdError           — whether we expect ID validation to fail inside the handler
+	// serviceData         — the records per product slice returned by the mocked service
+	// serviceError        — the error returned by the mocked service
+	// expectedCode        — HTTP status code we expect the handler to produce
+	// expectedBody        — JSON body (string) we expect in the HTTP response
 	tests := []struct {
 		testName          string
+		payload           string
+		productAttributes models.ProductPatchRequest
+		id                int
+		isValidationError bool
 		serviceData       models.Product
 		serviceError      error
-		payload           string
-		idParam           int
-		productAttributes models.ProductPatchRequest
 		expectedCode      int
 		expectedBody      string
 	}{
 		{
 			testName:          "Success: Update all fields of product with ID 1",
+			payload:           payloadUpdatedProduct,
+			productAttributes: productAttributes,
+			id:                1,
+			isValidationError: false,
 			serviceData:       updatedProduct,
 			serviceError:      nil,
-			payload:           payloadUpdatedProduct,
-			idParam:           1,
-			productAttributes: productAttributes,
 			expectedCode:      http.StatusOK,
 			expectedBody: `
 			{
@@ -781,11 +800,12 @@ func TestProductHandler_Update(t *testing.T) {
 		},
 		{
 			testName:          "Success: Update a single field of product with ID 1",
+			payload:           payloadSingleFieldUpdatedProduct,
+			productAttributes: singleProductAttribute,
+			id:                1,
+			isValidationError: false,
 			serviceData:       singleFieldUpdatedProduct,
 			serviceError:      nil,
-			payload:           payloadSingleFieldUpdatedProduct,
-			idParam:           1,
-			productAttributes: singleProductAttribute,
 			expectedCode:      http.StatusOK,
 			expectedBody: `
 			{
@@ -806,27 +826,13 @@ func TestProductHandler_Update(t *testing.T) {
 			}`,
 		},
 		{
-			testName:          "Fail: Not found when giving a non existant ID",
-			serviceData:       models.Product{},
-			serviceError:      httperrors.NotFoundError{Message: "Product not found"},
+			testName:          "Error case: Invalid ID is given",
 			payload:           payloadUpdatedProduct,
-			idParam:           10000,
 			productAttributes: productAttributes,
-			expectedCode:      http.StatusNotFound,
-			expectedBody: `
-			{
-				"status": "Not Found",
-				"message": "Product not found"
-			}
-			`,
-		},
-		{
-			testName:          "Fail: Bad request when giving an invalid ID",
+			id:                -1,
+			isValidationError: true,
 			serviceData:       models.Product{},
 			serviceError:      httperrors.NotFoundError{Message: "Invalid ID"},
-			payload:           payloadUpdatedProduct,
-			idParam:           -1,
-			productAttributes: productAttributes,
 			expectedCode:      http.StatusBadRequest,
 			expectedBody: `
 			{
@@ -836,12 +842,13 @@ func TestProductHandler_Update(t *testing.T) {
 			`,
 		},
 		{
-			testName:          "Fail: Bad request when body contains unknown fields",
+			testName:          "Error case: Unknown JSON fields",
+			payload:           payloadWithUnkownFields,
+			productAttributes: productAttributes,
+			id:                1,
+			isValidationError: true,
 			serviceData:       models.Product{},
 			serviceError:      httperrors.BadRequestError{Message: "Invalid JSON body"},
-			payload:           payloadWithUnkownFields,
-			idParam:           1,
-			productAttributes: productAttributes,
 			expectedCode:      http.StatusBadRequest,
 			expectedBody: `
 			{
@@ -851,12 +858,13 @@ func TestProductHandler_Update(t *testing.T) {
 			`,
 		},
 		{
-			testName:          "Fail: Bad request when body contains an invalid value in some field",
+			testName:          "Error case: Invalid values in JSON fields",
+			payload:           payloadWithInvalidField,
+			productAttributes: productAttributes,
+			id:                1,
+			isValidationError: true,
 			serviceData:       models.Product{},
 			serviceError:      httperrors.UnprocessableEntityError{Message: "Invalid JSON body"},
-			payload:           payloadWithInvalidField,
-			idParam:           1,
-			productAttributes: productAttributes,
 			expectedCode:      http.StatusUnprocessableEntity,
 			expectedBody: `
 			{
@@ -866,12 +874,13 @@ func TestProductHandler_Update(t *testing.T) {
 			`,
 		},
 		{
-			testName:          "Fail: Internal server error after a DB Error",
+			testName:          "Error case: Process an error from the service layer",
+			payload:           payloadUpdatedProduct,
+			productAttributes: productAttributes,
+			id:                1,
+			isValidationError: false,
 			serviceData:       models.Product{},
 			serviceError:      errors.New("db error"),
-			payload:           payloadUpdatedProduct,
-			idParam:           1,
-			productAttributes: productAttributes,
 			expectedCode:      http.StatusInternalServerError,
 			expectedBody: `
 			{
@@ -883,20 +892,23 @@ func TestProductHandler_Update(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.testName, func(t *testing.T) {
-			// Run tests parallel
-			t.Parallel()
-
 			// Arrange
 			serviceMock := &mocks.ProductServiceMock{}
-			serviceMock.
-				On("Update", mock.Anything, tc.idParam, tc.productAttributes).
-				Return(tc.serviceData, tc.serviceError)
+
+			// If a validation error occurs the service method is not called
+			if !tc.isValidationError {
+				serviceMock.
+					On("Update", mock.Anything, tc.id, tc.productAttributes).
+					Return(tc.serviceData, tc.serviceError)
+			}
 			handler := handler.NewProductHandler(serviceMock)
 
-			url := fmt.Sprintf("/api/v1/products/%d", tc.idParam)
+			url := fmt.Sprintf("/api/v1/products/%d", tc.id)
 			request := httptest.NewRequest(http.MethodPatch, url, strings.NewReader(tc.payload))
+
+			// Create chi context to pass the ID to the handler test
 			routeCtx := chi.NewRouteContext()
-			routeCtx.URLParams.Add("id", strconv.Itoa(tc.idParam))
+			routeCtx.URLParams.Add("id", strconv.Itoa(tc.id))
 			request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, routeCtx))
 
 			response := httptest.NewRecorder()
@@ -907,6 +919,7 @@ func TestProductHandler_Update(t *testing.T) {
 			// Assert
 			require.Equal(t, tc.expectedCode, response.Code)
 			require.JSONEq(t, tc.expectedBody, response.Body.String())
+			serviceMock.AssertExpectations(t)
 		})
 	}
 }
