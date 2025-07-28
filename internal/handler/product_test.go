@@ -215,6 +215,8 @@ func TestProductHandler_Create(t *testing.T) {
 		t.Run(tc.testName, func(t *testing.T) {
 			// Arrange
 			serviceMock := &mocks.ProductServiceMock{}
+
+			// If a validation error occurs the service method is not called
 			if !tc.isPayloadError {
 				serviceMock.
 					On("Create", mock.Anything, tc.productAttributes).
