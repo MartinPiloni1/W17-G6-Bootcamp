@@ -9,14 +9,16 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
-func Ptr[T any](v T) *T { return &v }
-
+// Verifies the behavior of the HTTP handler responsible for creating a new Product. It covers:
+// - Successful creation
+// - Error propagation from the repository layer
 func TestProductService_Create(t *testing.T) {
-	// Arrange
+	// Define the products used in common by the test cases
 	newProduct := models.ProductAttributes{
 		Description:                    "",
 		ExpirationRate:                 1,
@@ -28,7 +30,7 @@ func TestProductService_Create(t *testing.T) {
 		ProductCode:                    "",
 		RecommendedFreezingTemperature: 1,
 		ProductTypeID:                  1,
-		SellerID:                       Ptr(1),
+		SellerID:                       utils.Ptr(1),
 	}
 
 	createdProduct := models.Product{
@@ -36,25 +38,31 @@ func TestProductService_Create(t *testing.T) {
 		ProductAttributes: newProduct,
 	}
 
+	// Each test case is constructed by:
+	// testName            — human‐readable description
+	// repositoryData      — the Product object returned by the mocked repository
+	// repositoryError     — the error returned by the mocked repository
+	// expectedData        — the data we expect the service to produce
+	// expectedError       — the error we expect the service to produce
 	tests := []struct {
 		testName        string
 		repositoryData  models.Product
 		repositoryError error
-		expectedResp    models.Product
+		expectedData    models.Product
 		expectedError   error
 	}{
 		{
 			testName:        "Success case: Should create a product",
 			repositoryData:  createdProduct,
 			repositoryError: nil,
-			expectedResp:    createdProduct,
+			expectedData:    createdProduct,
 			expectedError:   nil,
 		},
 		{
-			testName:        "Error case: should return an error",
+			testName:        "Error case: Process an error from the repository layer",
 			repositoryData:  models.Product{},
 			repositoryError: errors.New("db error"),
-			expectedResp:    models.Product{},
+			expectedData:    models.Product{},
 			expectedError:   errors.New("db error"),
 		},
 	}
@@ -74,7 +82,7 @@ func TestProductService_Create(t *testing.T) {
 
 			// Assert
 			require.Equal(t, tc.expectedError, err)
-			require.Equal(t, tc.expectedResp, result)
+			require.Equal(t, tc.expectedData, result)
 			repositoryMock.AssertExpectations(t)
 		})
 	}
@@ -96,7 +104,7 @@ func TestProductService_GetAll(t *testing.T) {
 				ProductCode:                    "",
 				RecommendedFreezingTemperature: 1,
 				ProductTypeID:                  1,
-				SellerID:                       Ptr(1),
+				SellerID:                       utils.Ptr(1),
 			},
 		},
 		{
@@ -112,7 +120,7 @@ func TestProductService_GetAll(t *testing.T) {
 				ProductCode:                    "",
 				RecommendedFreezingTemperature: 1,
 				ProductTypeID:                  1,
-				SellerID:                       Ptr(1),
+				SellerID:                       utils.Ptr(1),
 			},
 		},
 	}
@@ -176,7 +184,7 @@ func TestProductService_GetByID(t *testing.T) {
 			ProductCode:                    "",
 			RecommendedFreezingTemperature: 1,
 			ProductTypeID:                  1,
-			SellerID:                       Ptr(1),
+			SellerID:                       utils.Ptr(1),
 		},
 	}
 
@@ -269,7 +277,7 @@ func TestProductService_GetRecordsPerProduct(t *testing.T) {
 			testName:        "Success: Should return product record count of a single product",
 			repositoryData:  singleRecord,
 			repositoryError: nil,
-			idParam:         Ptr(2),
+			idParam:         utils.Ptr(2),
 			expectedResp:    singleRecord,
 			expectedError:   nil,
 		},
@@ -305,7 +313,7 @@ func TestProductService_GetRecordsPerProduct(t *testing.T) {
 }
 
 func TestProductService_Update(t *testing.T) {
-	sellerID := Ptr(1) // Should be declared in a variable to avoid different memory addreses issues
+	sellerID := utils.Ptr(1) // Should be declared in a variable to avoid different memory addreses issues
 
 	originalProduct := models.Product{
 		ID: 1,
@@ -325,16 +333,16 @@ func TestProductService_Update(t *testing.T) {
 	}
 
 	updatePayload := models.ProductPatchRequest{
-		Description:                    Ptr(""),
-		ExpirationRate:                 Ptr(1),
-		FreezingRate:                   Ptr(2),
-		Height:                         Ptr(1.0),
-		Length:                         Ptr(1.0),
-		Width:                          Ptr(1.0),
-		NetWeight:                      Ptr(1.0),
-		ProductCode:                    Ptr(""),
-		RecommendedFreezingTemperature: Ptr(1.0),
-		ProductTypeID:                  Ptr(1),
+		Description:                    utils.Ptr(""),
+		ExpirationRate:                 utils.Ptr(1),
+		FreezingRate:                   utils.Ptr(2),
+		Height:                         utils.Ptr(1.0),
+		Length:                         utils.Ptr(1.0),
+		Width:                          utils.Ptr(1.0),
+		NetWeight:                      utils.Ptr(1.0),
+		ProductCode:                    utils.Ptr(""),
+		RecommendedFreezingTemperature: utils.Ptr(1.0),
+		ProductTypeID:                  utils.Ptr(1),
 		SellerID:                       sellerID,
 	}
 
@@ -356,7 +364,7 @@ func TestProductService_Update(t *testing.T) {
 	}
 
 	singleFieldUpdatePayload := models.ProductPatchRequest{
-		Description: Ptr("Yogur helado"),
+		Description: utils.Ptr("Yogur helado"),
 	}
 
 	singleFieldUpdatedProduct := models.Product{
