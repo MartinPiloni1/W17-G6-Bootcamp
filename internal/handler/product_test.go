@@ -381,6 +381,7 @@ func TestProductHandler_GetAll(t *testing.T) {
 // - Error when an invalid ID is given
 // - Error propagation from the service layer
 func TestProductHandler_GetById(t *testing.T) {
+	// Define the product used in common by the test cases
 	product := models.Product{
 		ID: 1,
 		ProductAttributes: models.ProductAttributes{
@@ -441,7 +442,7 @@ func TestProductHandler_GetById(t *testing.T) {
 			}`,
 		},
 		{
-			testName:     "Error case: Bad request when giving an invalid ID",
+			testName:     "Error case: Invalid ID is given",
 			id:           -1,
 			isIdError:    true,
 			serviceData:  models.Product{},
@@ -473,6 +474,8 @@ func TestProductHandler_GetById(t *testing.T) {
 		t.Run(tc.testName, func(t *testing.T) {
 			// Arrange
 			serviceMock := &mocks.ProductServiceMock{}
+
+			// If a validation error occurs the service method is not called
 			if !tc.isIdError {
 				serviceMock.
 					On("GetByID", mock.Anything, tc.id).
@@ -501,7 +504,14 @@ func TestProductHandler_GetById(t *testing.T) {
 	}
 }
 
+// Verifies the behavior of the HTTP handler responsible for retrieving records per product.
+// It covers:
+// - Successful retrieval of the record count of every product
+// - Successful retrieval of the record count of a single product
+// - Error when an invalid ID is given
+// - Error propagation from the service layer
 func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
+	// Define the records used in common by the test cases
 	record1 := models.ProductRecordCount{
 		ProductID:    1,
 		Description:  "Yogurt helado",
@@ -514,19 +524,29 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 		RecordsCount: 1,
 	}
 
+	// Each test case is constructed by:
+	// testName            — human‐readable description
+	// id                  - ID of the product to retrieve as a pointer
+	// isIdError           — whether we expect ID validation to fail inside the handler
+	// serviceData         — the records per product slice returned by the mocked service
+	// serviceError        — the error returned by the mocked service
+	// expectedCode        — HTTP status code we expect the handler to produce
+	// expectedBody        — JSON body (string) we expect in the HTTP response
 	tests := []struct {
 		testName     string
+		id           *int
+		isIdError    bool
 		serviceData  []models.ProductRecordCount
 		serviceError error
-		idParam      *int
 		expectedCode int
 		expectedBody string
 	}{
 		{
 			testName:     "Success: Get all product if no ID query param is given",
+			id:           nil,
+			isIdError:    false,
 			serviceData:  []models.ProductRecordCount{record1, record2},
 			serviceError: nil,
-			idParam:      nil,
 			expectedCode: http.StatusOK,
 			expectedBody: `
 			{
@@ -546,9 +566,10 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 		},
 		{
 			testName:     "Success: Get a single product if ID query param is given",
+			id:           utils.Ptr(2),
+			isIdError:    false,
 			serviceData:  []models.ProductRecordCount{record2},
 			serviceError: nil,
-			idParam:      utils.Ptr(2),
 			expectedCode: http.StatusOK,
 			expectedBody: `
 			{
@@ -562,10 +583,11 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 			}`,
 		},
 		{
-			testName:     "Fail: Invalid ID is given",
+			testName:     "Error case: Invalid ID is given",
+			id:           utils.Ptr(-1),
+			isIdError:    true,
 			serviceData:  nil,
 			serviceError: errors.New("invalid id"),
-			idParam:      utils.Ptr(-1),
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `
 			{
@@ -574,10 +596,11 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 			}`,
 		},
 		{
-			testName:     "Fail: Internal server error after a DB Error",
+			testName:     "Error case: Process an error from the service layer",
+			id:           utils.Ptr(1),
+			isIdError:    false,
 			serviceData:  nil,
 			serviceError: errors.New("db error"),
-			idParam:      utils.Ptr(1),
 			expectedCode: http.StatusInternalServerError,
 			expectedBody: `
 				{
@@ -589,18 +612,21 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.testName, func(t *testing.T) {
-			// Run tests parallel
-			t.Parallel()
-
 			// Arrange
 			serviceMock := &mocks.ProductServiceMock{}
-			serviceMock.On("GetRecordsPerProduct", mock.Anything, tc.idParam).Return(tc.serviceData, tc.serviceError)
+
+			// If a validation error occurs the service method is not called
+			if !tc.isIdError {
+				serviceMock.
+					On("GetRecordsPerProduct", mock.Anything, tc.id).
+					Return(tc.serviceData, tc.serviceError)
+			}
 			handler := handler.NewProductHandler(serviceMock)
 
 			url := "/api/v1/products/reportRecords"
 			fmt.Println(url)
-			if tc.idParam != nil {
-				url += fmt.Sprintf("?id=%d", *tc.idParam)
+			if tc.id != nil {
+				url += fmt.Sprintf("?id=%d", *tc.id)
 			}
 
 			request := httptest.NewRequest(http.MethodGet, url, nil)
@@ -612,6 +638,7 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 			// Assert
 			require.Equal(t, tc.expectedCode, response.Code)
 			require.JSONEq(t, tc.expectedBody, response.Body.String())
+			serviceMock.AssertExpectations(t)
 		})
 	}
 }
