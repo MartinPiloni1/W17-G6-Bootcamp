@@ -262,7 +262,7 @@ func TestProductService_GetByID(t *testing.T) {
 // - Successful retrieval of the record count of a single product
 // - Error propagation from the repository layer
 func TestProductService_GetRecordsPerProduct(t *testing.T) {
-	// Define the recods used in common by the test cases
+	// Define the records used in common by the test cases
 	recordsPerProduct := []models.ProductRecordCount{
 		{
 			ProductID:    1,
@@ -346,7 +346,15 @@ func TestProductService_GetRecordsPerProduct(t *testing.T) {
 	}
 }
 
+// Verifies the behavior of service layer responsible for updating a product.
+// It covers:
+// - Successful update all fields of a product
+// - Successful update a single field of a product
+// - Error when GetByID call fails
+// - Error propagation from the repository layer
 func TestProductService_Update(t *testing.T) {
+	// Define the products used in common by the test cases
+
 	sellerID := utils.Ptr(1) // Should be declared in a variable to avoid different memory addreses issues
 
 	originalProduct := models.Product{
@@ -418,61 +426,73 @@ func TestProductService_Update(t *testing.T) {
 		},
 	}
 
+	// Each test case is constructed by:
+	// testName              — human‐readable description
+	// payload               - The ProductPatchRequest to update a product
+	// id                    - ID of the product to update
+	// updatedProduct        - The Product with the updated fields
+	// repositoryGetData     — the Product returned by the get call on the mocked repository
+	// repositoryGetError    — the error returned by get call on the mocked repository
+	// repositoryPatchData   — the Product returned by the patch call on the mocked repository
+	// repositoryPatchError  — the error returned by the patch call mocked repository
+	// expectedData          — the data we expect the service to produce
+	// expectedError         — the error we expect the service to produce
 	tests := []struct {
 		testName             string
 		payload              models.ProductPatchRequest
+		id                   int
 		updatedProduct       models.Product
 		repositoryGetData    models.Product
 		repositoryGetError   error
 		repositoryPatchData  models.Product
 		repositoryPatchError error
-		idParam              int
-		expectedResp         models.Product
+		expectedData         models.Product
 		expectedError        error
 	}{
 		{
 			testName:             "Success: should update all fields of a product",
 			payload:              updatePayload,
+			id:                   1,
 			updatedProduct:       updatedProduct,
 			repositoryGetData:    originalProduct,
 			repositoryGetError:   nil,
 			repositoryPatchData:  updatedProduct,
 			repositoryPatchError: nil,
-			idParam:              1,
-			expectedResp:         updatedProduct,
+			expectedData:         updatedProduct,
 			expectedError:        nil,
 		},
 		{
 			testName:             "Success: should update a single field of a product",
 			payload:              singleFieldUpdatePayload,
 			updatedProduct:       singleFieldUpdatedProduct,
+			id:                   1,
 			repositoryGetData:    originalProduct,
 			repositoryGetError:   nil,
 			repositoryPatchData:  singleFieldUpdatedProduct,
 			repositoryPatchError: nil,
-			idParam:              1,
-			expectedResp:         singleFieldUpdatedProduct,
+			expectedData:         singleFieldUpdatedProduct,
 			expectedError:        nil,
 		},
 		{
 			testName:           "Error case: GetByID fails",
 			payload:            updatePayload,
+			id:                 1,
+			updatedProduct:     models.Product{},
 			repositoryGetData:  models.Product{},
 			repositoryGetError: httperrors.NotFoundError{Message: "Product not found"},
-			idParam:            1,
-			expectedResp:       models.Product{},
+			expectedData:       models.Product{},
 			expectedError:      httperrors.NotFoundError{Message: "Product not found"},
 		},
 		{
 			testName:             "Error case: Process an error from the repository layer",
 			payload:              updatePayload,
 			updatedProduct:       updatedProduct,
+			id:                   1,
 			repositoryGetData:    originalProduct,
 			repositoryGetError:   nil,
 			repositoryPatchData:  models.Product{},
 			repositoryPatchError: errors.New("db error"),
-			idParam:              1,
-			expectedResp:         models.Product{},
+			expectedData:         models.Product{},
 			expectedError:        errors.New("db error"),
 		},
 	}
@@ -484,21 +504,22 @@ func TestProductService_Update(t *testing.T) {
 			service := service.NewProductServiceDefault(&repositoryMock)
 
 			repositoryMock.
-				On("GetByID", mock.Anything, tc.idParam).
+				On("GetByID", mock.Anything, tc.id).
 				Return(tc.repositoryGetData, tc.repositoryGetError)
 
+			// Check if the GetByID call failed
 			if tc.repositoryGetError == nil {
 				repositoryMock.
-					On("Update", mock.Anything, tc.idParam, tc.updatedProduct).
+					On("Update", mock.Anything, tc.id, tc.updatedProduct).
 					Return(tc.repositoryPatchData, tc.repositoryPatchError)
 			}
 
 			// Act
-			result, err := service.Update(context.Background(), tc.idParam, tc.payload)
+			result, err := service.Update(context.Background(), tc.id, tc.payload)
 
 			// Assert
 			require.Equal(t, tc.expectedError, err)
-			require.Equal(t, tc.expectedResp, result)
+			require.Equal(t, tc.expectedData, result)
 			repositoryMock.AssertExpectations(t)
 		})
 	}
