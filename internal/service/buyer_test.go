@@ -126,20 +126,41 @@ func TestBuyerServiceDefault_Update(t *testing.T) {
 }
 
 func TestBuyerServiceDefault_Delete(t *testing.T) {
-	// assert
-	repoMock := mocks.NewBuyerRepositoryDBMock()
-	serviceDefault := service.NewBuyerServiceDefault(repoMock)
+	t.Run("successfully delete buyer returns nil", func(t *testing.T) {
+		// assert
+		repoMock := mocks.NewBuyerRepositoryDBMock()
+		serviceDefault := service.NewBuyerServiceDefault(repoMock)
 
-	ctx := context.Background()
+		ctx := context.Background()
 
-	repoMock.On("Delete", ctx, 1).Return(nil).Once()
+		repoMock.On("Delete", ctx, 1).Return(nil).Once()
 
-	// act
-	actual := serviceDefault.Delete(ctx, 1)
+		// act
+		actual := serviceDefault.Delete(ctx, 1)
 
-	// assert
-	assert.Nil(t, actual)
-	repoMock.AssertNumberOfCalls(t, "Delete", 1)
+		// assert
+		assert.Nil(t, actual)
+		repoMock.AssertNumberOfCalls(t, "Delete", 1)
+	})
+
+	t.Run("error deleting the buyer, returning the error", func(t *testing.T) {
+		// assert
+		repoMock := mocks.NewBuyerRepositoryDBMock()
+		serviceDefault := service.NewBuyerServiceDefault(repoMock)
+
+		ctx := context.Background()
+
+		errNotFound := httperrors.NotFoundError{Message: "Buyer Not Found"}
+		repoMock.On("Delete", ctx, 1).Return(errNotFound).Once()
+
+		// act
+		actual := serviceDefault.Delete(ctx, 1)
+
+		// assert
+		assert.Equal(t, errNotFound, actual)
+		assert.Equal(t, errNotFound.Error(), actual.Error())
+		repoMock.AssertNumberOfCalls(t, "Delete", 1)
+	})
 }
 
 func TestBuyerServiceDefault_GetWithPurchaseOrdersCount(t *testing.T) {
@@ -182,25 +203,47 @@ func TestBuyerServiceDefault_GetWithPurchaseOrdersCount(t *testing.T) {
 }
 
 func TestBuyerServiceDefault_GetByID(t *testing.T) {
-	repoMock := mocks.NewBuyerRepositoryDBMock()
-	serviceDefault := service.NewBuyerServiceDefault(repoMock)
 
-	buyer := models.Buyer{
-		Id: 1,
-		BuyerAttributes: models.BuyerAttributes{
-			CardNumberId: 12312312,
-			FirstName:    "Juan",
-			LastName:     "Perez",
+	type TestCase struct {
+		Name          string
+		ExpectedError error
+		ExpectedBuyer models.Buyer
+	}
+	testCases := []TestCase{
+		{
+			Name:          "successfully returns the buyer with the givenID",
+			ExpectedError: nil,
+			ExpectedBuyer: models.Buyer{
+				Id: 1,
+				BuyerAttributes: models.BuyerAttributes{
+					CardNumberId: 12312312,
+					FirstName:    "Juan",
+					LastName:     "Perez",
+				},
+			},
+		},
+		{
+			Name:          "repository returned error, the service returns the same error",
+			ExpectedError: httperrors.NotFoundError{Message: "Buyer Not Found"},
+			ExpectedBuyer: models.Buyer{},
 		},
 	}
-	ctx := context.Background()
-	repoMock.On("GetByID", ctx, buyer.Id).Return(buyer, nil)
+	for _, test := range testCases {
+		t.Run(test.Name, func(t *testing.T) {
+			// arrange
+			repoMock := mocks.NewBuyerRepositoryDBMock()
+			serviceDefault := service.NewBuyerServiceDefault(repoMock)
 
-	// act
-	got, err := serviceDefault.GetByID(ctx, buyer.Id)
+			ctx := context.Background()
+			repoMock.On("GetByID", ctx, 1).Return(test.ExpectedBuyer, test.ExpectedError)
 
-	// assert
-	assert.Nil(t, err)
-	assert.Equal(t, buyer, got)
-	repoMock.AssertNumberOfCalls(t, "GetByID", 1)
+			// act
+			got, err := serviceDefault.GetByID(ctx, 1)
+
+			// assert
+			assert.Equal(t, test.ExpectedBuyer, got)
+			assert.Equal(t, test.ExpectedError, err)
+			repoMock.AssertNumberOfCalls(t, "GetByID", 1)
+		})
+	}
 }
