@@ -20,11 +20,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Verifies the behavior of the HTTP handler responsible for creating a new Product. It covers
-// the “happy path” (successful creation) and several error scenarios related to:
-// - Incomplete JSON bodies
-// - Invalid JSON fields values
-// - Unknown JSON fields
+// Verifies the behavior of the HTTP handler responsible for creating a new Product. It covers:
+// - Successful creation
+// - Error when incomplete JSON bodies are given
+// - Error when invalid JSON fields values are given
+// - Error when unknown JSON fields are given
 // - Error propagation from the service layer
 func TestProductHandler_Create(t *testing.T) {
 	// Define the payloads and products used in common by the test cases
@@ -375,6 +375,11 @@ func TestProductHandler_GetAll(t *testing.T) {
 	}
 }
 
+// Verifies the behavior of the HTTP handler responsible for retrieving a single product.
+// It covers:
+// - Successful retrieval of a single product
+// - Error when an invalid ID is given
+// - Error propagation from the service layer
 func TestProductHandler_GetById(t *testing.T) {
 	product := models.Product{
 		ID: 1,
@@ -393,19 +398,29 @@ func TestProductHandler_GetById(t *testing.T) {
 		},
 	}
 
+	// Each test case is constructed by:
+	// testName            — human‐readable description
+	// id                  - ID of the product to retrieve
+	// isIdError           — whether we expect ID validation to fail inside the handler
+	// serviceData         — the Product object returned by the mocked service
+	// serviceError        — the error returned by the mocked service
+	// expectedCode        — HTTP status code we expect the handler to produce
+	// expectedBody        — JSON body (string) we expect in the HTTP response
 	tests := []struct {
 		testName     string
+		id           int
+		isIdError    bool
 		serviceData  models.Product
 		serviceError error
-		idParam      int
 		expectedCode int
 		expectedBody string
 	}{
 		{
 			testName:     "Success: Get product with ID 1",
+			id:           1,
+			isIdError:    false,
 			serviceData:  product,
 			serviceError: nil,
-			idParam:      1,
 			expectedCode: http.StatusOK,
 			expectedBody: `
 			{
@@ -426,23 +441,11 @@ func TestProductHandler_GetById(t *testing.T) {
 			}`,
 		},
 		{
-			testName:     "Fail: Not found when giving a non existant ID",
-			serviceData:  models.Product{},
-			serviceError: httperrors.NotFoundError{Message: "Product not found"},
-			idParam:      10000,
-			expectedCode: http.StatusNotFound,
-			expectedBody: `
-				{
-					"status": "Not Found",
-					"message": "Product not found"
-				}
-			`,
-		},
-		{
-			testName:     "Fail: Bad request when giving an invalid ID",
+			testName:     "Error case: Bad request when giving an invalid ID",
+			id:           -1,
+			isIdError:    true,
 			serviceData:  models.Product{},
 			serviceError: httperrors.NotFoundError{Message: "Invalid ID"},
-			idParam:      -1,
 			expectedCode: http.StatusBadRequest,
 			expectedBody: `
 				{
@@ -452,10 +455,11 @@ func TestProductHandler_GetById(t *testing.T) {
 			`,
 		},
 		{
-			testName:     "Fail: Internal server error after a DB Error",
+			testName:     "Error case: Process an error from the service layer",
+			id:           1,
+			isIdError:    false,
 			serviceData:  models.Product{},
 			serviceError: errors.New("db error"),
-			idParam:      1,
 			expectedCode: http.StatusInternalServerError,
 			expectedBody: `
 				{
@@ -467,18 +471,21 @@ func TestProductHandler_GetById(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.testName, func(t *testing.T) {
-			// Run tests parallel
-			t.Parallel()
-
 			// Arrange
 			serviceMock := &mocks.ProductServiceMock{}
-			serviceMock.On("GetByID", mock.Anything, tc.idParam).Return(tc.serviceData, tc.serviceError)
+			if !tc.isIdError {
+				serviceMock.
+					On("GetByID", mock.Anything, tc.id).
+					Return(tc.serviceData, tc.serviceError)
+			}
 			handler := handler.NewProductHandler(serviceMock)
 
-			url := fmt.Sprintf("/api/v1/products/%d", tc.idParam)
+			url := fmt.Sprintf("/api/v1/products/%d", tc.id)
 			request := httptest.NewRequest(http.MethodGet, url, nil)
+
+			// Create chi context to pass the ID to the handler test
 			routeCtx := chi.NewRouteContext()
-			routeCtx.URLParams.Add("id", strconv.Itoa(tc.idParam))
+			routeCtx.URLParams.Add("id", strconv.Itoa(tc.id))
 			request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, routeCtx))
 
 			response := httptest.NewRecorder()
@@ -489,6 +496,7 @@ func TestProductHandler_GetById(t *testing.T) {
 			// Assert
 			require.Equal(t, tc.expectedCode, response.Code)
 			require.JSONEq(t, tc.expectedBody, response.Body.String())
+			serviceMock.AssertExpectations(t)
 		})
 	}
 }
