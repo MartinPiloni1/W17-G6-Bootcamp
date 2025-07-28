@@ -22,10 +22,10 @@ import (
 
 // Verifies the behavior of the HTTP handler responsible for creating a new Product. It covers
 // the “happy path” (successful creation) and several error scenarios related to:
-// * Incomplete JSON bodies
-// * Invalid JSON fields values
-// * Unknown JSON fields
-// * Errors coming from the service layer
+// - Incomplete JSON bodies
+// - Invalid JSON fields values
+// - Unknown JSON fields
+// - Error propagation from the service layer
 func TestProductHandler_Create(t *testing.T) {
 	// Define the payloads and products used in common by the test cases
 	newProductAttributes := models.ProductAttributes{
@@ -238,9 +238,14 @@ func TestProductHandler_Create(t *testing.T) {
 	}
 }
 
+// Verifies the behavior of the HTTP handler responsible for retrieving all products.
+// It covers:
+// - Successful retrieval of multiple products
+// - Successful retrieval when no products exist (empty list)
+// - Error propagation from the service layer
 func TestProductHandler_GetAll(t *testing.T) {
-	// TODO: Generate random products with values in a valid range
-	p1 := models.Product{
+	// Define the products used in common by the test cases
+	product1 := models.Product{
 		ID: 1,
 		ProductAttributes: models.ProductAttributes{
 			Description:                    "Yogurt helado",
@@ -257,7 +262,7 @@ func TestProductHandler_GetAll(t *testing.T) {
 		},
 	}
 
-	p2 := models.Product{
+	product2 := models.Product{
 		ID: 2,
 		ProductAttributes: models.ProductAttributes{
 			Description:                    "Pechuga de pollo",
@@ -274,6 +279,12 @@ func TestProductHandler_GetAll(t *testing.T) {
 		},
 	}
 
+	// Each test case is constructed by:
+	// testName            — human‐readable description
+	// serviceData         — the Products slice returned by the mocked service
+	// serviceError        — the error returned by the mocked service
+	// expectedCode        — HTTP status code we expect the handler to produce
+	// expectedBody        — JSON body (string) we expect in the HTTP response
 	tests := []struct {
 		testName     string
 		serviceData  []models.Product
@@ -283,7 +294,7 @@ func TestProductHandler_GetAll(t *testing.T) {
 	}{
 		{
 			testName:     "Success: Get all products",
-			serviceData:  []models.Product{p1, p2},
+			serviceData:  []models.Product{product1, product2},
 			serviceError: nil,
 			expectedCode: http.StatusOK,
 			expectedBody: `
@@ -332,7 +343,7 @@ func TestProductHandler_GetAll(t *testing.T) {
 			`,
 		},
 		{
-			testName:     "Fail: Internal server error after a DB Error",
+			testName:     "Error case: Process an error from the service layer",
 			serviceData:  nil,
 			serviceError: errors.New("db error"),
 			expectedCode: http.StatusInternalServerError,
@@ -346,9 +357,6 @@ func TestProductHandler_GetAll(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
-			// Run tests parallel
-			t.Parallel()
-
 			// Arrange
 			serviceMock := &mocks.ProductServiceMock{}
 			serviceMock.On("GetAll", mock.Anything).Return(tt.serviceData, tt.serviceError)
@@ -362,12 +370,12 @@ func TestProductHandler_GetAll(t *testing.T) {
 			// Assert
 			require.Equal(t, tt.expectedCode, response.Code)
 			require.JSONEq(t, tt.expectedBody, response.Body.String())
+			serviceMock.AssertExpectations(t)
 		})
 	}
 }
 
 func TestProductHandler_GetById(t *testing.T) {
-	// TODO: Generate random products with values in a valid range
 	product := models.Product{
 		ID: 1,
 		ProductAttributes: models.ProductAttributes{
