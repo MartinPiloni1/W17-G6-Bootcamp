@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	mocks "github.com/aaguero_meli/W17-G6-Bootcamp/internal/mocks/repository"
@@ -246,4 +247,59 @@ func TestBuyerServiceDefault_GetByID(t *testing.T) {
 			repoMock.AssertNumberOfCalls(t, "GetByID", 1)
 		})
 	}
+}
+
+func TestBuyerServiceDefault_GetAll(t *testing.T) {
+	t.Run("error from repository service pass the error as it is", func(t *testing.T) {
+		repoMock := mocks.NewBuyerRepositoryDBMock()
+		serviceDefault := service.NewBuyerServiceDefault(repoMock)
+
+		ctx := context.Background()
+		repoMock.On("GetAll", ctx).
+			Return([]models.Buyer{}, errors.New("some random error from repository")).
+			Once()
+
+		got, err := serviceDefault.GetAll(ctx)
+
+		assert.Equal(t, []models.Buyer{}, got)
+		assert.Error(t, err)
+		repoMock.AssertNumberOfCalls(t, "GetAll", 1)
+		repoMock.AssertExpectations(t)
+	})
+
+	t.Run("repository pass the buyers, service pass the slice as it is", func(t *testing.T) {
+		repoMock := mocks.NewBuyerRepositoryDBMock()
+		serviceDefault := service.NewBuyerServiceDefault(repoMock)
+
+		expectedBuyer := []models.Buyer{
+			{
+				Id: 1,
+				BuyerAttributes: models.BuyerAttributes{
+					CardNumberId: 12345678,
+					LastName:     "Juan",
+					FirstName:    "Juan",
+				},
+			},
+			{
+				Id: 2,
+				BuyerAttributes: models.BuyerAttributes{
+					CardNumberId: 98765432,
+					FirstName:    "Carlos",
+					LastName:     "Perez",
+				},
+			},
+		}
+
+		ctx := context.Background()
+		repoMock.On("GetAll", ctx).
+			Return(expectedBuyer, nil).
+			Once()
+
+		got, err := serviceDefault.GetAll(ctx)
+
+		assert.Equal(t, expectedBuyer, got)
+		assert.Nil(t, err)
+		repoMock.AssertNumberOfCalls(t, "GetAll", 1)
+		repoMock.AssertExpectations(t)
+	})
 }
