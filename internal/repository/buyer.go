@@ -90,12 +90,14 @@ func (r *BuyerRepositoryDB) GetAll(ctx context.Context) ([]models.Buyer, error) 
 			&buyer.CardNumberId,
 		)
 
+		// error at the scan, defer db and return error
 		if err != nil {
 			return nil, err
 		}
 		buyers = append(buyers, buyer)
 	}
 
+	// check if the rows had any error
 	err = rows.Err()
 	if err != nil {
 		return nil, err
@@ -223,6 +225,7 @@ func (r *BuyerRepositoryDB) GetWithPurchaseOrdersCount(
 		params = append(params, *id)
 	}
 
+	// finally groups the records by the parameters and orders by id
 	query += `
 	GROUP BY
 		b.id,

@@ -96,6 +96,7 @@ func ProductRecordRouter(db *sql.DB) chi.Router {
 	return router
 }
 
+// BuyersRouter creates and returns the router of buyer
 func BuyersRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
@@ -145,6 +146,7 @@ func SectionRouter(db *sql.DB) chi.Router {
 	return router
 }
 
+// PurchaseOrderRouter creates and returns the router of PurchaseOrder
 func PurchaseOrderRouter(db *sql.DB) chi.Router {
 	purchaseOrderRepository := repository.NewPurchaseOrderRepositoryDB(db)
 	purchaseOrderService := service.NewPurchaseOrderDefault(purchaseOrderRepository)

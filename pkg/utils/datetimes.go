@@ -9,7 +9,7 @@ import (
 // intended use, add it as a new parameter in playground/validator
 // validates that the field Time is not seted into the future
 func NotFutureDatetime(fl validator.FieldLevel) bool {
-	date, ok := fl.Field().Interface().(time.Time)
+	date, ok := fl.Field().Interface().(time.Time) // check if the parameter is time.Time
 	if !ok {
 		return false
 	}
