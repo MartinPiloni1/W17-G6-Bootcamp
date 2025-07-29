@@ -15,7 +15,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Verifies the behavior of the repository layer responsible for creating a new Product. It covers:
+//   - Successful creation of a new Product.
+//   - Conflict when the given product_code is duplicated (MySQL error 1062).
+//   - Conflict when the given seller_id does not exist (MySQL error 1452).
+//   - InternalServerError on any other MySQL error code.
+//   - InternalServerError when LastInsertId itself fails.
 func TestProductRepository_Create(t *testing.T) {
+	// Define the query and product used by the tests cases
 	query := regexp.QuoteMeta(`
 		INSERT INTO products (
 			description,
@@ -53,6 +60,12 @@ func TestProductRepository_Create(t *testing.T) {
 		ProductAttributes: newProductAttributes,
 	}
 
+	// Each test case is constructed by:
+	//   testName          – a human‐readable description
+	//   productAttributes – the input attributes passed to repo.Create()
+	//   mockSetup         – sets up sqlmock expectations and returned results/errors
+	//   expectedResp      – the Product value we expect Create() to return
+	//   expectedError     – the error we expect Create() to return
 	tests := []struct {
 		testName          string
 		productAttributes models.ProductAttributes
@@ -158,7 +171,13 @@ func TestProductRepository_Create(t *testing.T) {
 	}
 }
 
+// Verifies the behavior of the repository layer responsible for fetching all Products. It covers:
+//   - Successful retrieval of all rows and mapping into []Product.
+//   - InternalServerError when the SQL query itself fails.
+//   - InternalServerError when scanning a row into the Product struct fails.
+//   - InternalServerError when rows iteration (rows.Err()) fails.
 func TestProductRepository_GetAll(t *testing.T) {
+	// Define the query and product used by the tests cases
 	query := regexp.QuoteMeta(`
 		SELECT
 			id,
@@ -226,6 +245,11 @@ func TestProductRepository_GetAll(t *testing.T) {
 		},
 	}
 
+	// Each test case is constructed by:
+	//   testName          – a human‐readable description
+	//   mockSetup         – sets up sqlmock expectations and returned results/errors
+	//   expectedResp      – the Products slice we expect GetAll() to return
+	//   expectedError     – the error we expect GetAll() to return
 	tests := []struct {
 		testName      string
 		mockSetup     func(mock sqlmock.Sqlmock)
@@ -361,7 +385,12 @@ func TestProductRepository_GetAll(t *testing.T) {
 	}
 }
 
+// Verifies the behavior of the repository layer responsible for fetching a Product by its ID. It covers:
+//   - Successful retrieval of an existing Product.
+//   - NotFoundError when no row exists for the given ID.
+//   - InternalServerError when the SQL query itself fails.
 func TestProductRepository_GetByID(t *testing.T) {
+	// Define the query, product and ID used by the tests cases
 	query := regexp.QuoteMeta(`
 		SELECT
 			id,
@@ -414,6 +443,11 @@ func TestProductRepository_GetByID(t *testing.T) {
 		},
 	}
 
+	// Each test case is constructed by:
+	//   testName          – a human‐readable description
+	//   mockSetup         – sets up sqlmock expectations and returned results/errors
+	//   expectedResp      – the Product we expect GetByID() to return
+	//   expectedError     – the error we expect GetByID() to return
 	tests := []struct {
 		testName      string
 		mockSetup     func(mock sqlmock.Sqlmock)
@@ -495,7 +529,15 @@ func TestProductRepository_GetByID(t *testing.T) {
 	}
 }
 
+// Verifies the behavior of the repository layer responsible for retrieving record counts per Product.
+// It covers:
+//   - Successful retrieval of record count for a single Product by its ID.
+//   - Successful retrieval of record counts for all Products.
+//   - NotFoundError when querying a Product ID yields no rows.
+//   - InternalServerError when scanning a row into the target struct fails.
+//   - InternalServerError when the SQL query itself fails.
 func TestProductRepository_GetRecordPerProduct(t *testing.T) {
+	// Define the query, record and ID used by the tests cases
 	query := regexp.QuoteMeta(`
 			SELECT 
 				p.id, 
@@ -534,6 +576,11 @@ func TestProductRepository_GetRecordPerProduct(t *testing.T) {
 		},
 	}
 
+	// Each test case is constructed by:
+	//   testName          – a human‐readable description
+	//   mockSetup         – sets up sqlmock expectations and returned results/errors
+	//   expectedResp      – the records per product count we expect GetRecordPerProduct() to return
+	//   expectedError     – the error we expect GetRecordPerProduct() to return
 	tests := []struct {
 		testName      string
 		mockSetup     func(mock sqlmock.Sqlmock)
@@ -649,7 +696,13 @@ func TestProductRepository_GetRecordPerProduct(t *testing.T) {
 	}
 }
 
+// Verifies the behavior of the repository layer responsible for updating an existing Product. It covers:
+//   - Successful update of a Product.
+//   - Conflict when the given product_code is duplicated (MySQL error 1062).
+//   - Conflict when the given seller_id does not exist (MySQL error 1452).
+//   - InternalServerError on any other database error.
 func TestProductRepository_Update(t *testing.T) {
+	// Define the query, product and ID used by the tests cases
 	query := regexp.QuoteMeta(`
 		UPDATE products
 		SET
@@ -686,6 +739,11 @@ func TestProductRepository_Update(t *testing.T) {
 
 	inputID := 1
 
+	// Each test case is constructed by:
+	//   testName          – a human‐readable description
+	//   mockSetup         – sets up sqlmock expectations and returned results/errors
+	//   expectedResp      – the updated product we expect Update() to return
+	//   expectedError     – the error we expect Update() to return
 	tests := []struct {
 		testName       string
 		id             int
@@ -784,7 +842,14 @@ func TestProductRepository_Update(t *testing.T) {
 	}
 }
 
+// Verifies the behavior of the repository layer responsible for deleting a Product by its ID. It covers:
+//   - Successful deletion of an existing Product.
+//   - Conflict when the Product is still referenced by some product_records (MySQL error 1451).
+//   - InternalServerError when the Exec call itself fails.
+//   - NotFoundError when no rows are affected (Product not found).
+//   - InternalServerError when retrieving RowsAffected fails.
 func TestProductRepository_Delete(t *testing.T) {
+	// Define the query and ID used by the tests cases
 	query := regexp.QuoteMeta(`
 		DELETE FROM products
 		WHERE id=?	
@@ -792,6 +857,10 @@ func TestProductRepository_Delete(t *testing.T) {
 
 	inputID := 1
 
+	// Each test case is constructed by:
+	//   testName          – a human‐readable description
+	//   mockSetup         – sets up sqlmock expectations and returned results/errors
+	//   expectedError     – the error we expect Delete() to return
 	tests := []struct {
 		testName      string
 		mockSetup     func(mock sqlmock.Sqlmock)
