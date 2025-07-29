@@ -1,4 +1,4 @@
-package repository
+package repository_mocks
 
 import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
