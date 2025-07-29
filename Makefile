@@ -28,7 +28,6 @@ clean:
 
 # Creates database 
 migrate:
-
 	go run cmd/migrate/main.go
 
 # Populates the database tables
