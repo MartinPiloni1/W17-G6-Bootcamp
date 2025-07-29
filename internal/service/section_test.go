@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/mock/repository"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/mocks/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/stretchr/testify/assert"
@@ -125,7 +125,7 @@ func TestSectionService_Update(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
-			mockRepo := new(mock.SectionRepositoryDBMock)
+			mockRepo := new(mocks.SectionRepositoryDBMock)
 			service := NewSectionServiceDefault(mockRepo)
 			
 			mockRepo.On("GetByID", testifyMock.Anything, tt.inputID).Return(tt.mockGetByIDResp, tt.mockGetByIDError)
@@ -182,7 +182,7 @@ func TestSectionService_GetAll(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
-			mockRepo := new(mock.SectionRepositoryDBMock)
+			mockRepo := new(mocks.SectionRepositoryDBMock)
 			service := NewSectionServiceDefault(mockRepo)
 
 			mockRepo.On("GetAll", testifyMock.Anything).Return(tt.mockResp, tt.mockErr)
@@ -202,7 +202,7 @@ func TestSectionService_GetAll(t *testing.T) {
 func TestSectionService_GetByID(t *testing.T) {
 	expectedSection := models.Section{ID: 1, SectionNumber: "SEC-101"}
 	inputID := 1
-	mockRepo := new(mock.SectionRepositoryDBMock)
+	mockRepo := new(mocks.SectionRepositoryDBMock)
 	service := NewSectionServiceDefault(mockRepo)
 
 	mockRepo.On("GetByID", testifyMock.Anything, inputID).Return(expectedSection, nil)
@@ -217,7 +217,7 @@ func TestSectionService_GetByID(t *testing.T) {
 // TestSectionService_Delete tests the Delete method of SectionService
 func TestSectionService_Delete(t *testing.T) {
 	inputID := 1
-	mockRepo := new(mock.SectionRepositoryDBMock)
+	mockRepo := new(mocks.SectionRepositoryDBMock)
 	service := NewSectionServiceDefault(mockRepo)
 
 	mockRepo.On("Delete", testifyMock.Anything, inputID).Return(nil)
@@ -232,7 +232,7 @@ func TestSectionService_Delete(t *testing.T) {
 func TestSectionService_Create(t *testing.T) {
 	sectionToCreate := models.Section{SectionNumber: "SEC-NEW"}
 	expectedSection := models.Section{ID: 1, SectionNumber: "SEC-NEW"}
-	mockRepo := new(mock.SectionRepositoryDBMock)
+	mockRepo := new(mocks.SectionRepositoryDBMock)
 	service := NewSectionServiceDefault(mockRepo)
 	mockRepo.On("Create", testifyMock.Anything, sectionToCreate).Return(expectedSection, nil)
 
@@ -247,7 +247,7 @@ func TestSectionService_Create(t *testing.T) {
 func TestSectionService_GetProductsReport(t *testing.T) {
 	expectedReport := models.SectionProductsReport{SectionID: 1, ProductsCount: 10}
 	inputID := 1
-	mockRepo := new(mock.SectionRepositoryDBMock)
+	mockRepo := new(mocks.SectionRepositoryDBMock)
 	service := NewSectionServiceDefault(mockRepo)
 	mockRepo.On("GetProductsReport", testifyMock.Anything, inputID).Return(expectedReport, nil)
 
@@ -264,7 +264,7 @@ func TestSectionService_GetAllProductsReport(t *testing.T) {
 		{SectionID: 1, ProductsCount: 10},
 		{SectionID: 2, ProductsCount: 20},
 	}
-	mockRepo := new(mock.SectionRepositoryDBMock)
+	mockRepo := new(mocks.SectionRepositoryDBMock)
 	service := NewSectionServiceDefault(mockRepo)
 
 	mockRepo.On("GetAllProductsReport", testifyMock.Anything).Return(expectedReports, nil)

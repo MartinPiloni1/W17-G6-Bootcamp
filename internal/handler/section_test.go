@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/mock/service"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/mocks/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/go-chi/chi/v5"
@@ -110,7 +110,7 @@ func TestSectionHandler_Create(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
-			mockService := new(mock.SectionServiceMock)
+			mockService := new(mocks.SectionServiceMock)
 
 			if tt.expectedCode == http.StatusCreated || tt.expectedCode == http.StatusConflict {
 				mockService.On("Create", testifyMock.Anything, tt.serviceInput).Return(tt.serviceOutput, tt.serviceError)
@@ -183,7 +183,7 @@ func TestSectionHandler_GetAll(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
-			mockService := new(mock.SectionServiceMock)
+			mockService := new(mocks.SectionServiceMock)
 
 			mockService.On("GetAll", testifyMock.Anything).Return(tt.serviceOutput, tt.serviceError)
 
@@ -223,8 +223,8 @@ func TestSectionHandler_GetByID(t *testing.T) {
 
 	tests := []struct {
 		testName      string
-		inputID       int    // ID que espera el mock
-		requestURL    string // URL para la petición
+		inputID       int
+		requestURL    string 
 		serviceOutput models.Section
 		serviceError  error
 		expectedCode  int
@@ -267,7 +267,7 @@ func TestSectionHandler_GetByID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
-			mockService := new(mock.SectionServiceMock)
+			mockService := new(mocks.SectionServiceMock)
 
 			if tt.expectedCode == http.StatusOK || tt.expectedCode == http.StatusNotFound {
 				mockService.On("GetByID", testifyMock.Anything, tt.inputID).Return(tt.serviceOutput, tt.serviceError)
@@ -331,7 +331,7 @@ func TestSectionHandler_Delete(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
-			mockService := new(mock.SectionServiceMock)
+			mockService := new(mocks.SectionServiceMock)
 
 			if tt.expectedCode == http.StatusNoContent || tt.expectedCode == http.StatusNotFound {
 				mockService.On("Delete", testifyMock.Anything, tt.inputID).Return(tt.serviceError)
@@ -454,7 +454,7 @@ func TestSectionHandler_Update(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
-			mockService := new(mock.SectionServiceMock)
+			mockService := new(mocks.SectionServiceMock)
 
 			if tt.expectedCode == http.StatusOK || tt.expectedCode == http.StatusNotFound {
 				mockService.On("Update", testifyMock.Anything, tt.inputID, tt.serviceInput).Return(tt.serviceOutput, tt.serviceError)
@@ -550,7 +550,7 @@ func TestSectionHandler_GetProductsReport(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
-			mockService := new(mock.SectionServiceMock)
+			mockService := new(mocks.SectionServiceMock)
 
 			switch tt.mockMethod {
 			case "GetProductsReport":
