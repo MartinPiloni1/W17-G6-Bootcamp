@@ -51,7 +51,7 @@ func TestPurchaseOrderHandler_Create(t *testing.T) {
 
 		invalidBody := strings.NewReader(`{
 			"order_number": "ORD-1",
-			"order_date": "3000-04-04T15:04:05",
+			"order_date": "3000-04-04T15:04:05Z",
 			"tracking_code": "abc123asd",
 			"buyer_id": 1,
 			"product_record_id": 1
