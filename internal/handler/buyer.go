@@ -72,6 +72,7 @@ func (h *BuyerHandler) GetAll() http.HandlerFunc {
 	}
 }
 
+// get the buyer (if exists) by the valid param id
 func (h *BuyerHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -97,6 +98,7 @@ func (h *BuyerHandler) GetByID() http.HandlerFunc {
 	}
 }
 
+// Update the buyer (if exists) by the ID  with the fields of BuyerPatchRequest
 func (h *BuyerHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -140,6 +142,7 @@ func (h *BuyerHandler) Update() http.HandlerFunc {
 	}
 }
 
+// Deletes a buyer based on his id, return error not found or noContent
 func (h *BuyerHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

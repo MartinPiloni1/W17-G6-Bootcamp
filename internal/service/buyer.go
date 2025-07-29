@@ -7,10 +7,12 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 )
 
+// BuyerServiceDefault contains a repository for buyer
 type BuyerServiceDefault struct {
 	repository repository.BuyerRepository
 }
 
+// NewBuyerServiceDefault returns an instance of BuyerServiceDefault
 func NewBuyerServiceDefault(repositoryInstance repository.BuyerRepository) BuyerService {
 	return &BuyerServiceDefault{repository: repositoryInstance}
 }
@@ -24,9 +26,6 @@ func (s *BuyerServiceDefault) Create(ctx context.Context, newBuyer models.BuyerA
 // Get all buyers
 func (s *BuyerServiceDefault) GetAll(ctx context.Context) ([]models.Buyer, error) {
 	buyerData, err := s.repository.GetAll(ctx)
-	if err != nil {
-		return nil, err
-	}
 	return buyerData, err
 }
 
