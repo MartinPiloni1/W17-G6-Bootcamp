@@ -653,7 +653,6 @@ func TestProductHandler_GetRecordsPerProduct(t *testing.T) {
 			handler := handler.NewProductHandler(serviceMock)
 
 			url := "/api/v1/products/reportRecords"
-			fmt.Println(url)
 			if tc.id != nil {
 				url += fmt.Sprintf("?id=%d", *tc.id)
 			}
