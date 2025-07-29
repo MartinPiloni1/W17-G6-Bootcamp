@@ -77,7 +77,7 @@ func ProductRouter(db *sql.DB) chi.Router {
 
 	router.Post("/", productHandler.Create())
 	router.Get("/", productHandler.GetAll())
-	router.Get("/{id}", productHandler.GetById())
+	router.Get("/{id}", productHandler.GetByID())
 	router.Get("/reportRecords", productHandler.GetRecordsPerProduct())
 	router.Patch("/{id}", productHandler.Update())
 	router.Delete("/{id}", productHandler.Delete())
@@ -96,6 +96,7 @@ func ProductRecordRouter(db *sql.DB) chi.Router {
 	return router
 }
 
+// BuyersRouter creates and returns the router of buyer
 func BuyersRouter(db *sql.DB) chi.Router {
 	router := chi.NewRouter()
 
@@ -145,6 +146,7 @@ func SectionRouter(db *sql.DB) chi.Router {
 	return router
 }
 
+// PurchaseOrderRouter creates and returns the router of PurchaseOrder
 func PurchaseOrderRouter(db *sql.DB) chi.Router {
 	purchaseOrderRepository := repository.NewPurchaseOrderRepositoryDB(db)
 	purchaseOrderService := service.NewPurchaseOrderDefault(purchaseOrderRepository)
