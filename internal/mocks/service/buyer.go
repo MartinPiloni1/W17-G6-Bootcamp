@@ -7,10 +7,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// BuyerServiceDefaultMock is a mock of BuyerServiceDefault
 type BuyerServiceDefaultMock struct {
 	mock.Mock
 }
 
+// NewBuyerServiceDefaultMock retuns an instance of BuyerServiceDefaultMock
 func NewBuyerServiceDefaultMock() *BuyerServiceDefaultMock {
 	return new(BuyerServiceDefaultMock)
 }

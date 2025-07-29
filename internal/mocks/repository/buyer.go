@@ -7,10 +7,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// BuyerRepositoryDBMock is a mock of BuyerRepositoryDB
 type BuyerRepositoryDBMock struct {
 	mock.Mock
 }
 
+// NewBuyerRepositoryDBMock creates an instance of BuyerRepositoryDBMock
 func NewBuyerRepositoryDBMock() *BuyerRepositoryDBMock {
 	return new(BuyerRepositoryDBMock)
 }

@@ -7,10 +7,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// PurchaseOrderDefaultMock is a mock of PurchaseOrderDefault
 type PurchaseOrderDefaultMock struct {
 	mock.Mock
 }
 
+// NewPurchaseOrderDefaultMock returns an instance of PurchaseOrderDefaultMock
 func NewPurchaseOrderDefaultMock() *PurchaseOrderDefaultMock {
 	return new(PurchaseOrderDefaultMock)
 }

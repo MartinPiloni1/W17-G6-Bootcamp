@@ -19,6 +19,7 @@ import (
 
 func TestPurchaseOrderHandler_Create(t *testing.T) {
 
+	// simulates the success response of the method
 	type DataResponseCreate struct {
 		Data models.PurchaseOrder `json:"data"`
 	}

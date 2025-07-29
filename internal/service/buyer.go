@@ -7,10 +7,12 @@ import (
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/repository"
 )
 
+// BuyerServiceDefault contains a repository for buyer
 type BuyerServiceDefault struct {
 	repository repository.BuyerRepository
 }
 
+// NewBuyerServiceDefault returns an instance of BuyerServiceDefault
 func NewBuyerServiceDefault(repositoryInstance repository.BuyerRepository) BuyerService {
 	return &BuyerServiceDefault{repository: repositoryInstance}
 }

@@ -28,7 +28,7 @@ type errorResponse struct {
 	Message string `json:"message"`
 }
 
-// allows to mock path params to the request
+// allows to mock ONE path params to the request
 func addChiURLParam(r *http.Request, key, value string) *http.Request {
 	chiCtx := chi.NewRouteContext()
 	chiCtx.URLParams.Add(key, value)
@@ -38,6 +38,7 @@ func addChiURLParam(r *http.Request, key, value string) *http.Request {
 func TestBuyerHandler_Create(t *testing.T) {
 	t.Parallel()
 
+	// simulates the success response of the method
 	type DataResponseCreate struct {
 		Data models.Buyer `json:"data"`
 	}
@@ -226,6 +227,7 @@ func TestBuyerHandler_Create(t *testing.T) {
 func TestBuyerHandler_GetAll(t *testing.T) {
 	t.Parallel()
 
+	// simulates the success response of the method
 	type DataResponseGetAll struct {
 		Data []models.Buyer `json:"data"`
 	}
@@ -305,6 +307,7 @@ func TestBuyerHandler_GetAll(t *testing.T) {
 func TestBuyerHandler_GetByID(t *testing.T) {
 	t.Parallel()
 
+	// simulates the success response of the method
 	type DataResponseGetByID struct {
 		Data models.Buyer `json:"data"`
 	}
@@ -639,6 +642,7 @@ func TestBuyerHandler_Update(t *testing.T) {
 	})
 
 	t.Run("malformed JSON returns StatusBadRequest", func(t *testing.T) {
+		// arrange
 		serviceMock := mocks.NewBuyerServiceDefaultMock()
 		buyerHandler := handler.NewBuyerHandler(serviceMock)
 
@@ -647,16 +651,22 @@ func TestBuyerHandler_Update(t *testing.T) {
 		req = addChiURLParam(req, "id", "1")
 		rec := httptest.NewRecorder()
 
+		// act
 		buyerHandler.Update().ServeHTTP(rec, req)
 
+		// assert
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+		// validate the response body
 		var resp errorResponse
 		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+
 		assert.Equal(t, "Invalid JSON body", resp.Message)
 		serviceMock.AssertNotCalled(t, "Update")
 	})
 
 	t.Run("unknown fields in JSON returns StatusBadRequest", func(t *testing.T) {
+		// arrange
 		serviceMock := mocks.NewBuyerServiceDefaultMock()
 		buyerHandler := handler.NewBuyerHandler(serviceMock)
 
@@ -665,16 +675,22 @@ func TestBuyerHandler_Update(t *testing.T) {
 		req = addChiURLParam(req, "id", "1")
 		rec := httptest.NewRecorder()
 
+		// act
 		buyerHandler.Update().ServeHTTP(rec, req)
 
+		// assert
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+		// decode response for validation
 		var resp errorResponse
 		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+
 		assert.Equal(t, "Invalid JSON body", resp.Message)
 		serviceMock.AssertNotCalled(t, "Update")
 	})
 
 	t.Run("validation error returns StatusUnprocessableEntity", func(t *testing.T) {
+		// arrange
 		serviceMock := mocks.NewBuyerServiceDefaultMock()
 		buyerHandler := handler.NewBuyerHandler(serviceMock)
 
@@ -683,16 +699,22 @@ func TestBuyerHandler_Update(t *testing.T) {
 		req = addChiURLParam(req, "id", "1")
 		rec := httptest.NewRecorder()
 
+		// act
 		buyerHandler.Update().ServeHTTP(rec, req)
 
+		// assert
 		assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
+
+		// decode response for validation
 		var resp errorResponse
 		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+
 		assert.Equal(t, "Invalid JSON body", resp.Message)
 		serviceMock.AssertNotCalled(t, "Update")
 	})
 
 	t.Run("service returns error NotFoundError that can be returned as it is", func(t *testing.T) {
+		// arrange
 		serviceMock := mocks.NewBuyerServiceDefaultMock()
 		buyerHandler := handler.NewBuyerHandler(serviceMock)
 
@@ -708,13 +730,16 @@ func TestBuyerHandler_Update(t *testing.T) {
 		serviceMock.On("Update", mock.Anything, 1, buyerNewData).
 			Return(models.Buyer{}, notFoundErr)
 
+		// act
 		buyerHandler.Update().ServeHTTP(rec, req)
 
+		// assert
 		assert.NotEqual(t, http.StatusOK, rec.Code)
 		serviceMock.AssertExpectations(t)
 	})
 
 	t.Run("successfully updates the buyer", func(t *testing.T) {
+		// arrange
 		serviceMock := mocks.NewBuyerServiceDefaultMock()
 		buyerHandler := handler.NewBuyerHandler(serviceMock)
 
@@ -735,13 +760,18 @@ func TestBuyerHandler_Update(t *testing.T) {
 		}
 		serviceMock.On("Update", mock.Anything, 1, patch).Return(expected, nil)
 
+		// act
 		buyerHandler.Update().ServeHTTP(rec, req)
 
+		// assert
 		assert.Equal(t, http.StatusOK, rec.Code)
+
+		// internal structure thas similar to the actual response
 		var resp struct {
 			Data models.Buyer `json:"data"`
 		}
 		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+
 		assert.Equal(t, expected, resp.Data)
 		serviceMock.AssertExpectations(t)
 	})

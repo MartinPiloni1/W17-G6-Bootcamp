@@ -7,10 +7,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// PurchaseOrderRepositoryDBMock is a mock of PurchaseOrderRepositoryDB
 type PurchaseOrderRepositoryDBMock struct {
 	mock.Mock
 }
 
+// NewPurchaseOrderRepositoryDB retuns an instance of PurchaseOrderRepositoryDB
 func NewPurchaseOrderRepositoryDBMock() *PurchaseOrderRepositoryDBMock {
 	return new(PurchaseOrderRepositoryDBMock)
 }
