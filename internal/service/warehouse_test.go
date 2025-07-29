@@ -59,7 +59,7 @@ func Test_Create(t *testing.T) {
 	// Success scenario: create warehouse with valid attributes
 	t.Run("create warehouse success (create_ok)", func(t *testing.T) {
 		// Arrange: mock repository to return successful creation
-		mockRepository := new(repository.WarehouseRepositoryMock)
+		mockRepository := new(repository_mocks.WarehouseRepositoryMock)
 		mockRepository.On("Create", warehouseAtt).Return(warehouse, nil)
 		serviceTest := service.NewWarehouseService(mockRepository)
 
@@ -94,7 +94,7 @@ func Test_Create(t *testing.T) {
 		for _, test := range tests {
 			t.Run(test.name, func(t *testing.T) {
 				// Arrange: mock repository to return specific error
-				mockRepository := new(repository.WarehouseRepositoryMock)
+				mockRepository := new(repository_mocks.WarehouseRepositoryMock)
 				serviceTest := service.NewWarehouseService(mockRepository)
 				mockRepository.On("Create", warehouseAtt).Return(models.Warehouse{}, test.repositoryError)
 
@@ -114,7 +114,7 @@ func Test_Create(t *testing.T) {
 	// Validation scenarios: invalid warehouse attributes
 	t.Run("on invalid warehouse attributes (create_invalid)", func(t *testing.T) {
 		// Setup: common test infrastructure
-		mockRepository := new(repository.WarehouseRepositoryMock)
+		mockRepository := new(repository_mocks.WarehouseRepositoryMock)
 		serviceTest := service.NewWarehouseService(mockRepository)
 
 		// Table-driven test for different validation scenarios
@@ -194,7 +194,7 @@ func Test_GetAll(t *testing.T) {
 	// Success scenario: retrieve multiple warehouses
 	t.Run("on success (find_all)", func(t *testing.T) {
 		// Arrange: mock repository to return warehouse collection
-		mockRepository := new(repository.WarehouseRepositoryMock)
+		mockRepository := new(repository_mocks.WarehouseRepositoryMock)
 		serviceTest := service.NewWarehouseService(mockRepository)
 
 		// Test data: collection of warehouses with different attributes
@@ -219,7 +219,7 @@ func Test_GetAll(t *testing.T) {
 	t.Run("on error repository get all (find_all_error)", func(t *testing.T) {
 		// Arrange: mock repository to return internal server error
 		errorReturned := httperrors.InternalServerError{Message: "error getting warehouses"}
-		mockRepository := new(repository.WarehouseRepositoryMock)
+		mockRepository := new(repository_mocks.WarehouseRepositoryMock)
 		mockRepository.On("GetAll").Return([]models.Warehouse{}, errorReturned)
 		serviceTest := service.NewWarehouseService(mockRepository)
 
@@ -251,7 +251,7 @@ func Test_GetByID(t *testing.T) {
 	// Success scenario: retrieve existing warehouse by valid ID
 	t.Run("on success (find_by_id_existent)", func(t *testing.T) {
 		// Arrange: mock repository to return existing warehouse
-		mockRepository := new(repository.WarehouseRepositoryMock)
+		mockRepository := new(repository_mocks.WarehouseRepositoryMock)
 		serviceTest := service.NewWarehouseService(mockRepository)
 
 		// Test data: warehouse with complete attributes
@@ -302,7 +302,7 @@ func Test_GetByID(t *testing.T) {
 		for _, test := range tests {
 			t.Run(test.name, func(t *testing.T) {
 				// Arrange: mock repository to return specific error
-				mockRepository := new(repository.WarehouseRepositoryMock)
+				mockRepository := new(repository_mocks.WarehouseRepositoryMock)
 				mockRepository.On("GetByID", idSearched).Return(models.Warehouse{}, test.repositoryError)
 				serviceTest := service.NewWarehouseService(mockRepository)
 
@@ -368,7 +368,7 @@ func Test_Update(t *testing.T) {
 	// Success scenario: update existing warehouse with valid data
 	t.Run("on success", func(t *testing.T) {
 		// Arrange: mock repository for successful update workflow
-		mockRepository := new(repository.WarehouseRepositoryMock)
+		mockRepository := new(repository_mocks.WarehouseRepositoryMock)
 		mockRepository.On("GetByID", warehouseTest.Id).Return(warehouseTest, nil)
 		mockRepository.On("GetAll").Return(warehouses, nil)
 		mockRepository.On("Update", warehouseTest.Id, warehouseAttUpdated).Return(wareHouseUpdated, nil)
@@ -388,7 +388,7 @@ func Test_Update(t *testing.T) {
 	// Error scenario: attempt to update non-existent warehouse
 	t.Run("on id not found (update_non_existent)", func(t *testing.T) {
 		// Arrange: mock repository to return not found error during existence check
-		mockRepository := new(repository.WarehouseRepositoryMock)
+		mockRepository := new(repository_mocks.WarehouseRepositoryMock)
 		mockRepository.On("GetByID", warehouseTest.Id).Return(models.Warehouse{}, httperrors.NotFoundError{Message: "warehouse not found"})
 		serviceTest := service.NewWarehouseService(mockRepository)
 
@@ -411,7 +411,7 @@ func Test_Update(t *testing.T) {
 			{Id: 1, WarehouseAttributes: models.WarehouseAttributes{WarehouseCode: "WH-001", Address: "Fake Street 123", Telephone: "123456789", MinimunCapacity: 10, MinimunTemperature: 5.0}},
 			{Id: 2, WarehouseAttributes: models.WarehouseAttributes{WarehouseCode: "WH-001", Address: "Uwu 342", Telephone: "987654321", MinimunCapacity: 2, MinimunTemperature: 5.0}},
 		}
-		mockRepository := new(repository.WarehouseRepositoryMock)
+		mockRepository := new(repository_mocks.WarehouseRepositoryMock)
 		mockRepository.On("GetByID", warehouseTest.Id).Return(warehouseTest, nil)
 		mockRepository.On("GetAll").Return(warehousesTest, nil)
 		serviceTest := service.NewWarehouseService(mockRepository)
@@ -433,7 +433,7 @@ func Test_Update(t *testing.T) {
 	// Error scenario: repository error during warehouse collection retrieval
 	t.Run("Repository error during validation", func(t *testing.T) {
 		// Arrange: mock repository to return error during GetAll operation
-		mockRepository := new(repository.WarehouseRepositoryMock)
+		mockRepository := new(repository_mocks.WarehouseRepositoryMock)
 		mockRepository.On("GetByID", warehouseTest.Id).Return(warehouseTest, nil)
 		mockRepository.On("GetAll").Return([]models.Warehouse{}, httperrors.InternalServerError{Message: "error reading warehouse data"})
 		serviceTest := service.NewWarehouseService(mockRepository)
@@ -468,7 +468,7 @@ func Test_Delete(t *testing.T) {
 	// Success scenario: delete existing warehouse
 	t.Run("on success (delete_ok)", func(t *testing.T) {
 		// Arrange: mock repository to return successful deletion
-		mockRepository := new(repository.WarehouseRepositoryMock)
+		mockRepository := new(repository_mocks.WarehouseRepositoryMock)
 		mockRepository.On("Delete", idSearched).Return(nil)
 		serviceTest := service.NewWarehouseService(mockRepository)
 
@@ -484,7 +484,7 @@ func Test_Delete(t *testing.T) {
 	// Error scenario: attempt to delete non-existent warehouse
 	t.Run("on repository error (delete_non_existent)", func(t *testing.T) {
 		// Arrange: mock repository to return not found error
-		mockRepository := new(repository.WarehouseRepositoryMock)
+		mockRepository := new(repository_mocks.WarehouseRepositoryMock)
 		mockRepository.On("Delete", idSearched).Return(httperrors.NotFoundError{Message: "warehouse not found"})
 		serviceTest := service.NewWarehouseService(mockRepository)
 
