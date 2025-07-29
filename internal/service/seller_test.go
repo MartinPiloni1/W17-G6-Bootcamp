@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	mocks "github.com/aaguero_meli/W17-G6-Bootcamp/internal/mock/repository"
+	mocks "github.com/aaguero_meli/W17-G6-Bootcamp/internal/mocks/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"

@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/handler"
-	mocks "github.com/aaguero_meli/W17-G6-Bootcamp/internal/mock/service"
+	mock "github.com/aaguero_meli/W17-G6-Bootcamp/internal/mocks/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/go-chi/chi/v5"
@@ -21,12 +21,12 @@ import (
 func TestSellerHandler_GetAll(t *testing.T) {
 	cases := []struct {
 		name       string
-		setupMock  func(s *mocks.SellerServiceDBMock)
+		setupMock  func(s *mock.SellerServiceDBMock)
 		wantStatus int
 	}{
 		{
 			name: "ok",
-			setupMock: func(s *mocks.SellerServiceDBMock) {
+			setupMock: func(s *mock.SellerServiceDBMock) {
 				s.On("GetAll").Return([]models.Seller{
 					{ID: 1, SellerAttributes: models.SellerAttributes{CID: 1}},
 					{ID: 2, SellerAttributes: models.SellerAttributes{CID: 2}},
@@ -36,7 +36,7 @@ func TestSellerHandler_GetAll(t *testing.T) {
 		},
 		{
 			name: "fail",
-			setupMock: func(s *mocks.SellerServiceDBMock) {
+			setupMock: func(s *mock.SellerServiceDBMock) {
 				s.On("GetAll").Return([]models.Seller{}, errors.New("db fail"))
 			},
 			wantStatus: http.StatusInternalServerError, // O el código de error que uses
@@ -45,7 +45,7 @@ func TestSellerHandler_GetAll(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			service := new(mocks.SellerServiceDBMock)
+			service := new(mock.SellerServiceDBMock)
 			tc.setupMock(service)
 			handler := handler.NewSellerHandler(service)
 			router := chi.NewRouter()
@@ -65,13 +65,13 @@ func TestSellerHandler_GetByID(t *testing.T) {
 	cases := []struct {
 		name       string
 		id         string
-		setupMock  func(s *mocks.SellerServiceDBMock)
+		setupMock  func(s *mock.SellerServiceDBMock)
 		wantStatus int
 	}{
 		{
 			name: "ok",
 			id:   "11",
-			setupMock: func(s *mocks.SellerServiceDBMock) {
+			setupMock: func(s *mock.SellerServiceDBMock) {
 				s.On("GetByID", 11).Return(models.Seller{ID: 11, SellerAttributes: models.SellerAttributes{CID: 555}}, nil)
 			},
 			wantStatus: http.StatusOK,
@@ -79,7 +79,7 @@ func TestSellerHandler_GetByID(t *testing.T) {
 		{
 			name: "not found",
 			id:   "987",
-			setupMock: func(s *mocks.SellerServiceDBMock) {
+			setupMock: func(s *mock.SellerServiceDBMock) {
 				s.On("GetByID", 987).Return(models.Seller{}, httperrors.NotFoundError{Message: "not found"})
 			},
 			wantStatus: http.StatusNotFound,
@@ -87,7 +87,7 @@ func TestSellerHandler_GetByID(t *testing.T) {
 		{
 			name: "bad id",
 			id:   "abc",
-			setupMock: func(s *mocks.SellerServiceDBMock) {
+			setupMock: func(s *mock.SellerServiceDBMock) {
 				// No call, porque path param no es int.
 			},
 			wantStatus: http.StatusBadRequest,
@@ -96,7 +96,7 @@ func TestSellerHandler_GetByID(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			service := new(mocks.SellerServiceDBMock)
+			service := new(mock.SellerServiceDBMock)
 			tc.setupMock(service)
 			handler := handler.NewSellerHandler(service)
 			router := chi.NewRouter()
@@ -138,13 +138,13 @@ func TestSellerHandler_Create(t *testing.T) {
 	cases := []struct {
 		name       string
 		body       []byte
-		setupMock  func(s *mocks.SellerServiceDBMock)
+		setupMock  func(s *mock.SellerServiceDBMock)
 		wantStatus int
 	}{
 		{
 			name: "ok",
 			body: func() []byte { b, _ := json.Marshal(attrOK); return b }(),
-			setupMock: func(s *mocks.SellerServiceDBMock) {
+			setupMock: func(s *mock.SellerServiceDBMock) {
 				s.On("Create", attrOK).Return(models.Seller{ID: 5, SellerAttributes: attrOK}, nil)
 			},
 			wantStatus: http.StatusCreated,
@@ -152,13 +152,13 @@ func TestSellerHandler_Create(t *testing.T) {
 		{
 			name:       "bad json",
 			body:       []byte("{not a json}"),
-			setupMock:  func(s *mocks.SellerServiceDBMock) {},
+			setupMock:  func(s *mock.SellerServiceDBMock) {},
 			wantStatus: http.StatusUnprocessableEntity,
 		},
 		{
 			name: "fail (missing Address)",
 			body: func() []byte { b, _ := json.Marshal(attrFail); return b }(),
-			setupMock: func(s *mocks.SellerServiceDBMock) {
+			setupMock: func(s *mock.SellerServiceDBMock) {
 				s.On("Create", attrFail).Return(models.Seller{}, httperrors.UnprocessableEntityError{Message: "Invalid seller data"})
 			},
 			wantStatus: http.StatusUnprocessableEntity,
@@ -166,7 +166,7 @@ func TestSellerHandler_Create(t *testing.T) {
 		{
 			name: "conflict",
 			body: func() []byte { b, _ := json.Marshal(attrConflict); return b }(),
-			setupMock: func(s *mocks.SellerServiceDBMock) {
+			setupMock: func(s *mock.SellerServiceDBMock) {
 				s.On("Create", attrConflict).Return(models.Seller{}, httperrors.ConflictError{Message: "cid exists"})
 			},
 			wantStatus: http.StatusConflict,
@@ -175,7 +175,7 @@ func TestSellerHandler_Create(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			service := new(mocks.SellerServiceDBMock)
+			service := new(mock.SellerServiceDBMock)
 			tc.setupMock(service)
 			handler := handler.NewSellerHandler(service)
 			router := chi.NewRouter()
@@ -204,14 +204,14 @@ func TestSellerHandler_Update(t *testing.T) {
 		name       string
 		id         string
 		body       []byte
-		setupMock  func(s *mocks.SellerServiceDBMock)
+		setupMock  func(s *mock.SellerServiceDBMock)
 		wantStatus int
 	}{
 		{
 			name: "ok",
 			id:   "22",
 			body: func() []byte { b, _ := json.Marshal(attr); return b }(),
-			setupMock: func(s *mocks.SellerServiceDBMock) {
+			setupMock: func(s *mock.SellerServiceDBMock) {
 				s.On("Update", 22, &attr).Return(models.Seller{ID: 22, SellerAttributes: attr}, nil)
 			},
 			wantStatus: http.StatusOK,
@@ -220,14 +220,14 @@ func TestSellerHandler_Update(t *testing.T) {
 			name:       "bad id",
 			id:         "abc",
 			body:       func() []byte { b, _ := json.Marshal(attr); return b }(),
-			setupMock:  func(s *mocks.SellerServiceDBMock) {},
+			setupMock:  func(s *mock.SellerServiceDBMock) {},
 			wantStatus: http.StatusBadRequest,
 		},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			service := new(mocks.SellerServiceDBMock)
+			service := new(mock.SellerServiceDBMock)
 			tc.setupMock(service)
 			handler := handler.NewSellerHandler(service)
 			router := chi.NewRouter()
@@ -247,13 +247,13 @@ func TestSellerHandler_Delete(t *testing.T) {
 	cases := []struct {
 		name       string
 		id         string
-		setupMock  func(s *mocks.SellerServiceDBMock)
+		setupMock  func(s *mock.SellerServiceDBMock)
 		wantStatus int
 	}{
 		{
 			name: "ok",
 			id:   "42",
-			setupMock: func(s *mocks.SellerServiceDBMock) {
+			setupMock: func(s *mock.SellerServiceDBMock) {
 				s.On("Delete", 42).Return(nil)
 			},
 			wantStatus: http.StatusOK,
@@ -261,7 +261,7 @@ func TestSellerHandler_Delete(t *testing.T) {
 		{
 			name: "not found",
 			id:   "22",
-			setupMock: func(s *mocks.SellerServiceDBMock) {
+			setupMock: func(s *mock.SellerServiceDBMock) {
 				s.On("Delete", 22).Return(httperrors.NotFoundError{Message: "not found"})
 			},
 			wantStatus: http.StatusNotFound,
@@ -269,13 +269,13 @@ func TestSellerHandler_Delete(t *testing.T) {
 		{
 			name:       "bad id",
 			id:         "abc",
-			setupMock:  func(s *mocks.SellerServiceDBMock) {},
+			setupMock:  func(s *mock.SellerServiceDBMock) {},
 			wantStatus: http.StatusBadRequest,
 		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			service := new(mocks.SellerServiceDBMock)
+			service := new(mock.SellerServiceDBMock)
 			tc.setupMock(service)
 			handler := handler.NewSellerHandler(service)
 			router := chi.NewRouter()
