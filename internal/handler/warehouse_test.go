@@ -19,12 +19,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/mocks/service"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/handler"
-	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/mock/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
 	"github.com/go-chi/chi/v5"
@@ -64,7 +64,7 @@ func Test_Create(t *testing.T) {
 		}
 
 		// Mock service to return successful creation
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		mockService.On("Create", warehouseInput).
 			Return(warehuseUotput, nil)
 		handlerTest := handler.NewWarehouseHandler(mockService)
@@ -95,7 +95,7 @@ func Test_Create(t *testing.T) {
 	// Error scenario: malformed JSON request body
 	t.Run("Invalid JSON body (create_fail)", func(t *testing.T) {
 		// Arrange: prepare invalid JSON with wrong data type
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		handlerTest := handler.NewWarehouseHandler(mockService)
 		bodyInput := map[string]any{
 			"minimun_temperature": "this is not a float", // Invalid: string instead of float
@@ -133,7 +133,7 @@ func Test_Create(t *testing.T) {
 		require.NoError(t, err)
 
 		// Mock service to return conflict error
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		mockService.On("Create", warehouseInput).
 			Return(models.Warehouse{}, httperrors.ConflictError{Message: "the WarehouseCode already exists"})
 		handlerTest := handler.NewWarehouseHandler(mockService)
@@ -194,7 +194,7 @@ func Test_GetAll(t *testing.T) {
 		}
 
 		// Mock service to return warehouse collection
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		mockService.On("GetAll").
 			Return([]models.Warehouse{
 				warehouseTest1,
@@ -227,7 +227,7 @@ func Test_GetAll(t *testing.T) {
 	t.Run("on service error", func(t *testing.T) {
 		// Arrange: mock service to return internal server error
 		serviceError := httperrors.InternalServerError{Message: "error obtaining warehouses"}
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		mockService.On("GetAll").
 			Return([]models.Warehouse{}, serviceError)
 		handlerTest := handler.NewWarehouseHandler(mockService)
@@ -248,30 +248,30 @@ func Test_GetAll(t *testing.T) {
 		mockService.AssertNumberOfCalls(t, "GetAll", 1)
 	})
 
-	// Note: Commented test case for empty warehouse collection
-	// This scenario might be implemented in the future to handle empty results
-	//t.Run("There are not warehouses", func(t *testing.T) {
-	// Arrange
-	//	mockService := new(service.WarehouseServiceMock)
-	//	mockService.On("GetAll").
-	//		Return(nil, nil)
-	//	handlerTest := handler.NewWarehouseHandler(mockService)
+	// Test case for empty warehouse collection
+	// This scenario handles when no warehouses exist in the system
+	t.Run("There are not warehouses (find_all_empty)", func(t *testing.T) {
+		// Arrange: mock service to return empty slice (no warehouses)
+		mockService := new(mocks.WarehouseServiceMock)
+		mockService.On("GetAll").
+			Return([]models.Warehouse{}, nil)
+		handlerTest := handler.NewWarehouseHandler(mockService)
 
-	// Act
-	//	req := httptest.NewRequest(http.MethodGet, "/warehouses", nil)
-	//	res := httptest.NewRecorder()
-	//	handlerTest.GetAll()(res, req)
+		// Act: execute GET request when no warehouses exist
+		req := httptest.NewRequest(http.MethodGet, "/warehouses", nil)
+		res := httptest.NewRecorder()
+		handlerTest.GetAll()(res, req)
 
-	// Assert
-	//	expectedBody := `{"data":[]}`
-	//	expectedStatus := http.StatusOK
+		// Assert: verify empty array response with 200 OK status
+		expectedBody := `{"data":[]}`
+		expectedStatus := http.StatusOK
 
-	//	require.JSONEq(t, expectedBody, res.Body.String())
-	//	require.Equal(t, expectedStatus, res.Code)
-	//	require.Equal(t, expectedContentType, res.Header().Get("Content-Type"))
-	//	mockService.AssertExpectations(t)
-	//	mockService.AssertNumberOfCalls(t, "GetAll", 1)
-	//})
+		require.JSONEq(t, expectedBody, res.Body.String())
+		require.Equal(t, expectedStatus, res.Code)
+		require.Equal(t, expectedContentType, res.Header().Get("Content-Type"))
+		mockService.AssertExpectations(t)
+		mockService.AssertNumberOfCalls(t, "GetAll", 1)
+	})
 
 }
 
@@ -303,7 +303,7 @@ func Test_GetById(t *testing.T) {
 	// Success scenario: retrieve existing warehouse by valid ID
 	t.Run("on success (find_by_id_existent)", func(t *testing.T) {
 		// Arrange: mock service to return existing warehouse
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		mockService.On("GetByID", warehouseTest.Id).
 			Return(warehouseTest, nil)
 		handlerTest := handler.NewWarehouseHandler(mockService)
@@ -334,7 +334,7 @@ func Test_GetById(t *testing.T) {
 	// Error scenario: attempt to retrieve non-existent warehouse
 	t.Run("on id not exists (find_by_id_non_existent)", func(t *testing.T) {
 		// Arrange: mock service to return not found error
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		mockService.On("GetByID", 2).
 			Return(models.Warehouse{}, httperrors.NotFoundError{Message: "warehouse not found"})
 
@@ -364,7 +364,7 @@ func Test_GetById(t *testing.T) {
 	// Error scenario: invalid ID format provided
 	t.Run("on id invalid", func(t *testing.T) {
 		// Arrange: setup handler without mocking service calls
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		handlerTest := handler.NewWarehouseHandler(mockService)
 
 		// Act: execute request with non-numeric ID
@@ -422,7 +422,7 @@ func Test_Update(t *testing.T) {
 	// Success scenario: update existing warehouse with valid data
 	t.Run("on success (update_ok)", func(t *testing.T) {
 		// Arrange: mock service to return successful update
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		mockService.On("Update", 1, warehouseAttInput).
 			Return(warehouseOutput, nil)
 		handlerTest := handler.NewWarehouseHandler(mockService)
@@ -455,7 +455,7 @@ func Test_Update(t *testing.T) {
 	// Error scenario: attempt to update non-existent warehouse
 	t.Run("on id not exists (update_non_existent)", func(t *testing.T) {
 		// Arrange: mock service to return not found error
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		mockService.On("Update", 2, warehouseAttInput).
 			Return(models.Warehouse{}, httperrors.NotFoundError{Message: "warehouse not found"})
 		handlerTest := handler.NewWarehouseHandler(mockService)
@@ -489,7 +489,7 @@ func Test_Update(t *testing.T) {
 	// Error scenario: malformed JSON in request body
 	t.Run("on json malformed", func(t *testing.T) {
 		// Arrange: prepare invalid JSON with wrong data type
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		handlerTest := handler.NewWarehouseHandler(mockService)
 		bodyInput := map[string]any{
 			"minimun_temperature": "this is not a float", // Invalid: string instead of float
@@ -547,7 +547,7 @@ func Test_Update(t *testing.T) {
 		for _, test := range tests {
 			t.Run(test.name, func(t *testing.T) {
 				// Arrange: mock service to return specific error
-				mockService := new(service_mocks.WarehouseServiceMock)
+				mockService := new(mocks.WarehouseServiceMock)
 				mockService.On("Update", 1, warehouseAttInput).
 					Return(models.Warehouse{}, test.serviceError)
 				handlerTest := handler.NewWarehouseHandler(mockService)
@@ -580,7 +580,7 @@ func Test_Update(t *testing.T) {
 	// Error scenario: invalid ID format provided
 	t.Run("on id invalid", func(t *testing.T) {
 		// Arrange: setup with invalid ID parameter
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		handlerTest := handler.NewWarehouseHandler(mockService)
 		body, err := json.Marshal(warehouseAttInput)
 		require.NoError(t, err)
@@ -625,7 +625,7 @@ func Test_Delete(t *testing.T) {
 	// Success scenario: delete existing warehouse
 	t.Run("on success (delete_ok)", func(t *testing.T) {
 		// Arrange: mock service to return successful deletion
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		mockService.On("Delete", 1).
 			Return(nil)
 		handlerTest := handler.NewWarehouseHandler(mockService)
@@ -650,7 +650,7 @@ func Test_Delete(t *testing.T) {
 	// Error scenario: attempt to delete non-existent warehouse
 	t.Run("Id not exists (delete_non_existent)", func(t *testing.T) {
 		// Arrange: mock service to return not found error
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		mockService.On("Delete", 1).
 			Return(httperrors.NotFoundError{Message: "warehouse not found"})
 		handlerTest := handler.NewWarehouseHandler(mockService)
@@ -680,7 +680,7 @@ func Test_Delete(t *testing.T) {
 	// Error scenario: invalid ID format provided
 	t.Run("on id invalid", func(t *testing.T) {
 		// Arrange: setup with invalid ID parameter
-		mockService := new(service_mocks.WarehouseServiceMock)
+		mockService := new(mocks.WarehouseServiceMock)
 		handlerTest := handler.NewWarehouseHandler(mockService)
 
 		// Act: execute delete request with non-numeric ID
