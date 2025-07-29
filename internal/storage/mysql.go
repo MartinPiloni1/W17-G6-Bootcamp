@@ -7,6 +7,8 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
+// formats the parameters of the connection with the standar structure
+// mysql.Config struct, adding extra parameters
 func NewMySQLConfig(host, port, user, pass, dbname string) mysql.Config {
 	return mysql.Config{
 		User:                 user,
@@ -21,6 +23,8 @@ func NewMySQLConfig(host, port, user, pass, dbname string) mysql.Config {
 	}
 }
 
+// generates a connector to mysql, check if it can be used with Ping
+// returns error if it cant ping it, or the connector pointer for future use in the app
 func InitMySQLConnection(cfg mysql.Config) (*sql.DB, error) {
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
