@@ -91,7 +91,7 @@ func (h ProductHandler) GetAll() http.HandlerFunc {
 
 // GetById returns an http.HandlerFunc that parses the product ID
 // from the URL, retrieves the product, and writes it as JSON.
-func (h ProductHandler) GetById() http.HandlerFunc {
+func (h ProductHandler) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -132,7 +132,7 @@ func (h *ProductHandler) GetRecordsPerProduct() http.HandlerFunc {
 		idAsString := r.URL.Query().Get("id")
 		if idAsString != "" {
 			val, err := strconv.Atoi(idAsString)
-			if err != nil {
+			if err != nil || val <= 0 {
 				response.Error(w, http.StatusBadRequest, "invalid id")
 				return
 			}
