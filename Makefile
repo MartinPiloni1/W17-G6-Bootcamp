@@ -41,3 +41,12 @@ tidy:
 # Run the api
 run:
 	go run cmd/main.go
+
+coverage-section-html:
+	@echo "--- Generating full coverage report for section packages... ---"
+	@go test -cover -coverprofile=coverage.out ./internal/handler ./internal/service ./internal/repository
+	@echo "--- Filtering report for section.go files... ---"
+	@(head -n 1 coverage.out && grep "section.go" coverage.out) > coverage-section.out
+	@echo "--- Opening filtered HTML report in browser... ---"
+	@go tool cover -html="coverage-section.out"
+	@rm -f coverage-section.out
