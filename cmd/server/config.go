@@ -76,7 +76,7 @@ func (a *ServerChi) SetUp() (chi.Router, error) {
 	inboundOrderRouter := application.InboundOrderRouter(freshDB)
 	productBatchRouter := application.ProductBatchRouter(freshDB)
 
-	router.Mount("/healthcheck", healthRouter)
+	router.Mount("/ping", healthRouter)
 	router.Route("/api/v1", func(r chi.Router) {
 		r.Mount("/products", productRouter)
 		r.Mount("/productRecords", productRecordRouter)

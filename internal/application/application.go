@@ -16,7 +16,7 @@ func HealthRouter() chi.Router {
 	router := chi.NewRouter()
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		w.Write([]byte("pong"))
 	})
 
 	return router
