@@ -283,3 +283,42 @@ func TestSellerService_Update(t *testing.T) {
 		})
 	}
 }
+
+func TestSellerService_Update_CIDConflict(t *testing.T) {
+	attr := &models.SellerAttributes{CID: 999, CompanyName: "C", Address: "A", Telephone: "32", LocalityID: "L"}
+	existing := models.Seller{ID: 777, SellerAttributes: models.SellerAttributes{CID: 999}}
+	r := new(mocks.SellerRepositoryDBMock)
+	r.On("GetAll").Return([]models.Seller{existing}, nil)
+	svc := service.NewSellerService(r)
+	res, err := svc.Update(10, attr)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "CID already exists")
+	assert.Equal(t, models.Seller{}, res)
+	r.AssertExpectations(t)
+}
+
+func TestSellerService_Update_NoCIDValidation(t *testing.T) {
+	attr := &models.SellerAttributes{CID: 0, CompanyName: "NOCID", Address: "Q", Telephone: "Z", LocalityID: "LL"}
+	expected := models.Seller{ID: 42, SellerAttributes: *attr}
+	r := new(mocks.SellerRepositoryDBMock)
+	r.On("Update", 42, attr).Return(expected, nil)
+	svc := service.NewSellerService(r)
+	res, err := svc.Update(42, attr)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, res)
+	r.AssertExpectations(t)
+}
+
+func TestSellerService_Update_GetAllReturnsError(t *testing.T) {
+	attr := &models.SellerAttributes{CID: 9, CompanyName: "A", Address: "B", Telephone: "C", LocalityID: "Z"}
+	repo := new(mocks.SellerRepositoryDBMock)
+	repo.On("GetAll").Return([]models.Seller{}, errors.New("some db error"))
+
+	svc := service.NewSellerService(repo)
+	result, err := svc.Update(5, attr)
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "some db error")
+	assert.Equal(t, models.Seller{}, result)
+	repo.AssertExpectations(t)
+}
