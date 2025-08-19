@@ -65,7 +65,7 @@ func TestInboundOrderRepositoryDB_Create(t *testing.T) {
 	require.Equal(t, models.InboundOrder{}, created)
 	require.NoError(t, mock.ExpectationsWereMet())
 
-	// Case: LastInsertId error (simulate)
+	// Case: LastInsertId error (simulated)
 	mock.ExpectExec(regexp.QuoteMeta(`
 		INSERT INTO inbound_orders (
 			order_number,
@@ -180,7 +180,7 @@ func TestInboundOrderRepositoryDB_CountInboundOrdersForEmployees(t *testing.T) {
 
 	query := regexp.QuoteMeta("SELECT employee_id, COUNT(*) FROM inbound_orders GROUP BY employee_id")
 
-	// Case: more than 1 employee
+	// Case: more than one employee
 	rows := sqlmock.NewRows([]string{"employee_id", "COUNT(*)"}).
 		AddRow(1, 5).
 		AddRow(2, 6)
@@ -191,7 +191,7 @@ func TestInboundOrderRepositoryDB_CountInboundOrdersForEmployees(t *testing.T) {
 	require.Equal(t, map[int]int{1: 5, 2: 6}, got)
 	require.NoError(t, mock.ExpectationsWereMet())
 
-	// Case: error on query
+	// Case: query error
 	mock.ExpectQuery(query).WillReturnError(errors.New("db error"))
 	_, err = repo.CountInboundOrdersForEmployees()
 	require.Error(t, err)

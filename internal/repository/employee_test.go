@@ -42,7 +42,7 @@ func TestEmployeeRepositoryDB_Create(t *testing.T) {
 		expectedError error
 	}{
 		{
-			testName: "Success: Should create employee correctly",
+			testName: "Success: Employee is created successfully",
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(query).
 					WithArgs(input.EmployeeAttributes.CardNumberID, input.EmployeeAttributes.FirstName, input.EmployeeAttributes.LastName, input.EmployeeAttributes.WarehouseID).
@@ -52,7 +52,7 @@ func TestEmployeeRepositoryDB_Create(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			testName: "Error: Exec fails",
+			testName: "Error: Exec fails on insert statement",
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(query).
 					WithArgs(input.EmployeeAttributes.CardNumberID, input.EmployeeAttributes.FirstName, input.EmployeeAttributes.LastName, input.EmployeeAttributes.WarehouseID).
@@ -132,7 +132,7 @@ func TestEmployeeRepositoryDB_GetAll(t *testing.T) {
 		expectedError error
 	}{
 		{
-			testName: "Success: Should get all employees",
+			testName: "Success: Should retrieve all employees",
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows([]string{"id", "card_number_id", "first_name", "last_name", "warehouse_id"}).
 					AddRow(1, "AAA11", "Ana", "López", 1).
@@ -143,7 +143,7 @@ func TestEmployeeRepositoryDB_GetAll(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			testName: "Error: Query fails",
+			testName: "Error: Query execution fails",
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(query).WillReturnError(errors.New("query error"))
 			},
@@ -151,9 +151,8 @@ func TestEmployeeRepositoryDB_GetAll(t *testing.T) {
 			expectedError: errors.New("query error"),
 		},
 		{
-			testName: "Error: Scan fails",
+			testName: "Error: Scan fails due to invalid type",
 			mockSetup: func(mock sqlmock.Sqlmock) {
-				// string instead of int (id)
 				rows := sqlmock.NewRows([]string{"id", "card_number_id", "first_name", "last_name", "warehouse_id"}).
 					AddRow("invalid", "AAA11", "Ana", "López", 1)
 				mock.ExpectQuery(query).WillReturnRows(rows)
@@ -213,7 +212,7 @@ func TestEmployeeRepositoryDB_GetByID(t *testing.T) {
 		expectedError error
 	}{
 		{
-			testName: "Success: Should find employee",
+			testName: "Success: Employee found by ID",
 			inputID:  15,
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows([]string{"id", "card_number_id", "first_name", "last_name", "warehouse_id"}).
@@ -224,7 +223,7 @@ func TestEmployeeRepositoryDB_GetByID(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			testName: "Error: Not found",
+			testName: "Error: Employee not found (0 rows)",
 			inputID:  123,
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows([]string{"id", "card_number_id", "first_name", "last_name", "warehouse_id"})
@@ -234,7 +233,7 @@ func TestEmployeeRepositoryDB_GetByID(t *testing.T) {
 			expectedError: httperrors.NotFoundError{Message: "employee not found"},
 		},
 		{
-			testName: "Error: Query fails",
+			testName: "Error: Query execution fails",
 			inputID:  333,
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				mock.ExpectQuery(query).WithArgs(333).WillReturnError(errors.New("query error"))
@@ -243,7 +242,7 @@ func TestEmployeeRepositoryDB_GetByID(t *testing.T) {
 			expectedError: errors.New("query error"),
 		},
 		{
-			testName: "Error: Scan fails",
+			testName: "Error: Scan fails due to invalid type",
 			inputID:  888,
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows([]string{"id", "card_number_id", "first_name", "last_name", "warehouse_id"}).
@@ -266,7 +265,7 @@ func TestEmployeeRepositoryDB_GetByID(t *testing.T) {
 			result, err := repo.GetByID(tc.inputID)
 			if tc.expectedError != nil {
 				require.Equal(t, tc.expectedResp, result)
-				// For custom error types you can use require.IsType
+				// Use IsType for custom error types like NotFoundError
 				if nf, ok := tc.expectedError.(httperrors.NotFoundError); ok {
 					require.IsType(t, nf, err)
 				} else {
@@ -308,7 +307,7 @@ func TestEmployeeRepositoryDB_Update(t *testing.T) {
 		expectedError error
 	}{
 		{
-			testName:   "Success: Should update employee",
+			testName:   "Success: Employee updated successfully",
 			inputID:    21,
 			inputAttrs: newAttrs,
 			mockSetup: func(mock sqlmock.Sqlmock) {
@@ -320,7 +319,7 @@ func TestEmployeeRepositoryDB_Update(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			testName:   "Error: Not found (0 rows)",
+			testName:   "Error: Employee not found/0 rows affected",
 			inputID:    80,
 			inputAttrs: newAttrs,
 			mockSetup: func(mock sqlmock.Sqlmock) {
@@ -332,7 +331,7 @@ func TestEmployeeRepositoryDB_Update(t *testing.T) {
 			expectedError: httperrors.NotFoundError{Message: "employee not found"},
 		},
 		{
-			testName:   "Error: Exec fails",
+			testName:   "Error: Exec fails during update",
 			inputID:    50,
 			inputAttrs: newAttrs,
 			mockSetup: func(mock sqlmock.Sqlmock) {
@@ -344,7 +343,7 @@ func TestEmployeeRepositoryDB_Update(t *testing.T) {
 			expectedError: errors.New("update error"),
 		},
 		{
-			testName:   "Error: RowsAffected fails",
+			testName:   "Error: RowsAffected returns an error",
 			inputID:    22,
 			inputAttrs: newAttrs,
 			mockSetup: func(mock sqlmock.Sqlmock) {
@@ -396,7 +395,7 @@ func TestEmployeeRepositoryDB_Delete(t *testing.T) {
 		expectedError error
 	}{
 		{
-			testName: "Success: Should delete employee",
+			testName: "Success: Employee deleted",
 			inputID:  99,
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(query).
@@ -406,7 +405,7 @@ func TestEmployeeRepositoryDB_Delete(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			testName: "Error: 0 rows affected (not found)",
+			testName: "Error: Employee not found/0 rows affected",
 			inputID:  88,
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(query).
@@ -416,7 +415,7 @@ func TestEmployeeRepositoryDB_Delete(t *testing.T) {
 			expectedError: httperrors.NotFoundError{Message: "employee not found"},
 		},
 		{
-			testName: "Error: Exec fails",
+			testName: "Error: Exec fails during delete",
 			inputID:  77,
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(query).
@@ -426,7 +425,7 @@ func TestEmployeeRepositoryDB_Delete(t *testing.T) {
 			expectedError: errors.New("delete error"),
 		},
 		{
-			testName: "Error: RowsAffected fails",
+			testName: "Error: RowsAffected returns an error",
 			inputID:  66,
 			mockSetup: func(mock sqlmock.Sqlmock) {
 				mock.ExpectExec(query).
