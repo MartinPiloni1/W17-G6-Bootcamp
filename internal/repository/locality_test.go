@@ -218,3 +218,88 @@ func TestLocalityRepositoryDB_GetReportByLocalityId_DBError(t *testing.T) {
 	assert.Contains(t, err.Error(), "error obtaining Report by LocalityId")
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
+
+func TestLocalityRepositoryDB_Create_MySQLError_OtroNumero(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+	defer db.Close()
+	repo := repository.NewLocalityRepository(db)
+
+	locality := models.Locality{ID: "X", LocalityName: "Z", ProvinceName: "P", CountryName: "C"}
+
+	mysqlErr := &mysql.MySQLError{Number: 999, Message: "otro"}
+	mock.ExpectExec("INSERT INTO localities").
+		WithArgs(locality.ID, locality.LocalityName, locality.ProvinceName, locality.CountryName).
+		WillReturnError(mysqlErr)
+
+	_, err := repo.(*repository.LocalityRepositoryDB).Create(locality)
+	assert.Error(t, err)
+	assert.Equal(t, mysqlErr, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestLocalityRepositoryDB_Create_NotFoundError(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+	defer db.Close()
+	repo := repository.NewLocalityRepository(db)
+
+	locality := models.Locality{ID: "Z", LocalityName: "Y", ProvinceName: "X", CountryName: "W"}
+
+	mysqlErr := &mysql.MySQLError{Number: 1452, Message: "foreign key fails"}
+	mock.ExpectExec("INSERT INTO localities").
+		WithArgs(locality.ID, locality.LocalityName, locality.ProvinceName, locality.CountryName).
+		WillReturnError(mysqlErr)
+
+	_, err := repo.(*repository.LocalityRepositoryDB).Create(locality)
+	assert.Error(t, err)
+	assert.IsType(t, httperrors.NotFoundError{}, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestLocalityRepositoryDB_GetByID_GenError(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+	defer db.Close()
+	repo := repository.NewLocalityRepository(db)
+
+	mock.ExpectQuery("SELECT id, locality_name").
+		WithArgs("8").
+		WillReturnError(sql.ErrConnDone)
+
+	_, err := repo.(*repository.LocalityRepositoryDB).GetByID("8")
+	assert.Error(t, err)
+	assert.Equal(t, sql.ErrConnDone, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestLocalityRepositoryDB_GetSellerReport_ScanError(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+	defer db.Close()
+	repo := repository.NewLocalityRepository(db)
+
+	rows := sqlmock.NewRows([]string{"id", "locality_name", "sellers_count"}).
+		AddRow(1, "Loc", "bad_int") // intentionally 'bad' type so Scan falle
+
+	mock.ExpectQuery("SELECT l.id, l.locality_name, COUNT\\(s.id\\)").
+		WillReturnRows(rows)
+
+	_, err := repo.(*repository.LocalityRepositoryDB).GetSellerReport(nil)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Error reading Seller data")
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestLocalityRepositoryDB_GetReportByLocalityId_ScanError(t *testing.T) {
+	db, mock, _ := sqlmock.New()
+	defer db.Close()
+	repo := repository.NewLocalityRepository(db)
+
+	rows := sqlmock.NewRows([]string{"locality_id", "locality_name", "carries_count"}).
+		AddRow(1, "Loc", "bad_int")
+
+	mock.ExpectQuery("SELECT\\s+l.id AS locality_id").
+		WillReturnRows(rows)
+
+	_, err := repo.(*repository.LocalityRepositoryDB).GetReportByLocalityId("")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error reading Report by LocalityId data")
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
