@@ -81,7 +81,7 @@ func TestInboundOrderHandler_Create(t *testing.T) {
 	t.Run("validation error returns StatusUnprocessableEntity", func(t *testing.T) {
 		serviceMock := mocks.NewInboundOrderServiceDefaultMock()
 		handler := handler.NewInboundOrderHandler(serviceMock)
-		// employee_id = 0, no pasa la validación gt=0
+		// employee_id = 0, does not pass the validation gt=0
 		body := `{
 			"order_number": "123",
 			"order_date": "` + validOrderDateStr + `",

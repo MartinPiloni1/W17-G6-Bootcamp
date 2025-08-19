@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	mocks "github.com/aaguero_meli/W17-G6-Bootcamp/internal/mocks/repository" // Adjust if needed
+	mocks "github.com/aaguero_meli/W17-G6-Bootcamp/internal/mocks/repository"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/models"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/internal/service"
 	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/httperrors"
@@ -33,7 +33,7 @@ func TestInboundOrderService_Create(t *testing.T) {
 		setupMocks    func(repo *mocks.MockInboundOrderRepository, empRepo *mocks.MockEmployeeRepository, whRepo *mocks.WarehouseRepositoryMock)
 		input         models.InboundOrderAttributes
 		expectedOrder models.InboundOrder
-		expectedError error // Use require.IsType for error type in critical cases
+		expectedError error
 	}{
 		{
 			name: "successfully creates a new inbound order",
@@ -52,7 +52,7 @@ func TestInboundOrderService_Create(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			name: "should return error if GetByOrderNumber returns error",
+			name: "returns error if GetByOrderNumber fails",
 			setupMocks: func(repo *mocks.MockInboundOrderRepository, empRepo *mocks.MockEmployeeRepository, whRepo *mocks.WarehouseRepositoryMock) {
 				repo.On("GetByOrderNumber", validAttrs.OrderNumber).
 					Return(models.InboundOrder{}, errors.New("db error")).Once()
@@ -62,7 +62,7 @@ func TestInboundOrderService_Create(t *testing.T) {
 			expectedError: errors.New("db error"),
 		},
 		{
-			name: "should return conflict error if order number exists",
+			name: "returns conflict error if order number already exists",
 			setupMocks: func(repo *mocks.MockInboundOrderRepository, empRepo *mocks.MockEmployeeRepository, whRepo *mocks.WarehouseRepositoryMock) {
 				duplicate := models.InboundOrder{ID: 99}
 				repo.On("GetByOrderNumber", validAttrs.OrderNumber).
@@ -73,7 +73,7 @@ func TestInboundOrderService_Create(t *testing.T) {
 			expectedError: httperrors.ConflictError{},
 		},
 		{
-			name: "should return conflict if GetByID employee returns error",
+			name: "returns conflict error if fetching employee returns error",
 			setupMocks: func(repo *mocks.MockInboundOrderRepository, empRepo *mocks.MockEmployeeRepository, whRepo *mocks.WarehouseRepositoryMock) {
 				repo.On("GetByOrderNumber", validAttrs.OrderNumber).
 					Return(models.InboundOrder{}, nil).Once()
@@ -85,7 +85,7 @@ func TestInboundOrderService_Create(t *testing.T) {
 			expectedError: httperrors.ConflictError{},
 		},
 		{
-			name: "should return conflict if employee doesn't exist",
+			name: "returns conflict error if employee not found",
 			setupMocks: func(repo *mocks.MockInboundOrderRepository, empRepo *mocks.MockEmployeeRepository, whRepo *mocks.WarehouseRepositoryMock) {
 				repo.On("GetByOrderNumber", validAttrs.OrderNumber).
 					Return(models.InboundOrder{}, nil).Once()
@@ -97,7 +97,7 @@ func TestInboundOrderService_Create(t *testing.T) {
 			expectedError: httperrors.ConflictError{},
 		},
 		{
-			name: "should return conflict if GetByID warehouse returns error",
+			name: "returns conflict error if fetching warehouse returns error",
 			setupMocks: func(repo *mocks.MockInboundOrderRepository, empRepo *mocks.MockEmployeeRepository, whRepo *mocks.WarehouseRepositoryMock) {
 				repo.On("GetByOrderNumber", validAttrs.OrderNumber).
 					Return(models.InboundOrder{}, nil).Once()
@@ -111,7 +111,7 @@ func TestInboundOrderService_Create(t *testing.T) {
 			expectedError: httperrors.ConflictError{},
 		},
 		{
-			name: "should return conflict if warehouse doesn't exist",
+			name: "returns conflict error if warehouse not found",
 			setupMocks: func(repo *mocks.MockInboundOrderRepository, empRepo *mocks.MockEmployeeRepository, whRepo *mocks.WarehouseRepositoryMock) {
 				repo.On("GetByOrderNumber", validAttrs.OrderNumber).
 					Return(models.InboundOrder{}, nil).Once()
@@ -125,7 +125,7 @@ func TestInboundOrderService_Create(t *testing.T) {
 			expectedError: httperrors.ConflictError{},
 		},
 		{
-			name: "should return error if repo.Create fails",
+			name: "returns error if repository Create fails",
 			setupMocks: func(repo *mocks.MockInboundOrderRepository, empRepo *mocks.MockEmployeeRepository, whRepo *mocks.WarehouseRepositoryMock) {
 				repo.On("GetByOrderNumber", validAttrs.OrderNumber).
 					Return(models.InboundOrder{}, nil).Once()
@@ -143,7 +143,7 @@ func TestInboundOrderService_Create(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tt := tc // capture to avoid data race in parallel
+		tt := tc // capture iteration variable for parallel subtests
 		t.Run(tt.name, func(t *testing.T) {
 			// Arrange
 			repo := new(mocks.MockInboundOrderRepository)
@@ -163,7 +163,7 @@ func TestInboundOrderService_Create(t *testing.T) {
 			if tt.expectedError == nil {
 				assert.NoError(t, err)
 			} else {
-				// TODO: If you want stricter checks, use errors.Is, or require.IsType
+				// Use assert.IsType for error type assertion
 				assert.IsType(t, tt.expectedError, err)
 			}
 
