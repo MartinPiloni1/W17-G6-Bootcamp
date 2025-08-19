@@ -250,6 +250,29 @@ func TestEmployeeHandler_Get(t *testing.T) {
 		require.Equal(t, expectedHeaders, rr.Header())
 		mockService.AssertExpectations(t)
 	})
+
+	t.Run("find_by_id_invalid: fail - invalid id", func(t *testing.T) {
+		mockService := &serviceMocks.MockEmployeeService{}
+		h := handler.NewEmployeeHandler(mockService)
+		req := createRequestWithContext(http.MethodGet, "/employees/badid", "id", "badid")
+		rr := httptest.NewRecorder()
+		h.GetById()(rr, req)
+		require.Equal(t, http.StatusBadRequest, rr.Code)
+		require.Contains(t, rr.Body.String(), "Invalid id")
+	})
+
+	t.Run("find_all_service_error", func(t *testing.T) {
+		serviceErr := httperrors.InternalServerError{Message: "fail"}
+		mockService := &serviceMocks.MockEmployeeService{}
+		h := handler.NewEmployeeHandler(mockService)
+		mockService.On("GetAll").Return([]models.Employee{}, serviceErr)
+		req := httptest.NewRequest(http.MethodGet, "/employees", nil)
+		rr := httptest.NewRecorder()
+		h.GetAll()(rr, req)
+		require.Equal(t, http.StatusInternalServerError, rr.Code)
+		require.Contains(t, rr.Body.String(), "fail")
+		mockService.AssertExpectations(t)
+	})
 }
 
 // TestEmployeeHandler_Update tests employee update logic for success and not-found cases.
@@ -304,6 +327,46 @@ func TestEmployeeHandler_Update(t *testing.T) {
 		require.Equal(t, expectedHeaders, rr.Header())
 		mockService.AssertExpectations(t)
 	})
+
+	t.Run("update_invalid_id: fail - invalid id", func(t *testing.T) {
+		mockService := &serviceMocks.MockEmployeeService{}
+		h := handler.NewEmployeeHandler(mockService)
+		employee := getValidEmployeeToCreate()
+		req := createRequestWithBodyAndContext(http.MethodPut, "/employees/badid", employee, "id", "badid")
+		rr := httptest.NewRecorder()
+		h.Update()(rr, req)
+		require.Equal(t, http.StatusBadRequest, rr.Code)
+		require.Contains(t, rr.Body.String(), "Invalid id")
+	})
+
+	t.Run("update_invalid_body: fail - bad json", func(t *testing.T) {
+		mockService := &serviceMocks.MockEmployeeService{}
+		h := handler.NewEmployeeHandler(mockService)
+		req := httptest.NewRequest(http.MethodPut, "/employees/1", bytes.NewBufferString("{bad json"))
+		req.Header.Set("Content-Type", "application/json")
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "1")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		rr := httptest.NewRecorder()
+		h.Update()(rr, req)
+		require.Equal(t, http.StatusBadRequest, rr.Code)
+		require.Contains(t, rr.Body.String(), "Invalid JSON body")
+	})
+
+	t.Run("update_invalid_struct: fail - invalid struct", func(t *testing.T) {
+		mockService := &serviceMocks.MockEmployeeService{}
+		h := handler.NewEmployeeHandler(mockService)
+		invalidEmployee := models.EmployeeAttributes{
+			CardNumberID: "100",
+			FirstName:    "test",
+			WarehouseID:  1,
+		}
+		req := createRequestWithBodyAndContext(http.MethodPut, "/employees/1", invalidEmployee, "id", "1")
+		rr := httptest.NewRecorder()
+		h.Update()(rr, req)
+		require.Equal(t, http.StatusUnprocessableEntity, rr.Code)
+		require.Contains(t, rr.Body.String(), "Invalid JSON body")
+	})
 }
 
 // TestEmployeeHandler_Delete tests the Delete handler for both successful and not-found cases.
@@ -348,6 +411,16 @@ func TestEmployeeHandler_Delete(t *testing.T) {
 		require.Contains(t, rr.Body.String(), expectedSubBody)
 		require.Equal(t, http.Header{"Content-Type": []string{"application/json"}}, rr.Header())
 		mockService.AssertExpectations(t)
+	})
+
+	t.Run("delete_invalid_id: fail - invalid id", func(t *testing.T) {
+		mockService := &serviceMocks.MockEmployeeService{}
+		h := handler.NewEmployeeHandler(mockService)
+		req := createRequestWithContext(http.MethodDelete, "/employees/badid", "id", "badid")
+		rr := httptest.NewRecorder()
+		h.Delete()(rr, req)
+		require.Equal(t, http.StatusBadRequest, rr.Code)
+		require.Contains(t, rr.Body.String(), "Invalid id")
 	})
 }
 

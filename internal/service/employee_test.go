@@ -190,6 +190,29 @@ func TestEmployeeServiceDefault_Update(t *testing.T) {
 		require.Equal(t, models.Employee{}, emp)
 		mockRepo.AssertExpectations(t)
 	})
+
+	t.Run("update_conflict_repo_error: returns error if repo fails on GetAll during update", func(t *testing.T) {
+		mockRepo := mocks.MockEmployeeRepository{}
+		mockInboundOrderRepo := mocks.MockInboundOrderRepository{}
+		serviceEmp := service.NewEmployeeService(&mockRepo, &mockInboundOrderRepo)
+
+		originalEmp := expectedEmp
+		mockRepo.On("GetByID", 1).Return(originalEmp, nil)
+
+		mockRepo.On("GetAll").Return(nil, errors.New("repo-getall error"))
+
+		updatedAttrs := models.EmployeeAttributes{
+			CardNumberID: "nuevo-card",
+			FirstName:    "Nuevo",
+			LastName:     "Shelby",
+			WarehouseID:  1,
+		}
+		emp, err := serviceEmp.Update(1, updatedAttrs)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "repo-getall error")
+		require.Equal(t, models.Employee{}, emp)
+		mockRepo.AssertExpectations(t)
+	})
 }
 
 // TestEmployeeServiceDefault_Delete handles successful and failure cases for removing employees.
