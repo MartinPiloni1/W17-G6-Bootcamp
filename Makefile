@@ -1,6 +1,6 @@
 .PHONY: test coverage coverage-html coverage-total linter clean migrate seed tidy run
 
-PKGS := $(shell go list ./... | grep -vE '/mocks')
+PKGS := $(shell go list ./...)
 
 # This command will run the test for the project
 test:

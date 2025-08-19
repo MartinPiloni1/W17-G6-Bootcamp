@@ -11,7 +11,3 @@ type Seller struct {
 	ID int `json:"id"`
 	SellerAttributes
 }
-
-func (s Seller) GetID() int {
-	return s.ID
-}
