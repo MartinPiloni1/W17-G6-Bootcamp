@@ -1,57 +1,55 @@
 package utils_test
 
 import (
+	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 	"testing"
 	"time"
 
-	"github.com/aaguero_meli/W17-G6-Bootcamp/pkg/utils"
 	"github.com/go-playground/validator"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-type TestStruct struct {
-	Date time.Time `validate:"not_future"`
-}
-
-func TestNotFutureDatetimeValidator(t *testing.T) {
+func TestNotFutureDatetime(t *testing.T) {
 	v := validator.New()
-	err := v.RegisterValidation("not_future", utils.NotFutureDatetime)
-	require.NoError(t, err)
+	require.NoError(t, v.RegisterValidation("not_future", utils.NotFutureDatetime))
+	type S struct {
+		Date time.Time `validate:"not_future"`
+	}
+
+	now := time.Now()
+	past := now.Add(-time.Hour)
+	future := now.Add(time.Hour)
 
 	tests := []struct {
-		name    string
-		date    time.Time
-		wantErr bool
+		Name    string
+		Date    time.Time
+		WantErr bool
 	}{
-		{
-			"CurrentTime",
-			time.Now(),
-			false,
-		},
-		{
-			"PastTime",
-			time.Now().Add(-1 * time.Hour),
-			false,
-		},
-		{
-			"FutureTime",
-			time.Now().Add(1 * time.Hour),
-			true,
-		},
+		{"now", now, false},
+		{"past", past, false},
+		{"future", future, true},
 	}
 
-	for _, testCase := range tests {
-		t.Run(testCase.name, func(t *testing.T) {
-			// arrange
-			s := TestStruct{Date: testCase.date}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			s := S{Date: tc.Date}
 			err := v.Struct(s)
-
-			// act
-			gotErr := err != nil
-
-			// assert
-			assert.Equal(t, testCase.wantErr, gotErr)
+			if tc.WantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
 		})
 	}
+}
+
+func TestNotFutureDatetime_NotTimeType(t *testing.T) {
+	v := validator.New()
+	require.NoError(t, v.RegisterValidation("not_future", utils.NotFutureDatetime))
+	type S struct {
+		Fake int `validate:"not_future"`
+	}
+	s := S{Fake: 9}
+	err := v.Struct(s)
+	require.Error(t, err)
 }
